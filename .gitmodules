@@ -13,3 +13,6 @@
 [submodule "glad"]
 	path = glad
 	url = https://github.com/Dav1dde/glad.git
+[submodule "nanogui"]
+	path = nanogui
+	url = https://github.com/wjakob/nanogui.git
