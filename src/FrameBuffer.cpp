@@ -132,9 +132,19 @@ size_t FrameBuffer::attach_color_texture_array(Texture::InternalFormat internal_
 
 }
 
-void FrameBuffer::set_color_texture_level(size_t index, GLuint level) {
+void FrameBuffer::set_color_texture_level(size_t index, GLuint level, bool change_viewport) {
+
 	assert(index < m_color_textures.size());
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, m_color_textures[index]->id(), level);
+
+	auto& texture = m_color_textures[index];
+
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, texture->id(), level);
+
+	if (change_viewport) {
+		glm::uvec2 mip_size = texture->size() / static_cast<GLuint>(1 << level);
+		glViewport(0, 0, mip_size.x, mip_size.y);
+	}
+
 }
 
 /*

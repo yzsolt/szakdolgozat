@@ -21,6 +21,7 @@ class Skybox {
 	Program m_precompute_specular_irradiance;
 
 	TextureCubeMap m_environment_map;
+
 	TextureCubeMap m_diffuse_irradiance_map;
 	TextureCubeMap m_specular_irradiance_map;
 	Texture2D m_brdf_lut;

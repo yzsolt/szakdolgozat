@@ -117,7 +117,6 @@ void Skybox::_precompute_specular_irradiance() {
 				glm::uvec2 mipmap_size = brdf_size / unsigned(1 << i);
 
 				specular_irradiance_fb.set_color_texture_level(0, i);
-				glViewport(0, 0, mipmap_size.x, mipmap_size.y);
 				float roughness = (i + 0.5f) / CUBEMAP_SPEC_MIPS;
 				m_precompute_specular_irradiance.set_uniform("u_roughness", roughness);
 				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);

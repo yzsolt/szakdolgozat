@@ -40,7 +40,8 @@ public:
 	void attach_depth_texture();
 	size_t attach_color_texture(Texture::InternalFormat internal_format, Texture::Filter filter = Texture::Filter::LINEAR);
 	size_t attach_color_texture_array(Texture::InternalFormat internal_format, GLuint layer_count, Texture::Filter filter = Texture::Filter::LINEAR);
-	void set_color_texture_level(size_t index, GLuint level);
+
+	void set_color_texture_level(size_t index, GLuint level, bool change_viewport = true);
 
 	//void activate_draw_on(const std::vector<GLenum>& color_attachments) const;
 

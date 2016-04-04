@@ -151,7 +151,6 @@ void Renderer::_measure_average_luminance() {
 		// 16x16
 		
 		m_average_luminance_fb->set_color_texture_level(0, 2);
-		glViewport(0, 0, 16, 16);
 
 		m_average_luminance_program->set_uniform("u_previous_level", 0);
 		m_average_luminance_program->set_uniform("u_step", 1);
@@ -160,7 +159,6 @@ void Renderer::_measure_average_luminance() {
 		// 4x4
 
 		m_average_luminance_fb->set_color_texture_level(0, 4);
-		glViewport(0, 0, 4, 4);
 
 		m_average_luminance_program->set_uniform("u_previous_level", 2);
 		m_average_luminance_program->set_uniform("u_step", 1);
@@ -169,7 +167,6 @@ void Renderer::_measure_average_luminance() {
 		// 1x1
 
 		m_average_luminance_fb->set_color_texture_level(0, 6);
-		glViewport(0, 0, 1, 1);
 
 		m_average_luminance_program->set_uniform("u_previous_level", 4);
 		m_average_luminance_program->set_uniform("u_step", 2);
