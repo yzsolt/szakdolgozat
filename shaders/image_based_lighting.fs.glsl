@@ -13,6 +13,8 @@ in vec2 vs_out_texture;
 in vec3 vs_out_world_normal;
 in vec3 vs_out_view_direction;
 
+in mat3 vs_out_tbn;
+
 #include "pbr_common.glsl"
 
 vec3 approximate_specular(vec3 specular_color, float roughness, vec3 n, vec3 v) {
@@ -32,7 +34,17 @@ vec3 approximate_specular(vec3 specular_color, float roughness, vec3 n, vec3 v) 
 
 void main() {
 
-	vec3 n = normalize(vs_out_world_normal);
+	vec3 n;
+
+	if (u_pbm.normal.use_texture) {
+
+        vec3 normal_map_value = normalize(texture(u_pbm.normal.texture, vs_out_texture).rgb * 2 - 1);
+        n = normalize(vs_out_tbn * normal_map_value);
+
+    } else {
+        n = normalize(vs_out_world_normal);
+    }
+
 	vec3 v = normalize(vs_out_view_direction);
 
     vec4 diffuse_color = u_pbm.diffuse.use_texture ? texture(u_pbm.diffuse.texture, vs_out_texture) : u_pbm.diffuse.color;
