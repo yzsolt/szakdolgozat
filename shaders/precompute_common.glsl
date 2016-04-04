@@ -21,10 +21,10 @@ vec2 Hammersley(uint Index, uint NumSamples) {
 
 	return vec2(E1, E2);
 }
-/*
+
 vec2 Random(vec3 pixel, float seed) {
-	const vec3 scale1 = { 12.9898f, 78.233f, 151.7182f };
-	const vec3 scale2 = { 63.7264f, 10.873f, 623.6736f };
+	const vec3 scale1 = vec3(12.9898f, 78.233f, 151.7182f);
+	const vec3 scale2 = vec3(63.7264f, 10.873f, 623.6736f);
 
 	vec2 Xi;
 
@@ -41,7 +41,7 @@ vec3 CosineSample(vec2 Xi) {
 
 	return vec3(sintheta * cos(phi), sintheta * sin(phi), costheta);
 }
-*/
+
 vec3 GGXSample(vec2 Xi, float roughness) {
 	float a = roughness * roughness;
 	float a2 = a * a;
