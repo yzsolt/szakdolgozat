@@ -90,8 +90,6 @@ void Shader::compile() {
 
 	m_is_compiled = true;
 
-	LOG("Shader '" + m_path + "' successfully compiled.");
-
 }
 
 bool Shader::is_compiled() const {

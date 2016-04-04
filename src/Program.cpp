@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <memory>
 
+#include "log.h"
 #include "Program.h"
 
 Program::Program() {
@@ -26,6 +27,8 @@ Program::Program(const std::string& vertex_shader_path, const std::string& fragm
 	attach_shader(fragment_shader);
 
 	link();
+
+	LOG("Program created from '" + vertex_shader_path + "' and '" + fragment_shader_path + "' has successfully compiled and linked.");
 
 }
 
