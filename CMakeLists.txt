@@ -55,6 +55,8 @@ set(SOURCES
     src/Vertex.h
     src/VertexArray.h
     src/VertexArray.cpp
+    src/VertexBuffer.h
+    src/VertexBuffer.cpp
     src/VertexFormatDescriptor.h
     src/VertexFormatDescriptor.cpp
     src/Window.h
