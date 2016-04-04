@@ -31,7 +31,7 @@ void main() {
 
     if (u_bpm.normal.use_texture) {
 
-        vec3 normal_map_value = normal = normalize(texture(u_bpm.normal.texture, vs_out_texture).rgb * 2 - 1);
+        vec3 normal_map_value = normalize(texture(u_bpm.normal.texture, vs_out_texture).rgb * 2 - 1);
         normal = normalize(vs_out_tbn * normal_map_value);
 
         //light_direction = vs_out_tbn * light_direction;
