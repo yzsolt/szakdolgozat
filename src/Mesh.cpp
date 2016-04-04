@@ -457,10 +457,10 @@ Mesh::Mesh(const std::string& path, GUI* gui) : m_gui(gui) {
 
 	// Mesh info window
 
-	auto mesh_info_window = new nanogui::Window(m_gui, "Mesh info");
-	mesh_info_window->setLayout(new GroupLayout());
+	m_mesh_info_window = new nanogui::Window(m_gui, "Mesh info");
+	m_mesh_info_window->setLayout(new GroupLayout());
 
-	auto use_pbr_checkbox = new CheckBox(mesh_info_window, "Use PBR", [this](bool state) {
+	auto use_pbr_checkbox = new CheckBox(m_mesh_info_window, "Use PBR", [this](bool state) {
 
 		m_use_pbr = state;
 
@@ -474,7 +474,7 @@ Mesh::Mesh(const std::string& path, GUI* gui) : m_gui(gui) {
 	use_pbr_checkbox->setChecked(m_use_pbr);
 
 	if (m_shapes.empty()) {
-		new Label(mesh_info_window, "No shapes found.");
+		new Label(m_mesh_info_window, "No shapes found.");
 	} else {
 
 		std::vector<std::string> shape_names;
@@ -483,7 +483,7 @@ Mesh::Mesh(const std::string& path, GUI* gui) : m_gui(gui) {
 			shape_names.push_back(shape.name);
 		}
 
-		auto* shapes = new ComboBox(mesh_info_window, shape_names);
+		auto* shapes = new ComboBox(m_mesh_info_window, shape_names);
 
 		shapes->setCallback([this](int material_id) {
 			//_update_bp_material_info(material_id);
@@ -514,6 +514,11 @@ Mesh::Mesh(const std::string& path, GUI* gui) : m_gui(gui) {
 	*/
 	m_gui->performLayout();
 
+}
+
+Mesh::~Mesh() {
+	m_gui->removeChild(m_materials_window);
+	m_gui->removeChild(m_mesh_info_window);
 }
 
 glm::vec3 Mesh::center() const {

@@ -47,6 +47,7 @@ class Mesh {
 	static glm::vec4 _eigen4f_to_vec4(const Eigen::Vector4f& value);
 
 	nanogui::Window* m_materials_window = nullptr;
+	nanogui::Window* m_mesh_info_window = nullptr;
 
 	void _update_bp_material_info(int material_id);
 	void _update_pb_material_info(int material_id);
@@ -58,6 +59,7 @@ public:
 
 	/** Load mesh from OBJ file. */
 	Mesh(const std::string& path, GUI* gui);
+	~Mesh();
 
 	glm::vec3 center() const;
 
