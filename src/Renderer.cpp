@@ -258,7 +258,7 @@ void Renderer::_setup_gui() {
 
 }
 
-Renderer::Renderer(const Settings& settings) : m_window(settings.window_size, "PBR renderer", settings.multisample_count, settings.fullscreen, true) {
+Renderer::Renderer(const Settings& settings) : m_window(settings.window_size, "PBR renderer", settings.multisample_count, settings.fullscreen, false, true) {
 
 	m_window.set_close_callback([this]() -> bool {
 		m_is_running = false;
@@ -353,9 +353,6 @@ Renderer::Renderer(const Settings& settings) : m_window(settings.window_size, "P
 	// Load meshes
 	
 	m_mesh = std::make_unique<Mesh>("data/handgun/Handgun_obj.obj", m_gui.get());
-	//m_mesh = std::make_unique<Mesh>("data/watertank/Water_Tank_BI.obj", m_gui.get());
-	//m_mesh = std::make_unique<Mesh>("data/nanosuit/nanosuit.obj", m_gui.get());
-	//m_mesh = std::make_unique<Mesh>("data/ferrari_599gtb.obj");
 	m_mesh->upload();
 
 	// Create skybox
