@@ -42,7 +42,7 @@ void Window::_glfw_key_callback(GLFWwindow* glfw_window, int key, int scancode, 
 
 }
 
-Window::Window(const glm::uvec2& size, const std::string &title, GLuint multisampling, bool is_fullscreen, bool is_debug) {
+Window::Window(const glm::uvec2& size, const std::string &title, GLuint multisampling, bool is_fullscreen, bool is_resizable, bool is_debug) {
 
     if (!glfwInit()) {
         throw std::runtime_error("Couldn't initialize GLFW.");
@@ -56,6 +56,10 @@ Window::Window(const glm::uvec2& size, const std::string &title, GLuint multisam
     glfwWindowHint(GLFW_DEPTH_BITS, 24);
 
     glfwWindowHint(GLFW_SRGB_CAPABLE, true);
+
+	if (!is_resizable) {
+		glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+	}
 
     if (is_debug) {
         // We check if debug context is available after we have the context

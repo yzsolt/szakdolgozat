@@ -29,7 +29,7 @@ class Window {
 
 public:
 
-    Window(const glm::uvec2& size, const std::string& title, GLuint multisampling, bool is_fullscreen = false, bool is_debug = false);
+    Window(const glm::uvec2& size, const std::string& title, GLuint multisampling, bool is_fullscreen = false, bool is_resizable = false, bool is_debug = false);
     ~Window();
 
     glm::uvec2 size() const;
