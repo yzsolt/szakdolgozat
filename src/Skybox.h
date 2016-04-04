@@ -8,11 +8,13 @@
 #include "Program.h"
 #include "TextureCubeMap.h"
 #include "VertexArray.h"
+#include "VertexBuffer.h"
 
 class Skybox {
 
 	static const std::string ROOT_FOLDER;
-	static const std::array<glm::vec3, 36> VERTICES;
+	static const std::array<glm::vec2, 4> VERTICES_2D;
+	static const std::array<glm::vec3, 36> VERTICES_3D;
 
 	std::string m_name;
 
@@ -27,7 +29,7 @@ class Skybox {
 	Texture2D m_brdf_lut;
 
 	VertexArray m_vao;
-	GLuint m_vbo;
+	VertexBuffer m_vbo;
 
 	void _precompute_specular_irradiance();
 	void _precompute_brdf();
