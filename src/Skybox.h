@@ -20,6 +20,7 @@ class Skybox {
 
 	Program m_draw_program;
 	Program m_precompute_brdf;
+	Program m_precompute_diffuse_irradiance;
 	Program m_precompute_specular_irradiance;
 
 	TextureCubeMap m_environment_map;
@@ -31,7 +32,7 @@ class Skybox {
 	VertexArray m_vao;
 	VertexBuffer m_vbo;
 
-	void _precompute_specular_irradiance();
+	void _precompute_irradiance(bool specular);
 	void _precompute_brdf();
 
 public:

@@ -60,7 +60,7 @@ const std::array<glm::vec2, 4> Skybox::VERTICES_2D = { {
 	{  1.f,  1.f },
 } };
 
-void Skybox::_precompute_specular_irradiance() {
+void Skybox::_precompute_irradiance(bool specular) {
 
 	VertexFormatDescriptor precompute_vfd;
 	precompute_vfd.add_attribute(GL_FLOAT, 2, 0);
@@ -75,16 +75,19 @@ void Skybox::_precompute_specular_irradiance() {
 	
 	temp_vbo.upload<glm::vec2, 4>(VERTICES_2D);
 
-	glm::uvec2 brdf_size(512, 512);
+	glm::uvec2 side_size = specular ? glm::uvec2(512, 512) : glm::uvec2(128, 128);
 	const int CUBEMAP_SPEC_MIPS = 8;
 	
-	FrameBuffer specular_irradiance_fb(brdf_size);
+	FrameBuffer irradiance_fb(side_size);
 
-	specular_irradiance_fb.bind();
+	irradiance_fb.bind();
 
-		specular_irradiance_fb.attach_color_texture(Texture::InternalFormat::RGBA_32_FLOAT);
-		specular_irradiance_fb.validate();
-		specular_irradiance_fb.color_texture(0).generate_mipmap();
+		irradiance_fb.attach_color_texture(Texture::InternalFormat::RGBA_32_FLOAT);
+		irradiance_fb.validate();
+
+		if (specular) {
+			irradiance_fb.color_texture(0).generate_mipmap();
+		}
 
 		glClearColor(0, 0, 0, 1);
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -102,36 +105,53 @@ void Skybox::_precompute_specular_irradiance() {
 			glm::mat3(x, y, -z),
 		} };
 
-		m_precompute_specular_irradiance.bind();
+		Program* program = specular ? &m_precompute_specular_irradiance : &m_precompute_diffuse_irradiance;
 
-			m_precompute_specular_irradiance.set_texture("u_environment_map", m_environment_map);
+		program->bind();
+
+			program->set_texture("u_environment_map", m_environment_map);
 
 			for (size_t j = 0; j < 6; j++) {
 
-				m_precompute_specular_irradiance.set_uniform("u_transformation", transformations[j]);
+				program->set_uniform("u_transformation", transformations[j]);
 
-				for (GLuint i = 0; i < CUBEMAP_SPEC_MIPS; i++) {
+				if (specular) {
 
-					glm::uvec2 mipmap_size = brdf_size / unsigned(1 << i);
+					for (GLuint i = 0; i < CUBEMAP_SPEC_MIPS; i++) {
 
-					specular_irradiance_fb.set_color_texture_level(0, i);
-					float roughness = (i + 0.5f) / CUBEMAP_SPEC_MIPS;
-					m_precompute_specular_irradiance.set_uniform("u_roughness", roughness);
-					
+						glm::uvec2 mipmap_size = side_size / unsigned(1 << i);
+
+						irradiance_fb.set_color_texture_level(0, i);
+						float roughness = (i + 0.5f) / CUBEMAP_SPEC_MIPS;
+						program->set_uniform("u_roughness", roughness);
+
+						temp_vao.draw_arrays(GL_TRIANGLE_STRIP, temp_vbo.vertex_count());
+
+						std::unique_ptr<float[]> buffer(new float[mipmap_size.x * mipmap_size.y * 4]);
+						irradiance_fb.color_texture(0).bind();
+						glGetTexImage(GL_TEXTURE_2D, i, GL_RGBA, GL_FLOAT, buffer.get());
+						std::string output_name = ROOT_FOLDER + m_name + "/" + m_name + ".specular_irradiance." + std::to_string(j) + "." + std::to_string(i) + ".hdr";
+						stbi_write_hdr(output_name.c_str(), mipmap_size.x, mipmap_size.y, 4, buffer.get());
+
+					}
+
+				} else {
+
 					temp_vao.draw_arrays(GL_TRIANGLE_STRIP, temp_vbo.vertex_count());
 
-					std::unique_ptr<float[]> buffer(new float[mipmap_size.x * mipmap_size.y * 4]);
-					specular_irradiance_fb.color_texture(0).bind();
-					glGetTexImage(GL_TEXTURE_2D, i, GL_RGBA, GL_FLOAT, buffer.get());
-					std::string output_name = ROOT_FOLDER + m_name + "/" + m_name + ".specular_irradiance." + std::to_string(j) + "." + std::to_string(i) + ".hdr";
-					stbi_write_hdr(output_name.c_str(), mipmap_size.x, mipmap_size.y, 4, buffer.get());
+					std::unique_ptr<float[]> buffer(new float[side_size.x * side_size.y * 4]);
+					irradiance_fb.color_texture(0).bind();
+					glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, buffer.get());
+					std::string output_name = ROOT_FOLDER + m_name + "/" + m_name + ".diffuse_irradiance." + std::to_string(j) + ".hdr";
+					stbi_write_hdr(output_name.c_str(), side_size.x, side_size.y, 4, buffer.get());
+
 				}
 
 			}
 
-		m_precompute_specular_irradiance.unbind();
+		program->unbind();
 
-	specular_irradiance_fb.unbind();
+	irradiance_fb.unbind();
 	
 	temp_vbo.unbind();
 	temp_vao.unbind();
@@ -190,7 +210,8 @@ Skybox::Skybox(const std::string& name) :
 	m_name(name),
 	m_draw_program("skybox.vs.glsl", "skybox.fs.glsl") ,
 	m_precompute_brdf("precompute_brdf.vs.glsl", "precompute_brdf.fs.glsl"),
-	m_precompute_specular_irradiance("precompute_specular_irradiance.vs.glsl", "precompute_specular_irradiance.fs.glsl"),
+	m_precompute_diffuse_irradiance("precompute_irradiance.vs.glsl", "precompute_diffuse_irradiance.fs.glsl"),
+	m_precompute_specular_irradiance("precompute_irradiance.vs.glsl", "precompute_specular_irradiance.fs.glsl"),
 	m_brdf_lut({ 256, 256 })
 {
 
@@ -203,7 +224,8 @@ Skybox::Skybox(const std::string& name) :
 	m_environment_map.upload_hdr(ROOT_FOLDER + name + "/" + name + ".hdr", TextureCubeMap::InputType::VERTICAL_CROSS);
 	m_diffuse_irradiance_map.upload_hdr(ROOT_FOLDER + name + "/" + name + "_diffuse_irradiance.hdr", TextureCubeMap::InputType::VERTICAL_CROSS);
 
-	_precompute_specular_irradiance();
+	_precompute_irradiance(false);
+	_precompute_irradiance(true);
 	_precompute_brdf();
 
 	m_specular_irradiance_map.upload_hdr_sides_and_mips(ROOT_FOLDER + name + "/", name + ".specular_irradiance", 8);
