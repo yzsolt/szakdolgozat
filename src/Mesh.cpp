@@ -527,33 +527,26 @@ glm::vec3 Mesh::center() const {
 
 void Mesh::upload() {
 
-	m_vao = std::make_unique<VertexArray>();
-
 	// Upload vertices and indices
-
-	glGenBuffers(1, &m_vbo);
-
-	if (m_vbo == 0) {
-		throw std::runtime_error("Couldn't create the VBO.");
-	}
 
 	glGenBuffers(1, &m_ibo);
 
 	if (m_ibo == 0) {
 		throw std::runtime_error("Couldn't create the IBO.");
 	}
-    
-	//glDeleteBuffers(1, &m_vbo);
 
-	m_vao->bind();
+	m_vao.bind();
+		m_vbo.bind();
 
-	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * m_vertices.size(), m_vertices.data(), GL_STATIC_DRAW);
+		m_vbo.upload<Vertex>(m_vertices);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * m_indices.size(), m_indices.data(), GL_STATIC_DRAW);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * m_indices.size(), m_indices.data(), GL_STATIC_DRAW);
 
-	m_vao->set_vertex_format(Vertex::vertex_format_descriptor());
+		m_vao.set_vertex_format(Vertex::vertex_format_descriptor());
+
+		m_vbo.unbind();
+	m_vao.unbind();
 
 	// Upload textures
 
@@ -617,9 +610,8 @@ void Mesh::upload() {
 
 void Mesh::draw(Program& program) {
 
-	m_vao->bind();
-	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
+	m_vao.bind();
+	m_vbo.bind();
 
 	//glDrawArrays(GL_TRIANGLES, 0, m_vertices.size());
 	//glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, (void*)0);

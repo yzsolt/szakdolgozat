@@ -12,16 +12,17 @@
 #include "materials.h"
 #include "Vertex.h"
 #include "VertexArray.h"
+#include "VertexBuffer.h"
 #include "Program.h"
 #include "GUI.h"
 
 class Mesh {
 
 	GUI* m_gui;
-
-	GLuint m_vbo;
+	
+	VertexArray m_vao;
+	VertexBuffer m_vbo;
 	GLuint m_ibo;
-	std::unique_ptr<VertexArray> m_vao;
 
 	std::string m_directory;
 
