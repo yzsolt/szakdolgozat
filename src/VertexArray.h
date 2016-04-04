@@ -30,7 +30,8 @@ public:
 
 	//void bind_vertex_buffer(const VertexBuffer& vertex_buffer) const;
 
-    void draw(GLuint vertex_count) const;
+    void draw_arrays(GLenum mode, GLuint vertex_count) const;
+	void draw_arrays(GLenum mode, GLuint from, GLuint vertex_count) const;
 
 	//void draw_indexed() const;
     //void draw_indexed(GLuint from, GLuint count) const;

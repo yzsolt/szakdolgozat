@@ -33,10 +33,6 @@ void VertexArray::set_vertex_format(const VertexFormatDescriptor& vertex_format_
 	for (const auto& attribute : vertex_format_descriptor.m_attributes) {
 
 		glEnableVertexAttribArray(location);
-
-		//glVertexAttribFormat(location, attribute.component_count, attribute.type, attribute.normalized, attribute.offset);
-		//glVertexAttribBinding(location, binding_index);
-
 		glVertexAttribPointer(location, attribute.component_count, attribute.type, attribute.normalized, vertex_format_descriptor.size(), (void*)attribute.offset);
 
 		location++;
@@ -70,9 +66,15 @@ void VertexArray::bind_vertex_buffer(const VertexBuffer& vertex_buffer) const {
 	glBindVertexBuffer(0, vertex_buffer.get_id(), 0, m_vertex_format_descriptor.get_size());
 }
 */
-void VertexArray::draw(GLuint vertex_count) const {
-    glDrawArrays(GL_TRIANGLES, 0, vertex_count);
+
+void VertexArray::draw_arrays(GLenum mode, GLuint vertex_count) const {
+    glDrawArrays(mode, 0, vertex_count);
 }
+
+void VertexArray::draw_arrays(GLenum mode, GLuint from, GLuint vertex_count) const {
+	glDrawArrays(mode, from, vertex_count);
+}
+
 /*
 void VertexArray::draw_indexed() const {
 	draw_indexed(0, m_index_buffer->indices().size());
