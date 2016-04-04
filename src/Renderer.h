@@ -66,6 +66,7 @@ private:
 	std::unique_ptr<Skybox> m_skybox;
 	std::unique_ptr<Mesh> m_mesh;
 	bool m_rotate_mesh = true;
+	float m_mesh_rotation = 0.f;
 
 	Visualize m_visualize = Visualize::NOTHING;
 	ToneMap m_tone_map = ToneMap::UNCHARTED_2;
@@ -83,6 +84,8 @@ private:
 
 	void _measure_average_luminance();
 	void _adapt_luminance();
+
+	void _setup_gui();
 
 public:
 

@@ -212,22 +212,7 @@ void Renderer::_adapt_luminance() {
 
 }
 
-Renderer::Renderer(const Settings& settings) : m_window(settings.window_size, "PBR renderer", settings.multisample_count, settings.fullscreen, true) {
-
-	m_window.set_close_callback([this]() -> bool {
-		m_is_running = false;
-		return true; // Let GLFW close the window
-	});
-
-	m_window.set_vsync(settings.vsync);
-
-	// Debug
-
-	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-	glDebugMessageCallback(_on_gl_message, nullptr);
-	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
-
-	// Setup GUI
+void Renderer::_setup_gui() {
 
 	m_gui = std::make_unique<GUI>(&m_window);
 
@@ -257,6 +242,30 @@ Renderer::Renderer(const Settings& settings) : m_window(settings.window_size, "P
 		m_tone_map = static_cast<ToneMap>(index);
 	});
 
+	auto rotate_mesh_checkbox = new CheckBox(renderer_settings, "Rotate mesh", [this](bool state) {
+		m_rotate_mesh = state;
+	});
+	rotate_mesh_checkbox->setChecked(m_rotate_mesh);
+
+}
+
+Renderer::Renderer(const Settings& settings) : m_window(settings.window_size, "PBR renderer", settings.multisample_count, settings.fullscreen, true) {
+
+	m_window.set_close_callback([this]() -> bool {
+		m_is_running = false;
+		return true; // Let GLFW close the window
+	});
+
+	m_window.set_vsync(settings.vsync);
+
+	// Debug
+
+	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+	glDebugMessageCallback(_on_gl_message, nullptr);
+	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+
+	_setup_gui();
+
 	// Bind camera cursor callbacks
 
 	m_gui->setCursorPosCallback([this](double x, double y) {
@@ -282,7 +291,7 @@ Renderer::Renderer(const Settings& settings) : m_window(settings.window_size, "P
 
 	m_gui->setScrollCallback([this](double x, double y) {
 
-		m_camera.set_radius(m_camera.radius() - y);
+		m_camera.set_radius(m_camera.radius() - static_cast<float>(y));
 
 	});
 
@@ -333,7 +342,7 @@ Renderer::Renderer(const Settings& settings) : m_window(settings.window_size, "P
 	//	m_current_adapted_luminance_fb->unbind();
 
 	// Load meshes
-
+	
 	m_mesh = std::make_unique<Mesh>("data/handgun/Handgun_obj.obj", m_gui.get());
 	//m_mesh = std::make_unique<Mesh>("data/watertank/Water_Tank_BI.obj", m_gui.get());
 	//m_mesh = std::make_unique<Mesh>("data/nanosuit/nanosuit.obj", m_gui.get());
@@ -359,7 +368,7 @@ Renderer::Renderer(const Settings& settings) : m_window(settings.window_size, "P
 }
 
 void Renderer::run() {
-	float avg = 1.f;
+
 	while (m_is_running) {
 
 		m_window.poll_events();
@@ -372,15 +381,14 @@ void Renderer::run() {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 			glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 
-			float rotation = static_cast<float>(glfwGetTime() / 2.0);
+			if (m_rotate_mesh) {
+				m_mesh_rotation += static_cast<float>(glfwGetTime() - m_last_frame_time) / 2.f;
+			}
 
 			// Matrix calculations
 
 			m_world = glm::mat4(1);
-
-			if (m_rotate_mesh) {
-				m_world = glm::rotate(m_world, rotation, glm::vec3(0, 1, 0));
-			}
+			m_world = glm::rotate(m_world, m_mesh_rotation, glm::vec3(0, 1, 0));
 
 			m_world = glm::translate(m_world, -m_mesh->center());
 
@@ -444,7 +452,6 @@ void Renderer::run() {
 			m_tone_map_program->bind();
 				
 				m_tone_map_program->set_texture("u_hdr_texture", m_main_fb->color_texture(0));
-				avg += 0.02; m_tone_map_program->set_uniform("u_avg", avg);
 				m_tone_map_program->set_uniform("u_tone_map", static_cast<GLint>(m_tone_map));
 				m_tone_map_program->set_texture("u_average_luminance_texture", m_current_adapted_luminance_fb->color_texture(0));
 
