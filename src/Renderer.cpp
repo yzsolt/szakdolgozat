@@ -242,10 +242,19 @@ void Renderer::_setup_gui() {
 		m_tone_map = static_cast<ToneMap>(index);
 	});
 
+	new Label(renderer_settings, "Mesh settings");
+
 	auto rotate_mesh_checkbox = new CheckBox(renderer_settings, "Rotate mesh", [this](bool state) {
 		m_rotate_mesh = state;
 	});
 	rotate_mesh_checkbox->setChecked(m_rotate_mesh);
+
+	auto load_mesh = new Button(renderer_settings, "Load mesh");
+	load_mesh->setCallback([&] {
+		std::string mesh_path = file_dialog({ { "obj", "Wavefront OBJ" } }, false);
+		m_mesh.reset(new Mesh(mesh_path, m_gui.get()));
+		m_mesh->upload();
+	});
 
 }
 
