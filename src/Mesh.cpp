@@ -387,8 +387,6 @@ Mesh::Mesh(const std::string& path, GUI* gui) : m_gui(gui) {
 
 	}
 
-	std::cout << glm::to_string(m_bounding_box.center()) << std::endl;
-
 	m_draw_shape.resize(m_shapes.size(), true);
 
 	_calculate_tangents();
