@@ -146,6 +146,10 @@ void TextureCubeMap::upload_hdr_sides_and_mips(const std::string &folder, const 
 
 			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, j, component_count == 4 ? GL_RGBA32F : GL_RGB32F, size.x, size.y, 0, component_count == 4 ? GL_RGBA : GL_RGB, GL_FLOAT, data.get());
 
+			if (j == 0) {
+				m_size = size;
+			}
+
 		}
 	}
 

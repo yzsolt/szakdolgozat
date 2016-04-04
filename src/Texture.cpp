@@ -94,7 +94,7 @@ GLuint Texture::id() const {
 	return m_id;
 }
 
-const glm::vec2& Texture::size() const {
+const glm::uvec2& Texture::size() const {
 	return m_size;
 }
 

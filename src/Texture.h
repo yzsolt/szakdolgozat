@@ -98,7 +98,7 @@ public:
 	static std::unique_ptr<float[]> load_hdr_image(const std::string& path, int& component_count, glm::uvec2& out_size);
 
 	GLuint id() const;
-	const glm::vec2& size() const;
+	const glm::uvec2& size() const;
 
 	void bind();
 	void unbind();
