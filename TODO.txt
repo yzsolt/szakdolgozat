@@ -1,0 +1,4 @@
+
+ - spec irrad cubemapnél még az egyik oldalt el kell forgatni
+ - jobb gombbal up vektorra merőleges síkon kamera mozgatás
+ - disable window resize (fb resize is macerás)
