@@ -20,6 +20,8 @@ struct TextureMap {
 	TextureMap() {}
 	TextureMap(const std::string& path, const glm::vec3& color) : path(path), color(glm::vec4(color, 1.f)) {}
 
+	void upload(const std::string& material_directory);
+
 };
 
 struct Material {
@@ -36,7 +38,11 @@ struct Material {
 	Material() {}
 	Material(const std::string& name) : name(name) {}
 
+	/** Set the relevant material uniforms. */
 	virtual void set_uniforms(Program& program) const = 0;
+
+	/** Load textures from the disk and upload them to the GPU. */
+	virtual void upload(const std::string& material_directory) = 0;
 
 };
 
@@ -57,6 +63,7 @@ struct BlinnPhongMaterial : public Material {
 	BlinnPhongMaterial(const std::string& name);
 
 	void set_uniforms(Program& program) const override;
+	void upload(const std::string& material_directory) override;
 
 };
 
@@ -71,6 +78,7 @@ struct PhysicallyBasedMaterial : public Material {
 	PhysicallyBasedMaterial(const std::string& name);
 
 	void set_uniforms(Program& program) const override;
+	void upload(const std::string& material_directory) override;
 
 };
 

@@ -548,57 +548,17 @@ void Mesh::upload() {
 		m_vbo.unbind();
 	m_vao.unbind();
 
-	// Upload textures
+	// Upload materials
 
 	for (auto& material : m_bp_materials) {
-
-		if (!material.diffuse.path.empty()) {
-			material.diffuse.texture = std::make_unique<Texture2D>();
-			material.diffuse.texture->upload(m_directory + material.diffuse.path);
-			material.diffuse.use_texture = true;
-		}
-
-		if (!material.specular.path.empty()) {
-			material.specular.texture = std::make_unique<Texture2D>();
-			material.specular.texture->upload(m_directory + material.specular.path);
-			material.specular.use_texture = true;
-		}
-
-		if (!material.normal.path.empty()) {
-			material.normal.texture = std::make_unique<Texture2D>();
-			material.normal.texture->upload(m_directory + material.normal.path);
-			material.normal.use_texture = true;
-		}
-
-		if (!material.reflection.path.empty()) {
-			material.reflection.texture = std::make_unique<Texture2D>();
-			material.reflection.texture->upload(m_directory + material.reflection.path);
-			material.reflection.use_texture = true;
-		}
-
+		material.upload(m_directory);
 	}
 
 	for (auto& material : m_pb_materials) {
-
-		if (!material.diffuse.path.empty()) {
-			material.diffuse.texture = std::make_unique<Texture2D>();
-			material.diffuse.texture->upload(m_directory + material.diffuse.path);
-			material.diffuse.use_texture = true;
-		}
-
-		if (!material.normal.path.empty()) {
-			material.normal.texture = std::make_unique<Texture2D>();
-			material.normal.texture->upload(m_directory + material.normal.path);
-			material.normal.use_texture = true;
-		}
-
-		if (!material.roughness.path.empty()) {
-			material.roughness.texture = std::make_unique<Texture2D>();
-			material.roughness.texture->upload(m_directory + material.roughness.path);
-			material.roughness.use_texture = true;
-		}
-
+		material.upload(m_directory);
 	}
+
+	// Update materials window
 
 	if (m_use_pbr) {
 		_update_pb_material_info(0);

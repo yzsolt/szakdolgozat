@@ -1,6 +1,18 @@
 
 #include "materials.h"
 
+// Texture map
+
+void TextureMap::upload(const std::string& material_directory) {
+
+	if (!path.empty()) {
+		texture = std::make_unique<Texture2D>();
+		texture->upload(material_directory + path);
+		use_texture = true;
+	}
+
+}
+
 // Blinn-Phong material
 
 BlinnPhongMaterial::BlinnPhongMaterial(const std::string& name) : Material(name) {}
@@ -44,6 +56,15 @@ void BlinnPhongMaterial::set_uniforms(Program& program) const {
 
 }
 
+void BlinnPhongMaterial::upload(const std::string& material_directory) {
+
+	diffuse.upload(material_directory);
+	specular.upload(material_directory);
+	normal.upload(material_directory);
+	reflection.upload(material_directory);
+
+}
+
 // Physically based material
 
 PhysicallyBasedMaterial::PhysicallyBasedMaterial(const std::string& name) : Material(name) {}
@@ -80,5 +101,14 @@ void PhysicallyBasedMaterial::set_uniforms(Program& program) const {
 		program.set_texture("u_pbm.metalness.texture", *metalness.texture);
 	}
 	program.set_uniform("u_pbm.metalness.use_texture", metalness.use_texture);
+
+}
+
+void PhysicallyBasedMaterial::upload(const std::string& material_directory) {
+
+	diffuse.upload(material_directory);
+	normal.upload(material_directory);
+	roughness.upload(material_directory);
+	metalness.upload(material_directory);
 
 }
