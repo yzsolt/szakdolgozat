@@ -22,6 +22,7 @@ public:
 	void upload_ldr(const std::string& folder);
 	void upload_hdr(const std::string& path, InputType input_type);
 
+	void upload_hdr_sides(const std::string& folder, const std::string& name);
 	void upload_hdr_sides_and_mips(const std::string& folder, const std::string& name, GLuint mip_count);
 
 };

@@ -1,11 +1,14 @@
 
+#include <fstream>
+
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
 
+#include "log.h"
 #include "Skybox.h"
 #include "Texture2D.h"
 
-const std::string Skybox::ROOT_FOLDER = "data/skyboxes/";
+const std::string Skybox::ROOT_DIRECTORY = "data/skyboxes/";
 
 const std::array<glm::vec3, 36> Skybox::VERTICES_3D = { {
 
@@ -62,6 +65,41 @@ const std::array<glm::vec2, 4> Skybox::VERTICES_2D = { {
 
 void Skybox::_precompute_irradiance(bool specular) {
 
+	const int CUBEMAP_SPEC_MIPS = 8;
+
+	// Check for existing precomputed textures
+
+	bool generate_textures = false;
+
+	for (GLuint j = 0; j < 6; j++) {
+
+		std::string file_name;
+
+		if (specular) {
+			for (GLuint i = 0; i < CUBEMAP_SPEC_MIPS; i++) {
+				file_name = m_directory + m_name + ".specular_irradiance." + std::to_string(j) + "." + std::to_string(i) + ".hdr";
+			}
+		} else {
+			file_name = m_directory + m_name + ".diffuse_irradiance." + std::to_string(j) + ".hdr";
+		}
+
+		std::ifstream infile(file_name);
+		if (!infile.good()) {
+			generate_textures = true;
+			break;
+		}
+
+	}
+
+	if (!generate_textures) {
+		LOG("Irradiance maps are already generated.");
+		return;
+	}
+
+	// Generate irradiance maps
+
+	LOG("Generating irradiance maps...");
+
 	VertexFormatDescriptor precompute_vfd;
 	precompute_vfd.add_attribute(GL_FLOAT, 2, 0);
 
@@ -76,7 +114,6 @@ void Skybox::_precompute_irradiance(bool specular) {
 	temp_vbo.upload<glm::vec2, 4>(VERTICES_2D);
 
 	glm::uvec2 side_size = specular ? glm::uvec2(512, 512) : glm::uvec2(128, 128);
-	const int CUBEMAP_SPEC_MIPS = 8;
 	
 	FrameBuffer irradiance_fb(side_size);
 
@@ -130,7 +167,7 @@ void Skybox::_precompute_irradiance(bool specular) {
 						std::unique_ptr<float[]> buffer(new float[mipmap_size.x * mipmap_size.y * 4]);
 						irradiance_fb.color_texture(0).bind();
 						glGetTexImage(GL_TEXTURE_2D, i, GL_RGBA, GL_FLOAT, buffer.get());
-						std::string output_name = ROOT_FOLDER + m_name + "/" + m_name + ".specular_irradiance." + std::to_string(j) + "." + std::to_string(i) + ".hdr";
+						std::string output_name = m_directory + m_name + ".specular_irradiance." + std::to_string(j) + "." + std::to_string(i) + ".hdr";
 						stbi_write_hdr(output_name.c_str(), mipmap_size.x, mipmap_size.y, 4, buffer.get());
 
 					}
@@ -142,7 +179,7 @@ void Skybox::_precompute_irradiance(bool specular) {
 					std::unique_ptr<float[]> buffer(new float[side_size.x * side_size.y * 4]);
 					irradiance_fb.color_texture(0).bind();
 					glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, buffer.get());
-					std::string output_name = ROOT_FOLDER + m_name + "/" + m_name + ".diffuse_irradiance." + std::to_string(j) + ".hdr";
+					std::string output_name = m_directory + m_name + ".diffuse_irradiance." + std::to_string(j) + ".hdr";
 					stbi_write_hdr(output_name.c_str(), side_size.x, side_size.y, 4, buffer.get());
 
 				}
@@ -155,6 +192,8 @@ void Skybox::_precompute_irradiance(bool specular) {
 	
 	temp_vbo.unbind();
 	temp_vao.unbind();
+
+	LOG("Irradiance map generation is done.");
 	
 }
 
@@ -192,7 +231,7 @@ void Skybox::_precompute_brdf() {
 
 		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_FLOAT, buffer.get());
 
-		std::string output_name = ROOT_FOLDER + m_name + "/" + m_name + ".brdf.hdr";
+		std::string output_name = m_directory + m_name + ".brdf.hdr";
 		stbi_write_hdr(output_name.c_str(), brdf_size.x, brdf_size.y, 3, buffer.get());
 
 	brdf_fb.unbind();
@@ -206,8 +245,7 @@ void Skybox::_precompute_brdf() {
 
 }
 
-Skybox::Skybox(const std::string& name) : 
-	m_name(name),
+Skybox::Skybox(const std::string& hdr_panorama) : 
 	m_draw_program("skybox.vs.glsl", "skybox.fs.glsl") ,
 	m_precompute_brdf("precompute_brdf.vs.glsl", "precompute_brdf.fs.glsl"),
 	m_precompute_diffuse_irradiance("precompute_irradiance.vs.glsl", "precompute_diffuse_irradiance.fs.glsl"),
@@ -215,20 +253,7 @@ Skybox::Skybox(const std::string& name) :
 	m_brdf_lut({ 256, 256 })
 {
 
-	// Precompute BRDF, diffuse and specular irradiance maps
-
-	
-
-	// Upload texture
-
-	m_environment_map.upload_hdr(ROOT_FOLDER + name + "/" + name + ".hdr", TextureCubeMap::InputType::VERTICAL_CROSS);
-	m_diffuse_irradiance_map.upload_hdr(ROOT_FOLDER + name + "/" + name + "_diffuse_irradiance.hdr", TextureCubeMap::InputType::VERTICAL_CROSS);
-
-	_precompute_irradiance(false);
-	_precompute_irradiance(true);
-	_precompute_brdf();
-
-	m_specular_irradiance_map.upload_hdr_sides_and_mips(ROOT_FOLDER + name + "/", name + ".specular_irradiance", 8);
+	reset_panorama(hdr_panorama);
 
 	// Upload vertices
 
@@ -244,6 +269,37 @@ Skybox::Skybox(const std::string& name) :
 
 		m_vbo.unbind();
 	m_vao.unbind();
+
+}
+
+void Skybox::reset_panorama(const std::string& hdr_panorama) {
+
+	size_t last_slash_position = hdr_panorama.find_last_of('/');
+
+	if (last_slash_position == std::string::npos) {
+		last_slash_position = 0;
+	}
+
+	size_t last_backslash_position = hdr_panorama.find_last_of('\\');
+
+	if (last_backslash_position == std::string::npos) {
+		last_backslash_position = 0;
+	}
+
+	size_t directory_end = std::max(last_slash_position, last_backslash_position);
+
+	m_directory = hdr_panorama.substr(0, directory_end);
+	std::string file_name = hdr_panorama.substr(directory_end + 1);
+	m_name = file_name.substr(0, file_name.find_last_of('.'));
+
+	m_environment_map.upload_hdr(hdr_panorama, TextureCubeMap::InputType::VERTICAL_CROSS);
+
+	_precompute_irradiance(false);
+	_precompute_irradiance(true);
+	_precompute_brdf();
+
+	m_diffuse_irradiance_map.upload_hdr_sides(m_directory, m_name + ".diffuse_irradiance");
+	m_specular_irradiance_map.upload_hdr_sides_and_mips(m_directory, m_name + ".specular_irradiance", 8);
 
 }
 

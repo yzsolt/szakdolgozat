@@ -226,6 +226,7 @@ void Renderer::_setup_gui() {
 	vsync_checkbox->setChecked(m_window.vsync());
 
 	new Label(renderer_settings, "Visualize");
+
 	auto visualize = new ComboBox(renderer_settings, {
 		"Nothing", "Positions", "Normals", "Tangents", "Ambient", "Diffuse", "Normal map", "Specularity", "Reflectivity"
 	});
@@ -233,7 +234,16 @@ void Renderer::_setup_gui() {
 		m_visualize = static_cast<Visualize>(index);
 	});
 
+	new Label(renderer_settings, "Skybox");
+
+	auto load_skybox = new Button(renderer_settings, "Load skybox");
+	load_skybox->setCallback([&] {
+		std::string skybox_path = file_dialog({ { "hdr", "Radiance HDR" } }, false);
+		m_skybox->reset_panorama(skybox_path);
+	});
+
 	new Label(renderer_settings, "Tone mapping");
+
 	auto tone_map = new ComboBox(renderer_settings, {
 		"Reinhard", "Uncharted 2", "Off"
 	});
@@ -291,8 +301,11 @@ Renderer::Renderer(const Settings& settings) : m_window(settings.window_size, "P
 	m_gui->setMouseButtonCallback([this](int button, int action, int modifiers) {
 		
 		switch (button) {
-		case GLFW_MOUSE_BUTTON_1:
-			m_camera.set_mouse_control(action == GLFW_PRESS);
+		case GLFW_MOUSE_BUTTON_LEFT:
+			m_camera.set_left_button_pressed(action == GLFW_PRESS);
+			break;
+		case GLFW_MOUSE_BUTTON_RIGHT:
+			m_camera.set_right_button_pressed(action == GLFW_PRESS);
 			break;
 		}
 
@@ -350,14 +363,14 @@ Renderer::Renderer(const Settings& settings) : m_window(settings.window_size, "P
 	glClear(GL_COLOR_BUFFER_BIT);
 	//	m_current_adapted_luminance_fb->unbind();
 
-	// Load meshes
+	// Load the default mesh
 	
 	m_mesh = std::make_unique<Mesh>("data/handgun/Handgun_obj.obj", m_gui.get());
 	m_mesh->upload();
 
-	// Create skybox
+	// Load the default skybox
 
-	m_skybox = std::make_unique<Skybox>("grace");
+	m_skybox = std::make_unique<Skybox>(Skybox::ROOT_DIRECTORY + "doge/doge.hdr");
 
 	m_last_frame_time = glfwGetTime();
 
@@ -378,9 +391,6 @@ void Renderer::run() {
 	while (m_is_running) {
 
 		m_window.poll_events();
-
-		//glm::uvec2 window_size = m_window.size();
-		//glViewport(0, 0, window_size.x, window_size.y);
 
 		m_main_fb->bind();
 

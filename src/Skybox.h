@@ -12,10 +12,10 @@
 
 class Skybox {
 
-	static const std::string ROOT_FOLDER;
 	static const std::array<glm::vec2, 4> VERTICES_2D;
 	static const std::array<glm::vec3, 36> VERTICES_3D;
 
+	std::string m_directory;
 	std::string m_name;
 
 	Program m_draw_program;
@@ -37,7 +37,11 @@ class Skybox {
 
 public:
 
-	Skybox(const std::string& name);
+	static const std::string ROOT_DIRECTORY;
+
+	Skybox(const std::string& hdr_panorama);
+
+	void reset_panorama(const std::string& hdr_panorama);
 
 	void draw(const glm::mat4& view_projection);
 

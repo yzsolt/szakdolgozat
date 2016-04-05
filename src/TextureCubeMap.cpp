@@ -129,6 +129,29 @@ void TextureCubeMap::upload_hdr(const std::string& path, InputType input_type) {
 
 }
 
+void TextureCubeMap::upload_hdr_sides(const std::string &folder, const std::string &name) {
+
+	bind();
+
+	for (GLuint i = 0; i < 6; i++) {
+
+		int component_count;
+		glm::uvec2 size;
+
+		std::unique_ptr<float[]> data = Texture::load_hdr_image(folder + name + "." + std::to_string(i) + ".hdr", component_count, size);
+
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, component_count == 4 ? GL_RGBA32F : GL_RGB32F, size.x, size.y, 0, component_count == 4 ? GL_RGBA : GL_RGB, GL_FLOAT, data.get());
+
+		if (i == 0) {
+			m_size = size;
+		}
+
+	}
+
+	unbind();
+
+}
+
 void TextureCubeMap::upload_hdr_sides_and_mips(const std::string &folder, const std::string &name, GLuint mip_count) {
 
 	bind();
