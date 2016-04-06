@@ -341,7 +341,6 @@ Mesh::Mesh(const std::string& path, GUI* gui) : m_gui(gui) {
 
 	std::size_t last_separator = path.find_last_of("/\\");
 	m_directory = path.substr(0, last_separator + 1);
-	//std::string file_name = path.substr(last_separator + 1);
 
 	bool success = tinyobj::LoadObj(m_shapes, materials, error_message, path.c_str(), m_directory.c_str());
 
@@ -386,6 +385,11 @@ Mesh::Mesh(const std::string& path, GUI* gui) : m_gui(gui) {
 		}
 
 	}
+
+	glm::vec3 extents = m_bounding_box.maximum - m_bounding_box.minimum;
+	float maximal_extent = std::max({ extents.x, extents.y, extents.z });
+
+	m_scale = 1 / maximal_extent;
 
 	m_draw_shape.resize(m_shapes.size(), true);
 
@@ -603,6 +607,10 @@ void Mesh::draw(Program& program) {
 
 	}
 	
+}
+
+float Mesh::scale() const {
+	return m_scale;
 }
 
 bool Mesh::use_pbr() const {

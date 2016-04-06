@@ -34,6 +34,7 @@ class Mesh {
 	std::vector<Vertex> m_vertices;
 	
 	AABB m_bounding_box;
+	float m_scale = 1.f;
 
 	bool m_use_pbr = true;
 	std::vector<BlinnPhongMaterial> m_bp_materials;
@@ -67,6 +68,8 @@ public:
 	void upload();
 
 	void draw(Program& program);
+
+	float scale() const;
 
 	bool use_pbr() const;
 

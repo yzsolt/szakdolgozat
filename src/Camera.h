@@ -16,7 +16,7 @@ class Camera {
 	bool m_left_button_pressed = false;
 	bool m_right_button_pressed = false;
 
-	float m_radius = 10.f;
+	float m_radius = 1.5f;
 
 	void _update();
 

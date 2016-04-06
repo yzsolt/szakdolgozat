@@ -323,6 +323,8 @@ Renderer::Renderer(const Settings& settings) : m_window(settings.window_size, "P
 
 	m_gui->setScrollCallback([this](double x, double y) {
 
+		y /= 10.f;
+
 		m_camera.set_radius(m_camera.radius() - static_cast<float>(y));
 
 	});
@@ -414,8 +416,8 @@ void Renderer::run() {
 			// Matrix calculations
 
 			m_world = glm::mat4(1);
+			m_world = glm::scale(m_world, glm::vec3(m_mesh->scale()));
 			m_world = glm::rotate(m_world, m_mesh_rotation, glm::vec3(0, 1, 0));
-
 			m_world = glm::translate(m_world, -m_mesh->center());
 
 			glm::mat4 view = m_camera.view_matrix();
