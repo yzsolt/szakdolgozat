@@ -77,16 +77,26 @@ void Skybox::_precompute_irradiance(bool specular) {
 
 		if (specular) {
 			for (GLuint i = 0; i < CUBEMAP_SPEC_MIPS; i++) {
+
 				file_name = m_directory + m_name + ".specular_irradiance." + std::to_string(j) + "." + std::to_string(i) + ".hdr";
+
+				std::ifstream infile(file_name);
+				if (!infile.good()) {
+					generate_textures = true;
+					break;
+				}
+
 			}
 		} else {
-			file_name = m_directory + m_name + ".diffuse_irradiance." + std::to_string(j) + ".hdr";
-		}
 
-		std::ifstream infile(file_name);
-		if (!infile.good()) {
-			generate_textures = true;
-			break;
+			file_name = m_directory + m_name + ".diffuse_irradiance." + std::to_string(j) + ".hdr";
+
+			std::ifstream infile(file_name);
+			if (!infile.good()) {
+				generate_textures = true;
+				break;
+			}
+
 		}
 
 	}
@@ -139,7 +149,7 @@ void Skybox::_precompute_irradiance(bool specular) {
 			glm::mat3(x, z, y),
 			glm::mat3(x, -z, -y),
 			glm::mat3(x, -y, z),
-			glm::mat3(x, y, -z),
+			glm::mat3(-x, -y, -z),
 		} };
 
 		Program* program = specular ? &m_precompute_specular_irradiance : &m_precompute_diffuse_irradiance;
@@ -288,7 +298,7 @@ void Skybox::reset_panorama(const std::string& hdr_panorama) {
 
 	size_t directory_end = std::max(last_slash_position, last_backslash_position);
 
-	m_directory = hdr_panorama.substr(0, directory_end);
+	m_directory = hdr_panorama.substr(0, directory_end + 1);
 	std::string file_name = hdr_panorama.substr(directory_end + 1);
 	m_name = file_name.substr(0, file_name.find_last_of('.'));
 
