@@ -369,8 +369,8 @@ Mesh::Mesh(const std::string& path, GUI* gui) : m_gui(gui) {
 			const std::vector<float>& t = m_shapes[i].mesh.texcoords;
 
 			glm::vec3 position(p[3 * v + 0], p[3 * v + 1], p[3 * v + 2]);
-			glm::vec3 normal(n[3 * v + 0], n[3 * v + 1], n[3 * v + 2]);
-			glm::vec2 texture(t[2 * v + 0], t[2 * v + 1]);
+			glm::vec3 normal = n.empty() ? glm::vec3(0, 0, 0) : glm::vec3(n[3 * v + 0], n[3 * v + 1], n[3 * v + 2]);
+			glm::vec2 texture = t.empty() ? glm::vec2(0, 0) : glm::vec2(t[2 * v + 0], t[2 * v + 1]);
 			
 			m_bounding_box.minimum = glm::min(m_bounding_box.minimum, position);
 			m_bounding_box.maximum = glm::max(m_bounding_box.maximum, position);
