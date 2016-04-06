@@ -10,12 +10,7 @@ in vec3 vs_out_position;
 #define NUM_SPEC_SAMPLES 2048U
 
 uniform samplerCube u_environment_map;
-/*
-uniform mat4 u_world;
-uniform mat4 u_projection;
-uniform mat4 u_cube_views[6];
 
-uniform vec3 u_view_position;*/
 uniform float u_roughness = 0.1f;
 
 vec3 PrefilterEnvMapSpecular(float roughness, vec3 R) {
