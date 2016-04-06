@@ -1,4 +1,5 @@
 
+#include "log.h"
 #include "materials.h"
 
 // Texture map
@@ -7,8 +8,15 @@ void TextureMap::upload(const std::string& material_directory) {
 
 	if (!path.empty()) {
 		texture = std::make_unique<Texture2D>();
-		texture->upload(material_directory + path);
-		use_texture = true;
+
+		try {
+			texture->upload(material_directory + path);
+			use_texture = true;
+		} catch (const std::runtime_error& e) {
+			LOG(std::string("Warning: ") + e.what());
+			use_texture = false;
+		}
+
 	}
 
 }
