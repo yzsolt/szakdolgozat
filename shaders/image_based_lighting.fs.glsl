@@ -25,7 +25,6 @@ vec3 approximate_specular(vec3 specular_color, float roughness, vec3 n, vec3 v) 
 	float mip_level = roughness * (NUM_MIPS - 1);
 
 	vec3 specular_radiance = textureLod(u_specular_irradiance_map, r, mip_level).rgb;
-	//vec3 specular_radiance = texture(u_specular_irradiance_map, r).rgb;
 	vec2 brdf = texture(u_brdf_lut, vec2(n_dot_v, roughness)).rg;
 
 	return specular_radiance * (specular_color * brdf.x + vec3(brdf.y));
