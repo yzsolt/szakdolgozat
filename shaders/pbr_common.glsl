@@ -9,8 +9,6 @@
 
 uniform PhysicallyBasedMaterial u_pbm;
 
-uniform vec4 matParams;			// roughness, metalness, hastexture, hasnormalmap
-
 vec3 F_Schlick(vec3 f0, float u) {
 	return f0 + (vec3(1.0) - f0) * pow(1.0 - u, 5.0);
 }
@@ -49,30 +47,6 @@ vec4 BRDF_Lambertian(vec2 tex) {
 	color.rgb *= ONE_OVER_PI;
 
 	return color;
-
-}
-
-vec3 BRDF_ImprovedOrenNayar(float ldotv, float ndotl, float ndotv, float roughness) {
-
-    float s = ldotv - ndotl * ndotv;
-    float t = s <= 0 ? 1 : max(ndotl, ndotv);
-
-    float r2 = roughness * roughness;
-
-    //float A = ONE_OVER_PI * (1 - 0.5 * r2 / (r2 + 0.33) + 0.17p * r2 / (r2 + 0.13)));
-    //float B = ONE_OVER_PI * 0.45 * r2 / (r2 + 0.09);
-
-    float A = 1 / (PI + (HALF_PI - 2/3) * roughness);
-    float B = roughness / (PI + (HALF_PI - 2/3) * roughness);
-
-    vec3 color = u_pbm.diffuse.use_texture ? texture(u_pbm.diffuse.texture, vs_out_texture).rgb : u_pbm.diffuse.color.rgb;
-    float metalness = u_pbm.metalness.use_texture ? texture(u_pbm.metalness.texture, vs_out_texture).r : u_pbm.metalness.color.r;
-	color = mix(color, vec3(0), metalness);
-
-    return color * ndotl * (A + B * s / t);
-
-    //vec3 Lr = color * ONE_OVER_PI * ndotl * (A + (B * max(0, cos()) * sin(alpha) * tan(beta))) * irradiance;
-    //return Lr;
 
 }
 
