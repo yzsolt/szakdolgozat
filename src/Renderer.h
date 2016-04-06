@@ -30,13 +30,14 @@ public:
 		DIFFUSE			= 5,
 		NORMAL_MAP		= 6,
 		SPECULARITY		= 7,
-		REFLECTIVITY	= 8
+		REFLECTIVITY	= 8,
 	};
 
 	enum class ToneMap : int {
 		REINHARD	= 0,
 		UNCHARTED_2	= 1,
-		OFF			= 2
+		UNREAL_4	= 2,
+		OFF			= 3,
 	};
 
 private:

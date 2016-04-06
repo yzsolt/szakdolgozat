@@ -238,14 +238,19 @@ void Renderer::_setup_gui() {
 
 	auto load_skybox = new Button(renderer_settings, "Load skybox");
 	load_skybox->setCallback([&] {
+
 		std::string skybox_path = file_dialog({ { "hdr", "Radiance HDR" } }, false);
-		m_skybox->reset_panorama(skybox_path);
+
+		if (!skybox_path.empty()) {
+			m_skybox->reset_panorama(skybox_path);
+		}
+
 	});
 
 	new Label(renderer_settings, "Tone mapping");
 
 	auto tone_map = new ComboBox(renderer_settings, {
-		"Reinhard", "Uncharted 2", "Off"
+		"Reinhard", "Uncharted 2", "Unreal 4", "Off"
 	});
 	tone_map->setSelectedIndex(static_cast<int>(m_tone_map));
 	tone_map->setCallback([this](int index) {
@@ -261,9 +266,14 @@ void Renderer::_setup_gui() {
 
 	auto load_mesh = new Button(renderer_settings, "Load mesh");
 	load_mesh->setCallback([&] {
+
 		std::string mesh_path = file_dialog({ { "obj", "Wavefront OBJ" } }, false);
-		m_mesh.reset(new Mesh(mesh_path, m_gui.get()));
-		m_mesh->upload();
+
+		if (!mesh_path.empty()) {
+			m_mesh.reset(new Mesh(mesh_path, m_gui.get()));
+			m_mesh->upload();
+		}
+
 	});
 
 }
