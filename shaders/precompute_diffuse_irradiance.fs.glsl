@@ -7,7 +7,7 @@ in vec3 vs_out_position;
 
 #include "precompute_common.glsl"
 
-#define NUM_DIFF_SAMPLES 8192U
+#define NUM_DIFF_SAMPLES 16384U
 
 uniform samplerCube u_environment_map;
 
@@ -15,8 +15,8 @@ vec3 PrefilterEnvMapDiffuse(vec3 N, vec3 pixel) {
 	vec3 color = vec3(0);
 
 	//[loop]
-	for (uint i = 0; i < NUM_DIFF_SAMPLES; ++i) {
-		vec2 E = Random(pixel, float(i)); //Hammersley(i, NUM_DIFF_SAMPLES);
+	for (uint i = 0U; i < NUM_DIFF_SAMPLES; ++i) {
+		vec2 E = Hammersley(i, NUM_DIFF_SAMPLES);
 		vec3 L = TangentToWorld(CosineSample(E), N);
 
 		color += textureLod(u_environment_map, L, 0).rgb;
