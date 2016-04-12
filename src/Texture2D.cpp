@@ -19,18 +19,30 @@ void Texture2D::upload(InternalFormat internal_format, const glm::uvec2 &size, F
 
 void Texture2D::upload(const std::string& path, bool is_srgb) {
 
-	GLubyte* data = Texture::load_ldr_image(path, m_bytes_per_pixel, m_size, true);
+	GLubyte* data = Texture::load_ldr_image(path, m_component_count, m_size, true);
 
 	GLint internal_format;
+	GLenum format;
 
-	if (m_bytes_per_pixel == 4) {
+	switch (m_component_count) {
+	case 4:
 		internal_format = is_srgb ? GL_SRGB8_ALPHA8 : GL_RGBA8;
-	} else {
+		format = GL_RGBA;
+		break;
+	case 3:
 		internal_format = is_srgb ? GL_SRGB8 : GL_RGB8;
+		format = GL_RGB;
+		break;
+	case 1:
+		internal_format = GL_R8;
+		format = GL_RED;
+		break;
+	default:
+		throw std::runtime_error("Unknown component count.");
 	}
 
 	bind();
-	glTexImage2D(m_type, 0, internal_format, m_size.x, m_size.y, 0, m_bytes_per_pixel == 4 ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, data);
+	glTexImage2D(m_type, 0, internal_format, m_size.x, m_size.y, 0, format, GL_UNSIGNED_BYTE, data);
 
 	free((void*)data);
 

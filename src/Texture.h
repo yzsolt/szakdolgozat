@@ -86,7 +86,7 @@ protected:
 	GLuint m_id;
 	GLenum m_type;
 	glm::uvec2 m_size;
-	int m_bytes_per_pixel;
+	int m_component_count;
 
 	Texture(GLenum type, const glm::uvec2& size);
 
@@ -94,7 +94,7 @@ protected:
 
 public:
 
-	static GLubyte* load_ldr_image(const std::string& path, int& out_bytes_per_pixel, glm::uvec2& out_size, bool flip_vertically = false);
+	static GLubyte* load_ldr_image(const std::string& path, int& component_count, glm::uvec2& out_size, bool flip_vertically = false);
 	static std::unique_ptr<float[]> load_hdr_image(const std::string& path, int& component_count, glm::uvec2& out_size);
 
 	GLuint id() const;

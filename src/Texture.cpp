@@ -3,7 +3,7 @@
 
 #include "Texture.h"
 
-GLubyte* Texture::load_ldr_image(const std::string& path, int& out_bytes_per_pixel, glm::uvec2& out_size, bool flip_vertically) {
+GLubyte* Texture::load_ldr_image(const std::string& path, int& component_count, glm::uvec2& out_size, bool flip_vertically) {
 
 	int width, height;
 
@@ -13,17 +13,11 @@ GLubyte* Texture::load_ldr_image(const std::string& path, int& out_bytes_per_pix
 		throw std::runtime_error("Texture not found at '" + path +"'.");
 	}
 
-	int bytes_per_pixel;
-
-	GLubyte* texture = static_cast<GLubyte*>(stbi_load_from_file(file, &width, &height, &bytes_per_pixel, 0));
-
-	if (bytes_per_pixel != 4) {
-		//throw std::runtime_error("PNG textures must be saved with alpha value.");
-	}
+	GLubyte* texture = static_cast<GLubyte*>(stbi_load_from_file(file, &width, &height, &component_count, 0));
 	
 	if (flip_vertically) {
 
-		size_t row_size = width * bytes_per_pixel;
+		size_t row_size = width * component_count;
 
 		int half_height = static_cast<int>(std::floor(height / 2.0));
 		GLubyte* buffer = new GLubyte[row_size];
@@ -40,7 +34,6 @@ GLubyte* Texture::load_ldr_image(const std::string& path, int& out_bytes_per_pix
 
 	fclose(file);
 
-	out_bytes_per_pixel = bytes_per_pixel;
 	out_size = glm::uvec2(width, height);
 
 	return texture;

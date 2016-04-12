@@ -5,12 +5,8 @@
 #include "TextureCubeMap.h"
 
 std::array<std::unique_ptr<float[]>, 6> TextureCubeMap::_load_hdr_vertical_cross(const std::string & file_path) {
-	
-	int component_count;
 
-	std::unique_ptr<float[]> data = Texture::load_hdr_image(file_path, component_count, m_size);
-
-	m_bytes_per_pixel = sizeof(float) * component_count;
+	std::unique_ptr<float[]> data = Texture::load_hdr_image(file_path, m_component_count, m_size);
 
 	assert(m_size.x % 3 == 0 && m_size.y % 4 == 0);
 	unsigned int section_width = m_size.x / 3;
@@ -32,8 +28,8 @@ std::array<std::unique_ptr<float[]>, 6> TextureCubeMap::_load_hdr_vertical_cross
 
 	std::array<int, 6> mapping = { 3, 1, 0, 4, 2, 5 };
 
-	size_t row_size_in_floats = m_size.x * component_count;
-	size_t section_row_in_floats = section_width * component_count;
+	size_t row_size_in_floats = m_size.x * m_component_count;
+	size_t section_row_in_floats = section_width * m_component_count;
 
 	std::array<std::unique_ptr<float[]>, 6> sides;
 
@@ -41,12 +37,12 @@ std::array<std::unique_ptr<float[]>, 6> TextureCubeMap::_load_hdr_vertical_cross
 
 		const auto& section = sections[mapping[i]];
 
-		std::unique_ptr<float[]> section_buffer(new float[section_width * (section_width * component_count)]);
+		std::unique_ptr<float[]> section_buffer(new float[section_width * (section_width * m_component_count)]);
 		float* buffer = section_buffer.get();
 
 		for (int row = 0; row < section_width; row++) {
 
-			float* source = data.get() + (section.y + row) * row_size_in_floats + section.x * component_count;
+			float* source = data.get() + (section.y + row) * row_size_in_floats + section.x * m_component_count;
 
 			if (i == 5) {
 				// With a vertical cross input, we have to flip the section both vertically and horizontally
@@ -56,9 +52,9 @@ std::array<std::unique_ptr<float[]>, 6> TextureCubeMap::_load_hdr_vertical_cross
 
 				//std::swap_ranges(destination, destination + section_row_in_floats, destination);
 				for (size_t x = 0; x < section_width / 2; x++) {
-					for (int c = 0; c < component_count; c++) {
-						float* from = destination + x * component_count + c;
-						float* to = destination + section_row_in_floats - x * component_count - (component_count - c - 1) - 1;
+					for (int c = 0; c < m_component_count; c++) {
+						float* from = destination + x * m_component_count + c;
+						float* to = destination + section_row_in_floats - x * m_component_count - (m_component_count - c - 1) - 1;
 						std::swap(*from, *to);
 					}
 				}
@@ -95,7 +91,7 @@ void TextureCubeMap::upload_ldr(const std::string& folder) {
 
 	for (int i = 0; i < 6; i++) {
 
-		GLubyte* data = Texture::load_ldr_image(folder + "/" + std::to_string(i) + ".jpg", m_bytes_per_pixel, m_size);
+		GLubyte* data = Texture::load_ldr_image(folder + "/" + std::to_string(i) + ".jpg", m_component_count, m_size);
 
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_SRGB8, m_size.x, m_size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 
