@@ -225,6 +225,11 @@ void Renderer::_setup_gui() {
 	});
 	vsync_checkbox->setChecked(m_window.vsync());
 
+	auto fullscreen_checkbox = new CheckBox(renderer_settings, "Fullscreen", [this](bool state) {
+		m_window.set_fullscreen(state);
+	});
+	fullscreen_checkbox->setChecked(m_window.fullscreen());
+
 	new Label(renderer_settings, "Visualize");
 
 	auto visualize = new ComboBox(renderer_settings, {
@@ -377,12 +382,12 @@ Renderer::Renderer(const Settings& settings) : m_window(settings.window_size, "P
 
 	// Load the default mesh
 	
-	m_mesh = std::make_unique<Mesh>("data/handgun/Handgun_obj.obj", m_gui.get());
+	m_mesh = std::make_unique<Mesh>("data/meshes/handgun/Handgun_obj.obj", m_gui.get());
 	m_mesh->upload();
 
 	// Load the default skybox
 
-	m_skybox = std::make_unique<Skybox>(Skybox::ROOT_DIRECTORY + "doge/doge.hdr");
+	m_skybox = std::make_unique<Skybox>(Skybox::ROOT_DIRECTORY + "at_the_window/at_the_window.hdr");
 
 	m_last_frame_time = glfwGetTime();
 

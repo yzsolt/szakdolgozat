@@ -150,6 +150,41 @@ void Window::set_vsync(bool vsync) {
 	glfwSwapInterval(vsync ? 1 : 0);
 }
 
+bool Window::fullscreen() const {
+	return m_is_fullscreen;
+}
+
+void Window::set_fullscreen(bool fullscreen) {
+
+	if (!m_is_fullscreen && fullscreen) {
+
+		m_size = size();
+
+		GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+
+		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+		glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+		glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+		glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+		glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+		
+		glfwSetWindowSize(m_window, mode->width, mode->height);
+		glfwSetWindowPos(m_window, 0, 0);
+
+		m_is_fullscreen = true;
+
+	} else if (m_is_fullscreen && !fullscreen) {
+
+		glfwSetWindowSize(m_window, m_size.x, m_size.y);
+		//glfwSetWindowPos(originalPosX, originalPosY);
+
+		m_is_fullscreen = false;
+
+	}
+
+}
+
 void Window::set_close_callback(Window::CloseCallback callback) {
 	m_close_callback = callback;
 }

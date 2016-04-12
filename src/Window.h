@@ -13,7 +13,10 @@ class Window {
 
 	GLFWwindow* m_window;
 
+	glm::uvec2 m_size;
+
 	bool m_vsync = true;
+	bool m_is_fullscreen = false;
 
 	typedef std::function<bool()> CloseCallback;
 	typedef std::function<void(const glm::dvec2&)> CursorPositionCallback;
@@ -39,6 +42,9 @@ public:
 
 	bool vsync() const;
 	void set_vsync(bool vsync);
+
+	bool fullscreen() const;
+	void set_fullscreen(bool fullscreen);
 
 	void set_close_callback(CloseCallback callback);
 	void set_cursor_position_callback(CursorPositionCallback callback);
