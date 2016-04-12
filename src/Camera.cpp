@@ -27,6 +27,7 @@ void Camera::on_mouse_move(const glm::vec2& movement) {
 
 	if (m_left_button_pressed) {
 		m_yaw_pitch += movement * 0.01f;
+		m_yaw_pitch.y = glm::clamp(m_yaw_pitch.y, -glm::half_pi<float>() + 0.001f, glm::half_pi<float>() - 0.001f);
 	}
 
 	if (m_right_button_pressed) {
