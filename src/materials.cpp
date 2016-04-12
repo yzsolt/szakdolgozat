@@ -75,7 +75,46 @@ void BlinnPhongMaterial::upload(const std::string& material_directory) {
 
 // Physically based material
 
+const std::vector<PhysicallyBasedMaterial> PhysicallyBasedMaterial::DEFAULTS = {
+
+	// Values are from https://docs.unrealengine.com/latest/INT/Engine/Rendering/Materials/PhysicallyBased/index.html
+
+	PhysicallyBasedMaterial("Gold",
+		TextureMap(glm::vec3(1.000, 0.766, 0.336)),
+		TextureMap(),
+		TextureMap(0.3),
+		TextureMap(1)
+	),
+
+	PhysicallyBasedMaterial("Copper",
+		TextureMap(glm::vec3(0.955, 0.637, 0.538)),
+		TextureMap(),
+		TextureMap(0.3),
+		TextureMap(1)
+	),
+
+	PhysicallyBasedMaterial("Silver",
+		TextureMap(glm::vec3(0.972, 0.960, 0.915)),
+		TextureMap(),
+		TextureMap(0.3),
+		TextureMap(1)
+	),
+
+};
+
 PhysicallyBasedMaterial::PhysicallyBasedMaterial(const std::string& name) : Material(name) {}
+
+PhysicallyBasedMaterial::PhysicallyBasedMaterial(
+	std::string&& name,
+	TextureMap&& diffuse,
+	TextureMap&& normal,
+	TextureMap&& roughness,
+	TextureMap&& metalness
+) :
+	Material(std::move(name), std::move(diffuse), std::move(normal)),
+	roughness(std::move(roughness)),
+	metalness(std::move(metalness))
+{}
 
 void PhysicallyBasedMaterial::set_uniforms(Program& program) const {
 

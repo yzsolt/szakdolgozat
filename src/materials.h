@@ -18,7 +18,31 @@ struct TextureMap {
 	bool use_texture = false;
 
 	TextureMap() {}
-	TextureMap(const std::string& path, const glm::vec3& color) : path(path), color(glm::vec4(color, 1.f)) {}
+
+	TextureMap(const TextureMap& other) : 
+		path(other.path), 
+		texture(other.texture ? new Texture2D(other.texture->size()) : nullptr), 
+		color(other.color), 
+		use_texture(other.use_texture) 
+	{}
+
+	TextureMap(TextureMap&& other) : path(other.path), texture(std::move(other.texture)), color(other.color), use_texture(other.use_texture) {
+	}
+
+	TextureMap(float value) : color(glm::vec4(value, 0, 0, 1)) {}
+	TextureMap(const glm::vec3& color) : color(glm::vec4(color, 1)) {}
+	TextureMap(const std::string& path, const glm::vec3& color = glm::vec3(0)) : path(path), color(glm::vec4(color, 1)) {}
+
+	TextureMap& operator=(const TextureMap& other) {
+
+		path = other.path;
+		texture.reset(other.texture ? new Texture2D(other.texture->size()) : nullptr);
+		color = other.color;
+		use_texture = other.use_texture;
+
+		return *this;
+
+	}
 
 	void upload(const std::string& material_directory);
 
@@ -35,8 +59,11 @@ struct Material {
 	/** The normal map. */
 	TextureMap normal;
 
+	int use_default = -1;
+
 	Material() {}
 	Material(const std::string& name) : name(name) {}
+	Material(std::string&& name, TextureMap&& diffuse, TextureMap&& normal) : name(name), diffuse(std::move(diffuse)), normal(std::move(normal)) {}
 
 	/** Set the relevant material uniforms. */
 	virtual void set_uniforms(Program& program) const = 0;
@@ -69,6 +96,8 @@ struct BlinnPhongMaterial : public Material {
 
 struct PhysicallyBasedMaterial : public Material {
 
+	static const std::vector<PhysicallyBasedMaterial> DEFAULTS;
+
 	/** The roughness map. */
 	TextureMap roughness;
 
@@ -76,6 +105,13 @@ struct PhysicallyBasedMaterial : public Material {
 	TextureMap metalness;
 
 	PhysicallyBasedMaterial(const std::string& name);
+	PhysicallyBasedMaterial(
+		std::string&& name,
+		TextureMap&& diffuse,
+		TextureMap&& normal,
+		TextureMap&& roughness,
+		TextureMap&& metalness
+	);
 
 	void set_uniforms(Program& program) const override;
 	void upload(const std::string& material_directory) override;

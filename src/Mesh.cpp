@@ -159,17 +159,35 @@ void Mesh::_update_bp_material_info(int material_id) {
 
 }
 
-void Mesh::_update_pb_material_info(int material_id) {
+void Mesh::_update_pb_material_info(int material_id, bool predefined) {
 
 	if (m_pb_materials.empty()) {
 		return;
 	}
 
-	if (m_materials_window->childCount() > 1) {
-		m_materials_window->removeChild(m_materials_window->children()[1]);
+	if (m_materials_window->childCount() > 3) {
+		m_materials_window->removeChild(m_materials_window->children()[3]);
 	}
 
 	m_materials_window->setTitle("Physically based materials");
+
+	PhysicallyBasedMaterial* material;
+
+	if (!predefined) {
+
+		material = &m_pb_materials[material_id];
+
+		bool use_predefined = material->use_default >= 0;
+
+		m_predefined_materials_button->setSelectedIndex(use_predefined ? material->use_default : 0);
+		m_predefined_materials_button->setEnabled(use_predefined);
+		m_use_predefined_material_checkbox->setChecked(use_predefined);
+
+	} else {
+		material = &m_default_pb_materials[material_id];
+	}
+
+	// Material values
 
 	auto grid_layout = new GridLayout(Orientation::Horizontal, 2, Alignment::Middle, 15, 5);
 	grid_layout->setColAlignment({ Alignment::Maximum, Alignment::Fill });
@@ -180,91 +198,128 @@ void Mesh::_update_pb_material_info(int material_id) {
 
 	TextBox* text_box;
 	Widget* split_panel;
-	auto& material = m_pb_materials[material_id];
 
 	new Label(material_grid, "Diffuse color:", "sans-bold");
-	auto diffuse_color = new ColorPicker(material_grid, _vec4_to_eigen4f(material.diffuse.color));
-	diffuse_color->setCallback([&material](const Color& color) {
-		material.diffuse.color = _eigen4f_to_vec4(color);
+	auto diffuse_color = new ColorPicker(material_grid, _vec4_to_eigen4f(material->diffuse.color));
+	diffuse_color->setCallback([material](const Color& color) {
+		material->diffuse.color = _eigen4f_to_vec4(color);
 	});
 
 	new Label(material_grid, "Diffuse texture:", "sans-bold");
 	split_panel = new Widget(material_grid);
 	split_panel->setLayout(new BoxLayout(Orientation::Horizontal, Alignment::Middle, 0, 10));
-	text_box = new TextBox(split_panel, material.diffuse.path);
+	text_box = new TextBox(split_panel, material->diffuse.path);
 	auto use_diffuse_texture = new CheckBox(split_panel, "");
-	if (material.diffuse.path.empty()) {
+	if (material->diffuse.path.empty()) {
 		text_box->setValue("N/A");
 		use_diffuse_texture->setChecked(false);
 		use_diffuse_texture->setEnabled(false);
 	} else {
-		use_diffuse_texture->setChecked(material.diffuse.use_texture);
-		use_diffuse_texture->setCallback([&material](bool value) {
-			material.diffuse.use_texture = value;
+		use_diffuse_texture->setChecked(material->diffuse.use_texture);
+		use_diffuse_texture->setCallback([material](bool value) {
+			material->diffuse.use_texture = value;
 		});
 	}
 
 	new Label(material_grid, "Normal texture:", "sans-bold");
 	split_panel = new Widget(material_grid);
 	split_panel->setLayout(new BoxLayout(Orientation::Horizontal, Alignment::Middle, 0, 10));
-	text_box = new TextBox(split_panel, material.normal.path);
+	text_box = new TextBox(split_panel, material->normal.path);
 	auto use_normal_texture = new CheckBox(split_panel, "");
-	if (material.normal.path.empty()) {
+	if (material->normal.path.empty()) {
 		text_box->setValue("N/A");
 		use_normal_texture->setChecked(false);
 		use_normal_texture->setEnabled(false);
 	} else {
-		use_normal_texture->setChecked(material.normal.use_texture);
-		use_normal_texture->setCallback([&material](bool value) {
-			material.normal.use_texture = value;
+		use_normal_texture->setChecked(material->normal.use_texture);
+		use_normal_texture->setCallback([material](bool value) {
+			material->normal.use_texture = value;
 		});
 	}
 
 	new Label(material_grid, "Roughness value:", "sans-bold");
 	auto roughness_slider = new Slider(material_grid);
-	roughness_slider->setValue(material.roughness.color.r);
-	roughness_slider->setCallback([&material](float value) {
-		material.roughness.color.r = value;
+	roughness_slider->setValue(material->roughness.color.r);
+	roughness_slider->setCallback([material](float value) {
+		material->roughness.color.r = value;
 	});
 
 	new Label(material_grid, "Roughness texture:", "sans-bold");
 	split_panel = new Widget(material_grid);
 	split_panel->setLayout(new BoxLayout(Orientation::Horizontal, Alignment::Middle, 0, 10));
-	text_box = new TextBox(split_panel, material.roughness.path);
+	text_box = new TextBox(split_panel, material->roughness.path);
 	auto use_roughness_texture = new CheckBox(split_panel, "");
-	if (material.roughness.path.empty()) {
+	if (material->roughness.path.empty()) {
 		text_box->setValue("N/A");
 		use_roughness_texture->setChecked(false);
 		use_roughness_texture->setEnabled(false);
 	} else {
-		use_roughness_texture->setChecked(material.roughness.use_texture);
-		use_roughness_texture->setCallback([&material](bool value) {
-			material.roughness.use_texture = value;
+		use_roughness_texture->setChecked(material->roughness.use_texture);
+		use_roughness_texture->setCallback([material](bool value) {
+			material->roughness.use_texture = value;
 		});
 	}
-
+	
 	new Label(material_grid, "Metalness value:", "sans-bold");
 	auto metalness_slider = new Slider(material_grid);
-	metalness_slider->setValue(material.metalness.color.r);
-	metalness_slider->setCallback([&material](float value) {
-		material.metalness.color.r = value;
+	metalness_slider->setValue(material->metalness.color.r);
+	metalness_slider->setCallback([material](float value) {
+		material->metalness.color.r = value;
 	});
 
 	new Label(material_grid, "Metalness texture:", "sans-bold");
 	split_panel = new Widget(material_grid);
 	split_panel->setLayout(new BoxLayout(Orientation::Horizontal, Alignment::Middle, 0, 10));
-	text_box = new TextBox(split_panel, material.metalness.path);
+	text_box = new TextBox(split_panel, material->metalness.path);
 	auto use_metalness_texture = new CheckBox(split_panel, "");
-	if (material.metalness.path.empty()) {
+	if (material->metalness.path.empty()) {
 		text_box->setValue("N/A");
 		use_metalness_texture->setChecked(false);
 		use_metalness_texture->setEnabled(false);
 	} else {
-		use_metalness_texture->setChecked(material.metalness.use_texture);
-		use_metalness_texture->setCallback([&material](bool value) {
-			material.metalness.use_texture = value;
+		use_metalness_texture->setChecked(material->metalness.use_texture);
+		use_metalness_texture->setCallback([material](bool value) {
+			material->metalness.use_texture = value;
 		});
 	}
+
+	m_gui->performLayout();
+
+}
+
+void Mesh::_update_mesh_info(int shape_id) {
+
+	if (m_shapes.empty()) {
+		return;
+	}
+
+	if (m_mesh_info_window->childCount() > 2) {
+		m_mesh_info_window->removeChild(m_mesh_info_window->children()[2]);
+	}
+
+	auto grid_layout = new GridLayout(Orientation::Horizontal, 2, Alignment::Middle, 15, 5);
+	grid_layout->setColAlignment({ Alignment::Maximum, Alignment::Fill });
+	grid_layout->setSpacing(0, 10);
+
+	auto shape_grid = new Widget(m_mesh_info_window);
+	shape_grid->setLayout(grid_layout);
+
+	TextBox* text_box;
+	Widget* split_panel;
+
+	const auto& shape = m_shapes[shape_id];
+
+	new Label(shape_grid, "Draw:", "sans-bold");
+	auto draw_shape = new CheckBox(shape_grid, "", [this, shape_id](bool state) {
+		m_draw_shape[shape_id] = state;
+	});
+	draw_shape->setChecked(m_draw_shape[shape_id]);
+
+	new Label(shape_grid, "Vertex count:", "sans-bold");
+	text_box = new TextBox(shape_grid, std::to_string(shape.mesh.positions.size() / 3));
+
+	new Label(shape_grid, "Index count:", "sans-bold");
+	text_box = new TextBox(shape_grid, std::to_string(shape.mesh.indices.size() / 3));
 
 	m_gui->performLayout();
 
@@ -397,7 +452,16 @@ Mesh::Mesh(const std::string& path, GUI* gui) : m_gui(gui) {
 
 	// Parse materials
 
-	for (const auto& material : materials) {
+	for (auto& material : materials) {
+		
+		std::string normal_texture = material.bump_texname;
+
+		if (normal_texture.empty()) {
+			// tinyobjloader doesn't recognize map_Bump, only map_bump
+			normal_texture = material.unknown_parameter["map_Bump"];
+		}
+
+		std::string reflection_texture = material.unknown_parameter["refl"];
 
 		// Blinn-Phong materials
 		
@@ -406,9 +470,9 @@ Mesh::Mesh(const std::string& path, GUI* gui) : m_gui(gui) {
 
 		bpm.ambient = TextureMap(material.ambient_texname, _float3_to_vec3(material.ambient));
 		bpm.diffuse = TextureMap(material.diffuse_texname, _float3_to_vec3(material.diffuse));
-		bpm.normal = TextureMap(material.bump_texname, glm::vec3(0));
+		bpm.normal = TextureMap(normal_texture, glm::vec3(0));
 		bpm.specular = TextureMap(material.specular_texname, _float3_to_vec3(material.specular));
-		bpm.reflection = TextureMap(material.reflection_texname, glm::vec3(0));
+		bpm.reflection = TextureMap(reflection_texture, glm::vec3(0));
 
 		bpm.shininess = material.shininess;
 
@@ -418,9 +482,9 @@ Mesh::Mesh(const std::string& path, GUI* gui) : m_gui(gui) {
 		PhysicallyBasedMaterial& pbm = m_pb_materials.back();
 
 		pbm.diffuse = TextureMap(material.diffuse_texname, _float3_to_vec3(material.diffuse));
-		pbm.normal = TextureMap(material.bump_texname, glm::vec3(0));
-		pbm.roughness = TextureMap(material.specular_texname, _float3_to_vec3(material.specular));
-		// TODO: roughness, metalness
+		pbm.normal = TextureMap(normal_texture, glm::vec3(0));
+		pbm.roughness = TextureMap(material.unknown_parameter["map_Roughness"], glm::vec3(1));
+		pbm.metalness = TextureMap(material.unknown_parameter["map_Metalness"], glm::vec3(0));
 
 	}
 
@@ -429,6 +493,10 @@ Mesh::Mesh(const std::string& path, GUI* gui) : m_gui(gui) {
 	for (size_t i = 0; i < m_shapes.size(); i++) {
 		m_material_map.push_back(m_shapes[i].mesh.material_ids.empty() ? -1 : m_shapes[i].mesh.material_ids[0]);
 	}
+
+	// Copy default materials
+
+	m_default_pb_materials = PhysicallyBasedMaterial::DEFAULTS;
 
 	// Materials window
 
@@ -448,12 +516,54 @@ Mesh::Mesh(const std::string& path, GUI* gui) : m_gui(gui) {
 		auto* materials = new ComboBox(m_materials_window, material_names);
 
 		materials->setCallback([this](int material_id) {
+
+			m_selected_material = material_id;
+
 			if (m_use_pbr) {
 				_update_pb_material_info(material_id);
 			} else {
 				_update_bp_material_info(material_id);
 			}
+
 		});
+
+		// Predefined materials
+
+		m_use_predefined_material_checkbox = new CheckBox(m_materials_window, "Use predefined material", [this](bool state) {
+
+			m_predefined_materials_button->setEnabled(state);
+
+			int selected_predefined_material = m_predefined_materials_button->selectedIndex();
+
+			m_pb_materials[m_selected_material].use_default = state ? selected_predefined_material : -1;
+
+			_update_pb_material_info(state ? selected_predefined_material : m_selected_material, state);
+
+		});
+
+		m_use_predefined_material_checkbox->setChecked(false);
+
+		std::vector<std::string> default_material_names;
+
+		for (const auto& default_material : m_default_pb_materials) {
+			default_material_names.push_back(default_material.name);
+		}
+
+		m_predefined_materials_button = new ComboBox(m_materials_window, default_material_names);
+
+		m_predefined_materials_button->setCallback([this](int default_material_id) {
+
+			if (m_use_pbr) {
+				m_pb_materials[m_selected_material].use_default = default_material_id;
+			} else {
+				// TODO
+			}
+
+			_update_pb_material_info(default_material_id, true);
+
+		});
+
+		m_predefined_materials_button->setEnabled(false);
 
 	}
 
@@ -473,6 +583,7 @@ Mesh::Mesh(const std::string& path, GUI* gui) : m_gui(gui) {
 		}
 
 	});
+
 	use_pbr_checkbox->setChecked(m_use_pbr);
 
 	if (m_shapes.empty()) {
@@ -487,33 +598,14 @@ Mesh::Mesh(const std::string& path, GUI* gui) : m_gui(gui) {
 
 		auto* shapes = new ComboBox(m_mesh_info_window, shape_names);
 
-		shapes->setCallback([this](int material_id) {
-			//_update_bp_material_info(material_id);
+		shapes->setCallback([this](int shape_id) {
+			_update_mesh_info(shape_id);
 		});
 
 	}
-	/*
-	FormHelper *shapes_info = new FormHelper(m_gui);
-	auto* shapes_window = shapes_info->addWindow(Eigen::Vector2i(120, 5), "Shapes");
 
-	for (size_t i = 0; i < m_shapes.size(); i++) {
+	_update_mesh_info(0);
 
-		shapes_info->addGroup(m_shapes[i].name);
-
-		bool draw_shape = true;
-		size_t vertex_count = m_shapes[i].mesh.positions.size() / 3;
-		size_t index_count = m_shapes[i].mesh.indices.size() / 3;
-
-		auto checkbox = shapes_info->addVariable("Draw:", draw_shape);
-		checkbox->setCallback([this, i](bool state) {
-			m_draw_shape[i] = state;
-		});
-
-		shapes_info->addVariable("Vertex count:", vertex_count, false);
-		shapes_info->addVariable("Index count:", index_count, false);
-
-	}
-	*/
 	m_gui->performLayout();
 
 }
@@ -589,7 +681,15 @@ void Mesh::draw(Program& program) {
 			if (material_id > -1) {
 				
 				if (m_use_pbr) {
-					m_pb_materials[material_id].set_uniforms(program);
+
+					auto& material = m_pb_materials[material_id];
+					
+					if (material.use_default < 0) {
+						material.set_uniforms(program);
+					} else {
+						m_default_pb_materials[material.use_default].set_uniforms(program);
+					}
+
 				} else {
 					m_bp_materials[material_id].set_uniforms(program);
 				}
