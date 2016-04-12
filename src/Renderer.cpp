@@ -217,7 +217,7 @@ void Renderer::_setup_gui() {
 	m_gui = std::make_unique<GUI>(&m_window);
 
 	auto renderer_settings = new nanogui::Window(m_gui.get(), "Renderer settings");
-	renderer_settings->setPosition(Eigen::Vector2i(15, 15));
+	renderer_settings->setPosition(Eigen::Vector2i(5, 5));
 	renderer_settings->setLayout(new GroupLayout());
 
 	auto vsync_checkbox = new CheckBox(renderer_settings, "V-Sync", [this](bool state) {

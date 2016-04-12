@@ -501,6 +501,7 @@ Mesh::Mesh(const std::string& path, GUI* gui) : m_gui(gui) {
 	// Materials window
 
 	m_materials_window = new nanogui::Window(m_gui, "Materials");
+	m_materials_window->setPosition(Eigen::Vector2i(5, 450));
 	m_materials_window->setLayout(new GroupLayout());
 
 	if (materials.empty()) {
@@ -571,6 +572,7 @@ Mesh::Mesh(const std::string& path, GUI* gui) : m_gui(gui) {
 
 	m_mesh_info_window = new nanogui::Window(m_gui, "Mesh info");
 	m_mesh_info_window->setLayout(new GroupLayout());
+	m_mesh_info_window->setPosition(Eigen::Vector2i(200, 5));
 
 	auto use_pbr_checkbox = new CheckBox(m_mesh_info_window, "Use PBR", [this](bool state) {
 
