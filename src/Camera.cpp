@@ -1,4 +1,6 @@
 
+#include "log.h"
+#include <string>
 #include "Camera.h"
 
 void Camera::_update() {
@@ -84,6 +86,9 @@ float Camera::radius() const {
 }
 
 void Camera::set_radius(float radius) {
-	m_radius = radius;
+
+	m_radius = glm::clamp(radius, m_radius_limit.x, m_radius_limit.y);
+	
 	_update();
+
 }

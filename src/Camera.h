@@ -16,6 +16,7 @@ class Camera {
 	bool m_left_button_pressed = false;
 	bool m_right_button_pressed = false;
 
+	glm::vec2 m_radius_limit = glm::vec2(0.8f, 6.f);
 	float m_radius = 1.5f;
 
 	void _update();
