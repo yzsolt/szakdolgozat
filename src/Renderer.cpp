@@ -302,7 +302,7 @@ Renderer::Renderer(const Settings& settings) :
 		return true; // Let GLFW close the window
 	});
 
-	m_window.set_vsync(settings.vsync);
+	m_window.set_vsync(true);
 
 	// Debug
 
