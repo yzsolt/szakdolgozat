@@ -44,6 +44,8 @@ private:
 
 	static void APIENTRY _on_gl_message(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *user_data);
 
+	Settings m_settings;
+
 	::Window m_window;
 	bool m_is_running = true;
 	std::unique_ptr<GUI> m_gui;
@@ -52,6 +54,8 @@ private:
 	std::unique_ptr<FrameBuffer> m_main_fb;
 	std::unique_ptr<FrameBuffer> m_msaa_fb;
 
+	float m_exposure = -1.f;
+	nanogui::Slider* m_exposure_slider = nullptr;
 	std::unique_ptr<FrameBuffer> m_average_luminance_fb;
 	std::unique_ptr<FrameBuffer> m_previous_adapted_luminance_fb;
 	std::unique_ptr<FrameBuffer> m_current_adapted_luminance_fb;

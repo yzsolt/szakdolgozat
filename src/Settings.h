@@ -11,7 +11,7 @@ struct Settings {
 	glm::uvec2 window_size			= { 1280, 800 };
 	bool fullscreen					= false;
 	bool vsync						= true;
-	unsigned int multisample_count	= 4;
+	unsigned int multisample_count	= 0;
 
 	Settings(const std::vector<std::string>& arguments);
 

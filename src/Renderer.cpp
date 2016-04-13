@@ -5,6 +5,7 @@
 #include <glm/gtx/string_cast.hpp>
 #include <glad/glad.h>
 
+#include "log.h"
 #include "Renderer.h"
 #include "Shader.h"
 #include "Mesh.h"
@@ -224,23 +225,16 @@ void Renderer::_setup_gui() {
 		m_window.set_vsync(state);
 	});
 	vsync_checkbox->setChecked(m_window.vsync());
-
-	auto fullscreen_checkbox = new CheckBox(renderer_settings, "Fullscreen", [this](bool state) {
-		m_window.set_fullscreen(state);
-	});
-	fullscreen_checkbox->setChecked(m_window.fullscreen());
-
+	/*
 	new Label(renderer_settings, "Visualize");
-
 	auto visualize = new ComboBox(renderer_settings, {
 		"Nothing", "Positions", "Normals", "Tangents", "Ambient", "Diffuse", "Normal map", "Specularity", "Reflectivity"
 	});
 	visualize->setCallback([this](int index) {
 		m_visualize = static_cast<Visualize>(index);
 	});
-
+	*/
 	new Label(renderer_settings, "Skybox");
-
 	auto load_skybox = new Button(renderer_settings, "Load skybox");
 	load_skybox->setCallback([&] {
 
@@ -253,7 +247,6 @@ void Renderer::_setup_gui() {
 	});
 
 	new Label(renderer_settings, "Tone mapping");
-
 	auto tone_map = new ComboBox(renderer_settings, {
 		"Reinhard", "Uncharted 2", "Unreal 4", "Off"
 	});
@@ -262,8 +255,24 @@ void Renderer::_setup_gui() {
 		m_tone_map = static_cast<ToneMap>(index);
 	});
 
-	new Label(renderer_settings, "Mesh settings");
+	// Exposure control
 
+	new Label(renderer_settings, "Exposure");
+	auto auto_exposure_checkbox = new CheckBox(renderer_settings, "Automatic exposure", [this](bool state) {
+		m_exposure *= -1;
+		m_exposure_slider->setEnabled(!state);
+	});
+	auto_exposure_checkbox->setChecked(m_exposure < 0);
+
+	m_exposure_slider = new Slider(renderer_settings);
+	m_exposure_slider->setValue(m_exposure);
+	m_exposure_slider->setCallback([this](float value) {
+		m_exposure = value * 16;
+	});
+
+	// Mesh settings
+
+	new Label(renderer_settings, "Mesh settings");
 	auto rotate_mesh_checkbox = new CheckBox(renderer_settings, "Rotate mesh", [this](bool state) {
 		m_rotate_mesh = state;
 	});
@@ -283,7 +292,10 @@ void Renderer::_setup_gui() {
 
 }
 
-Renderer::Renderer(const Settings& settings) : m_window(settings.window_size, "PBR renderer", settings.multisample_count, settings.fullscreen, false, true) {
+Renderer::Renderer(const Settings& settings) : 
+	m_settings(settings),
+	m_window(settings.window_size, "PBR renderer", settings.multisample_count, settings.fullscreen, false, true) 
+{
 
 	m_window.set_close_callback([this]() -> bool {
 		m_is_running = false;
@@ -351,7 +363,7 @@ Renderer::Renderer(const Settings& settings) : m_window(settings.window_size, "P
 	m_blinn_phong_program = std::make_unique<Program>("pass_through.vs.glsl", "blinn_phong.fs.glsl");
 
 	m_pbr_light_probe_program = std::make_unique<Program>("pbr_light_probe.vs.glsl", "image_based_lighting.fs.glsl");
-	m_physically_based_program = std::make_unique<Program>("pass_through.vs.glsl", "physically_based.fs.glsl");
+	//m_physically_based_program = std::make_unique<Program>("pass_through.vs.glsl", "physically_based.fs.glsl");
 
 	// Create frame buffers
 
@@ -362,16 +374,30 @@ Renderer::Renderer(const Settings& settings) : m_window(settings.window_size, "P
 		m_main_fb->validate();
 	m_main_fb->unbind();
 
-	if (settings.multisample_count > 0) {
+	if (m_settings.multisample_count > 0) {
 
-		// TODO: check if power of two
+		GLint max_samples;
+		glGetIntegerv(GL_MAX_SAMPLES, &max_samples);
 
-		m_msaa_fb = std::make_unique<FrameBuffer>(m_window.size());
-		m_msaa_fb->bind();
-			m_msaa_fb->attach_render_target(FrameBuffer::AttachmentType::DEPTH, Texture::InternalFormat::DEPTH_32, settings.multisample_count);
-			m_msaa_fb->attach_render_target(FrameBuffer::AttachmentType::COLOR, Texture::InternalFormat::RGBA_16_FLOAT, settings.multisample_count);
-			m_msaa_fb->validate();
-		m_msaa_fb->unbind();
+		if ((m_settings.multisample_count & (m_settings.multisample_count - 1)) != 0) {
+			LOG("Sample count for MSAA is not a power of two, disabling MSAA.");
+		} else {
+		
+			if (m_settings.multisample_count > max_samples) {
+				LOG("Implementation can't provide " + std::to_string(m_settings.multisample_count) + " samples, falling back to maximum (" + std::to_string(max_samples) + ").");
+				m_settings.multisample_count = max_samples;
+			}
+
+			m_msaa_fb = std::make_unique<FrameBuffer>(m_window.size());
+			m_msaa_fb->bind();
+				m_msaa_fb->attach_render_target(FrameBuffer::AttachmentType::DEPTH, Texture::InternalFormat::DEPTH_32, m_settings.multisample_count);
+				m_msaa_fb->attach_render_target(FrameBuffer::AttachmentType::COLOR, Texture::InternalFormat::RGBA_16_FLOAT, m_settings.multisample_count);
+				m_msaa_fb->validate();
+			m_msaa_fb->unbind();
+
+			LOG("MSAA frame buffer created with " + std::to_string(m_settings.multisample_count) + " samples.");
+
+		}
 
 	}
 
@@ -506,6 +532,7 @@ void Renderer::run() {
 			m_tone_map_program->bind();
 				
 				m_tone_map_program->set_texture("u_hdr_texture", m_main_fb->color_texture(0));
+				m_tone_map_program->set_uniform("u_exposure", m_exposure);
 				m_tone_map_program->set_uniform("u_tone_map", static_cast<GLint>(m_tone_map));
 				m_tone_map_program->set_texture("u_average_luminance_texture", m_current_adapted_luminance_fb->color_texture(0));
 

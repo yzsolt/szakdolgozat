@@ -5,6 +5,7 @@ layout(location = 0) out vec4 out_color;
 
 uniform sampler2D u_hdr_texture;
 uniform sampler2D u_average_luminance_texture;
+uniform float u_exposure;
 uniform int u_tone_map;
 
 in vec2 vs_out_texture;
@@ -37,9 +38,14 @@ vec3 uncharted_2_tone_map(vec3 hdr_color) {
 void main() {
 
     vec3 hdr_color = texture(u_hdr_texture, vs_out_texture).rgb;
+	float exposure;
 
-	float average_luminance = texelFetch(u_average_luminance_texture, ivec2(0, 0), 0).r;
-	float exposure = 1 / (9.6 * average_luminance);
+	if (u_exposure < 0) {
+		float average_luminance = texelFetch(u_average_luminance_texture, ivec2(0, 0), 0).r;
+		exposure = 1 / (9.6 * average_luminance);
+	} else {
+		exposure = u_exposure;
+	}
 
     switch (u_tone_map) {
 
