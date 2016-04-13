@@ -3,6 +3,7 @@
 #define SETTINGS_H
 
 #include <vector>
+#include <string>
 
 #include <glm/glm.hpp>
 
