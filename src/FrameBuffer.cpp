@@ -32,12 +32,29 @@ FrameBuffer::FrameBuffer(const glm::uvec2& size) :
 }
 
 FrameBuffer::~FrameBuffer() {
+
+	glDeleteRenderbuffers(1, &m_depth_render_buffer);
+	glDeleteRenderbuffers(m_color_render_buffers.size(), m_color_render_buffers.data());
+
 	glDeleteFramebuffers(1, &m_id);
+
+}
+
+GLuint FrameBuffer::id() const {
+	return m_id;
+}
+
+const glm::uvec2& FrameBuffer::size() const {
+	return m_size;
 }
 
 void FrameBuffer::bind() {
-
 	glBindFramebuffer(GL_FRAMEBUFFER, m_id);
+}
+
+void FrameBuffer::bind_for_drawing() {
+
+	bind();
 
 	std::vector<GLenum> buffers; // TODO: precalculate
 	buffers.reserve(m_color_textures.size());
@@ -147,11 +164,70 @@ void FrameBuffer::set_color_texture_level(size_t index, GLuint level, bool chang
 
 }
 
-/*
-void FrameBuffer::activate_draw_on(const std::vector<GLenum>& color_attachments) const {
-	glDrawBuffers(static_cast<GLsizei>(color_attachments.size()), color_attachments.data());
+void FrameBuffer::attach_render_target(AttachmentType attachment_type, Texture::InternalFormat internal_format, GLuint sample_count) {
+
+	GLuint id;
+
+	glGenRenderbuffers(1, &id);
+
+	if (id == 0) {
+		throw std::runtime_error("OpenGL render buffer creation failed.");
+	}
+
+	bind();
+	glBindRenderbuffer(GL_RENDERBUFFER, id);
+
+	if (sample_count > 1) {
+		glRenderbufferStorageMultisample(GL_RENDERBUFFER, sample_count, static_cast<GLenum>(internal_format), m_size.x, m_size.y);
+	} else {
+		glRenderbufferStorage(GL_RENDERBUFFER, static_cast<GLenum>(internal_format), m_size.x, m_size.y);
+	}
+
+	GLenum target;
+
+	// TODO: check internal format for depth attachments
+
+	switch (attachment_type) {
+	case AttachmentType::DEPTH:
+		target = GL_DEPTH_ATTACHMENT;
+		break;
+	case AttachmentType::DEPTH_STENCIL:
+		target = GL_DEPTH_STENCIL_ATTACHMENT;
+		break;
+	case AttachmentType::COLOR:
+		target = GL_COLOR_ATTACHMENT0 + m_color_render_buffers.size();
+		break;
+	}
+
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, target, GL_RENDERBUFFER, id);
+
+	if (attachment_type == AttachmentType::COLOR) {
+		m_color_render_buffers.push_back(id);
+	} else {
+
+		if (m_depth_render_buffer != 0) {
+			throw std::runtime_error("A depth render buffer is already attached.");
+		}
+
+		m_depth_render_buffer = id;
+
+	}
+
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+	unbind();
+
 }
-*/
+
+void FrameBuffer::blit(const FrameBuffer& to, GLuint bitmask) {
+
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, m_id);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, to.id());
+
+	GLenum filter = ((bitmask & (GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT)) ? GL_NEAREST : GL_LINEAR);
+	glBlitFramebuffer(0, 0, m_size.x, m_size.y, 0, 0, to.size().x, to.size().y, bitmask, filter);
+
+}
+
 void FrameBuffer::validate() const {
 
 	GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);

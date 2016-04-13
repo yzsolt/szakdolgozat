@@ -50,6 +50,8 @@ private:
 
 	FullscreenQuad m_fullscreen_quad;
 	std::unique_ptr<FrameBuffer> m_main_fb;
+	std::unique_ptr<FrameBuffer> m_msaa_fb;
+
 	std::unique_ptr<FrameBuffer> m_average_luminance_fb;
 	std::unique_ptr<FrameBuffer> m_previous_adapted_luminance_fb;
 	std::unique_ptr<FrameBuffer> m_current_adapted_luminance_fb;

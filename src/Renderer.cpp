@@ -135,7 +135,7 @@ void Renderer::_measure_average_luminance() {
 
 	glm::vec2 texel_size = glm::vec2(1) / glm::vec2(m_window.size());
 
-	m_average_luminance_fb->bind();
+	m_average_luminance_fb->bind_for_drawing();
 	m_average_luminance_program->bind();
 
 		// 64x64
@@ -183,7 +183,7 @@ void Renderer::_adapt_luminance() {
 
 	m_previous_adapted_luminance_fb.swap(m_current_adapted_luminance_fb);
 
-	m_current_adapted_luminance_fb->bind();
+	m_current_adapted_luminance_fb->bind_for_drawing();
 	m_luminance_adapter_program->bind();
 
 		m_luminance_adapter_program->set_texture("u_previous_adapted_luminance_texture", m_previous_adapted_luminance_fb->color_texture(0));
@@ -357,9 +357,23 @@ Renderer::Renderer(const Settings& settings) : m_window(settings.window_size, "P
 
 	m_main_fb = std::make_unique<FrameBuffer>(m_window.size());
 	m_main_fb->bind();
-	m_main_fb->attach_color_texture(Texture::InternalFormat::RGBA_16_FLOAT);
-	m_main_fb->attach_depth_texture();
-	m_main_fb->validate();
+		m_main_fb->attach_color_texture(Texture::InternalFormat::RGBA_16_FLOAT);
+		m_main_fb->attach_depth_texture();
+		m_main_fb->validate();
+	m_main_fb->unbind();
+
+	if (settings.multisample_count > 0) {
+
+		// TODO: check if power of two
+
+		m_msaa_fb = std::make_unique<FrameBuffer>(m_window.size());
+		m_msaa_fb->bind();
+			m_msaa_fb->attach_render_target(FrameBuffer::AttachmentType::DEPTH, Texture::InternalFormat::DEPTH_32, settings.multisample_count);
+			m_msaa_fb->attach_render_target(FrameBuffer::AttachmentType::COLOR, Texture::InternalFormat::RGBA_16_FLOAT, settings.multisample_count);
+			m_msaa_fb->validate();
+		m_msaa_fb->unbind();
+
+	}
 
 	m_average_luminance_fb = std::make_unique<FrameBuffer>(glm::uvec2(64, 64));
 	m_average_luminance_fb->bind();
@@ -409,7 +423,9 @@ void Renderer::run() {
 
 		m_window.poll_events();
 
-		m_main_fb->bind();
+		FrameBuffer* render_target = m_msaa_fb ? m_msaa_fb.get() : m_main_fb.get();
+
+		render_target->bind_for_drawing();
 
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 			glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
@@ -465,7 +481,12 @@ void Renderer::run() {
 			m_skybox->draw(m_projection * view_without_translation);
 			glDepthFunc(GL_LESS);
 
-		m_main_fb->unbind();
+		render_target->unbind();
+
+		if (m_msaa_fb) {
+			m_msaa_fb->blit(*m_main_fb, GL_DEPTH_BUFFER_BIT);
+			m_msaa_fb->blit(*m_main_fb, GL_COLOR_BUFFER_BIT);
+		}
 
 		// Measure average luminance, then adapt
 
