@@ -264,10 +264,12 @@ void Renderer::_setup_gui() {
 	});
 	auto_exposure_checkbox->setChecked(m_exposure < 0);
 
+	const float exposure_multiplier = 16;
+
 	m_exposure_slider = new Slider(renderer_settings);
-	m_exposure_slider->setValue(m_exposure);
-	m_exposure_slider->setCallback([this](float value) {
-		m_exposure = value * 16;
+	m_exposure_slider->setValue(m_exposure * -1 / exposure_multiplier);
+	m_exposure_slider->setCallback([this, exposure_multiplier](float value) {
+		m_exposure = value * exposure_multiplier;
 	});
 
 	// Mesh settings
