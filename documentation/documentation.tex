@@ -14,6 +14,7 @@
 \usepackage[a4paper, top=2.5cm, bottom=2.5cm, left=3.5cm, right=2.5cm]{geometry}
 %\usepackage{sidecap}
 \usepackage{wrapfig}
+\usepackage{enumitem}
 
 \usepackage{setspace}
 \onehalfspacing
@@ -95,7 +96,53 @@ A fizikai alapú megjelenítés előnyeinek bemutatására egy egyszerű modelle
 \section{kukac}
 nyehehe
 
+% Fejlesztői dokumentáció
+
 \chapter{Fejlesztői dokumentáció}
-semmi
+
+\section{A 3D-s megjelenítés elméleti háttere}
+
+\subsection{A megjelenítési egyenlet}
+
+Tetszőleges térbeli jelenet leképezéséhez alapvetően három dolog szükséges:
+
+\begin{itemize}[noitemsep]
+\item a jelenet geometriájának leírása,
+\item egy pont a térben, ahonnan "nézzük" a jelenetet, továbbá
+\item legalább egy fényforrás, ill. annak pozíciója.
+\end{itemize}
+
+Valósidejű grafikában a geometriák leírásához háromszöghálókat használunk, mivel a GPU-k térbeli háromszögeken dolgoznak. Domború felületek leírásához ezen háromszögháló felbontását növeljük addig, amíg a végeredmény szempontjából elfogadható közelítést kapunk. Ezt a folyamatot tesszelációnak hívjuk. Az "elfogadhatóság" teljesen szubjektív tulajdonság, így az egyetlen objektív behatároló tényező a grafikus hardver teljesítménye, amelynek folyamatos fejlődése ezen a téren remekül illusztrálható.
+
+%TODO: régi baltával faragott 3d modell kép vs. modern
+
+Önmagukban a háromszögeket meghatározó térbeli pozíciók még nem elégségesek. Ismernünk kell a felület tetszőleges pontjának irányultságát, amelyet egy, a felületből "kifelé" álló, normalizált vektorral írunk le és (felületi) normálvektornak hívunk. Jelölése: n.
+%TODO: ezt inkább a gyakorlati részhez, a vertex definíciójával együtt?
+Ezeket legegyszerűbben a háromszögeket alkotó pontokkal együtt tárolhatjuk, majd ezeket menet közben interpolálva kaphatjuk meg a háromszög által meghatározott felület tetszőleges pontján vett normálvektort.
+
+\subsection{A megjelenítési egyenlet}
+
+A számítógépes grafika egyik alaptételének tekinthető megjelenítési egyenletet (\textit{rendering equation}) David Immel et al. és James Kajiya írta le 1986-ban. Az egyenlet segítségével meghatározható a felület egy adott pontját elhagyó sugárzás a felület által kibocsátott ill. visszavert sugárzás összegének geometriai optika alapú közelítésével:
+
+\[
+L_0(\mathbf{x},\mathbf{v}) = L_e(\mathbf{x},\mathbf{v}) + \int_\Omega f_r(\mathbf{x},\mathbf{l},\mathbf{v}) L_i(\mathbf{x},\mathbf{l}) (-\mathbf{l} \cdot \mathbf{n})\,\mathrm{d}\mathbf{l}
+\]
+
+ahol
+
+\begin{itemize}[noitemsep]
+\item \(\mathbf{x}\) a felület adott pontja
+\item \(\mathbf{v}\) az x vektorból a nézeti pozícióba mutató vektor (nézeti vektor)
+\item \(\mathbf{n}\) a korábban bevezetett felületi normálvektor
+\item \(\mathbf{l}\) a beérkező fény negatív iránya
+\item \(\Omega\) dd
+\item \(L_e\) a felület által kibocsátott fény az adott pontban
+\item \(f_r\) 
+\item \(L_i\)
+\end{itemize}
+
+\textit{Megjegyzés: az eredeti egyenlet figyelembe veszi még az időt és a fény hullámhosszát is. Az egyenlet paraméterei az idő előrehaladtával ritkán változnak, és ebben az esetben is előre kiszámolhatóak, ezért az időt állandónak tekinthetjük, amely így kiesik az egyenletből. A gyakorlatban RGB színtérben dolgozunk, és ennek 3 összetevőjét külön-külön számoljuk, így a hullámhossz paraméter is elhagyható.}
+
+Számítógépes grafikában a kimenetünk színértékek kétdimenziós mátrixa, jellemzően a képernyő pixelei. Ahhoz tehát, hogy kimenetet állítsunk elő, ezen
 
 \end{document} 
