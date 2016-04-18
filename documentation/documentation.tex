@@ -93,8 +93,8 @@ A fizikai alapú megjelenítés előnyeinek bemutatására egy egyszerű modelle
 % Felhasználói dokumentáció
 
 \chapter{Felhasználói dokumentáció}
-\section{kukac}
-nyehehe
+\section{A program üzembe helyezése}
+\section{A felhasználói felület áttekintése}
 
 % Fejlesztői dokumentáció
 
@@ -102,7 +102,7 @@ nyehehe
 
 \section{A 3D-s megjelenítés elméleti háttere}
 
-\subsection{A megjelenítési egyenlet}
+\subsection{Bevezetés}
 
 Tetszőleges térbeli jelenet leképezéséhez alapvetően három dolog szükséges:
 
@@ -116,7 +116,7 @@ Valósidejű grafikában a geometriák leírásához háromszöghálókat haszn�
 
 %TODO: régi baltával faragott 3d modell kép vs. modern
 
-Önmagukban a háromszögeket meghatározó térbeli pozíciók még nem elégségesek. Ismernünk kell a felület tetszőleges pontjának irányultságát, amelyet egy, a felületből "kifelé" álló, normalizált vektorral írunk le és (felületi) normálvektornak hívunk. Jelölése: n.
+Önmagukban a háromszögeket meghatározó térbeli pozíciók még nem elégségesek. Ismernünk kell a felület tetszőleges pontjának irányultságát, amelyet egy, a felületből "kifelé" álló, egység hosszúságú vektorral írunk le és felületi normálvektornak hívunk. Jelölése: \(\mathbf{n}\).
 %TODO: ezt inkább a gyakorlati részhez, a vertex definíciójával együtt?
 Ezeket legegyszerűbben a háromszögeket alkotó pontokkal együtt tárolhatjuk, majd ezeket menet közben interpolálva kaphatjuk meg a háromszög által meghatározott felület tetszőleges pontján vett normálvektort.
 
@@ -128,21 +128,38 @@ A számítógépes grafika egyik alaptételének tekinthető megjelenítési egy
 L_0(\mathbf{x},\mathbf{v}) = L_e(\mathbf{x},\mathbf{v}) + \int_\Omega f_r(\mathbf{x},\mathbf{l},\mathbf{v}) L_i(\mathbf{x},\mathbf{l}) (-\mathbf{l} \cdot \mathbf{n})\,\mathrm{d}\mathbf{l}
 \]
 
-ahol
+\noindent
+ahol a paraméterek:
 
 \begin{itemize}[noitemsep]
-\item \(\mathbf{x}\) a felület adott pontja
-\item \(\mathbf{v}\) az x vektorból a nézeti pozícióba mutató vektor (nézeti vektor)
-\item \(\mathbf{n}\) a korábban bevezetett felületi normálvektor
-\item \(\mathbf{l}\) a beérkező fény negatív iránya
-\item \(\Omega\) dd
-\item \(L_e\) a felület által kibocsátott fény az adott pontban
-\item \(f_r\) 
-\item \(L_i\)
+\item \(\mathbf{x}\) a felület egy pontja,
+\item \(\mathbf{v}\) a felület egy pontjából a nézeti pozícióba mutató normálvektor (nézeti vektor),
+\item \(\mathbf{n}\) a korábban bevezetett felületi normálvektor,
+\item \(\mathbf{l}\) pedig a felület egy pontjából a fényforrás felé mutató normálvektor.
 \end{itemize}
 
-\textit{Megjegyzés: az eredeti egyenlet figyelembe veszi még az időt és a fény hullámhosszát is. Az egyenlet paraméterei az idő előrehaladtával ritkán változnak, és ebben az esetben is előre kiszámolhatóak, ezért az időt állandónak tekinthetjük, amely így kiesik az egyenletből. A gyakorlatban RGB színtérben dolgozunk, és ennek 3 összetevőjét külön-külön számoljuk, így a hullámhossz paraméter is elhagyható.}
+\noindent
+\textit{Megjegyzés: az eredeti egyenlet figyelembe veszi még az időt és a fény hullámhosszát is. Az egyenlet paraméterei az idő előrehaladtával ritkán változnak, és ebben az esetben is előre kiszámolhatóak, ezért gyakorlati alkalmazás esetén az időt állandónak tekinthetjük, amely így kiesik az egyenletből. Mivel számítógépes grafikánál RGB színtérben dolgozunk, és ennek 3 összetevőjét külön-külön számolhatjuk, így a hullámhossz paraméter is elhagyható. A továbbiakban ezért fény alatt a fény színét és erősségét értjük.}
 
-Számítógépes grafikában a kimenetünk színértékek kétdimenziós mátrixa, jellemzően a képernyő pixelei. Ahhoz tehát, hogy kimenetet állítsunk elő, ezen
+A könnyebb érthetőség kedvéért bontsuk részekre az egyenletet. A bal oldalon szereplő \(L_0)\) az eredmény: a felület egy pontjából érkező fényt határozza meg a nézeti vektor függvényében, később ez lesz a ténylegesen megjelenített színérték. A jobb oldal első tagja, \(L_e\) a felület egy pontjából kisugárzott fényt adja meg. Ez az érték a gyakorlatban jellemzően 0, mert kevés emisszív anyag létezik, de pl. a fényforrások megjelenítéséhez szükség van rá. A következő tag az integrál, amelyben az \(\Omega\) a felületi normálvektor körül vett félgömböt jelenti, ami az összes lehetséges \(\mathbf{l}\) vektort tartalmazza, amelyen integrálni kell a tartalmazott függvényeket. Mint később látni fogjuk, az integrálás lesz az egyik sarkalatos pontja az egyenlet gyakorlati alkalmazásának, ugyanis az integrálnak nem minden fényforrás esetén van analitikus megoldása - ilyenkor közelítést fogunk alkalmazni. \(f_r\) az ún. kétirányú visszaverődési eloszlásfüggvény (bi-directional reflection distribution function, röviden BRDF), amely a nézeti irányba visszavert fény és a fényforrás felől besugárzott fény arányát adja meg. A BRDF nagy előnye, hogy fizikailag mérhető, és az interneten található MERL adatbázis 100 különböző anyag visszaverődési függvényét tartalmazza. Tulajdonságai:
+
+\begin{itemize}[noitemsep]
+\item pozitív: \(f_r(\mathbf{x},\mathbf{l},\mathbf{v}) \geq 0\)
+\item szimmetrikus: \(f_r(\mathbf{x},\mathbf{l},\mathbf{v}) = f_r(\mathbf{x},\mathbf{v},\mathbf{l})\)
+\item teljesíti az energiamegmaradás törvényét: \(\int_\Omega f_r(\mathbf{x},\mathbf{l},\mathbf{v}) (-\mathbf{l} \cdot \mathbf{n})\,\mathrm{d}\mathbf{l} \leq 1\)
+\end{itemize}
+
+Az \(L_i\) függvény a felület adott pontjára \(-\mathbf{l}\) irányból beérkező fényt adja meg. Fontos megjegyezni, hogy ez a fény nem csak direkt, hanem indirekt forrásból is érkezhet (pl. már valahol tükröződött fény, ld. globális/kép alapú megvilágítás). Az utolsó tag, \(-\mathbf{l} \cdot \mathbf{n}\) a beérkező fény iránya és a felületi normálvektor által bezárt szög koszinusza alapján csökkenti a kisugárzott fény erősségét.
+
+\subsection{Fizikai alapú megjelenítés}
+
+\section{Gyakorlati megvalósítás}
+\subsection{A felhasznált nyílt forráskódú könyvtárak bemutatása}
+\subsection{A megjelenítő felépítése}
+\subsection{Nagy dinamikatartományú megjelenítés}
+\subsection{Kép alapú megvilágítás}
+\subsection{Pont- és zseblámpa fények}
+
+\section{Tesztelés}
 
 \end{document} 
