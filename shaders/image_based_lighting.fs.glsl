@@ -48,7 +48,6 @@ void main() {
 
     vec4 diffuse_color = u_pbm.diffuse.use_texture ? texture(u_pbm.diffuse.texture, vs_out_texture) : u_pbm.diffuse.color;
     float roughness = u_pbm.roughness.use_texture ? texture(u_pbm.roughness.texture, vs_out_texture).r : u_pbm.roughness.color.r;
-	roughness = 1 - roughness;
     float metalness = u_pbm.metalness.use_texture ? texture(u_pbm.metalness.texture, vs_out_texture).r : u_pbm.metalness.color.r;
 
 	vec4 fd					= BRDF_Lambertian(vs_out_texture);
