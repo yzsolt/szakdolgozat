@@ -1,4 +1,8 @@
 
- - spec irrad cubemapnél még az egyik oldalt el kell forgatni
  - jobb gombbal up vektorra merőleges síkon kamera mozgatás
- - disable window resize (fb resize is macerás)
+ - spot, pont fények
+ - folyamatban levő húzás GUI-n elengedve nem fejeződik be
+ - áttetsző anyagok megjelenítése
+ - ssao
+
+ google scholar
