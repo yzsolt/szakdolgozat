@@ -27,6 +27,8 @@ set(SOURCES
     src/FullscreenQuad.h
     src/FullscreenQuad.cpp
     src/main.cpp
+    src/lights.h
+    src/lights.cpp
     src/log.h
     src/GUI.h
     src/GUI.cpp

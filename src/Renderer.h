@@ -11,6 +11,7 @@
 #include "FrameBuffer.h"
 #include "FullscreenQuad.h"
 #include "GUI.h"
+#include "lights.h"
 #include "Mesh.h"
 #include "Program.h"
 #include "Settings.h"
@@ -54,8 +55,13 @@ private:
 	std::unique_ptr<FrameBuffer> m_main_fb;
 	std::unique_ptr<FrameBuffer> m_msaa_fb;
 
+	// Tone mapping
+
 	float m_exposure = -1.f;
 	nanogui::Slider* m_exposure_slider = nullptr;
+
+	ToneMap m_tone_map = ToneMap::UNCHARTED_2;
+
 	std::unique_ptr<FrameBuffer> m_average_luminance_fb;
 	std::unique_ptr<FrameBuffer> m_previous_adapted_luminance_fb;
 	std::unique_ptr<FrameBuffer> m_current_adapted_luminance_fb;
@@ -71,12 +77,16 @@ private:
 	glm::mat4 m_normal_matrix;
 
 	std::unique_ptr<Skybox> m_skybox;
+
+	// The mesh
+
 	std::unique_ptr<Mesh> m_mesh;
 	bool m_rotate_mesh = true;
 	float m_mesh_rotation = 0.f;
 
 	Visualize m_visualize = Visualize::NOTHING;
-	ToneMap m_tone_map = ToneMap::UNCHARTED_2;
+
+	// Programs
 
 	std::unique_ptr<Program> m_fullscreen_program;
 
@@ -86,8 +96,10 @@ private:
 
 	std::unique_ptr<Program> m_blinn_phong_program;
 
-	std::unique_ptr<Program> m_pbr_light_probe_program;
-	std::unique_ptr<Program> m_physically_based_program;
+	std::unique_ptr<Program> m_image_based_lighting_program;
+	std::unique_ptr<Program> m_direct_lighting_program;
+
+	std::vector<std::unique_ptr<Light>> m_lights;
 
 	void _measure_average_luminance();
 	void _adapt_luminance();

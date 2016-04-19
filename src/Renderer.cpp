@@ -364,8 +364,8 @@ Renderer::Renderer(const Settings& settings) :
 
 	m_blinn_phong_program = std::make_unique<Program>("pass_through.vs.glsl", "blinn_phong.fs.glsl");
 
-	m_pbr_light_probe_program = std::make_unique<Program>("pbr_light_probe.vs.glsl", "image_based_lighting.fs.glsl");
-	//m_physically_based_program = std::make_unique<Program>("pass_through.vs.glsl", "physically_based.fs.glsl");
+	m_image_based_lighting_program = std::make_unique<Program>("pbr_light_probe.vs.glsl", "image_based_lighting.fs.glsl");
+	m_direct_lighting_program = std::make_unique<Program>("direct_lighting.vs.glsl", "direct_lighting.fs.glsl");
 
 	// Create frame buffers
 
@@ -431,6 +431,14 @@ Renderer::Renderer(const Settings& settings) :
 
 	m_skybox = std::make_unique<Skybox>(Skybox::ROOT_DIRECTORY + "at_the_window/at_the_window.hdr");
 
+	// Set up lights
+
+	m_lights.push_back(std::make_unique<PointLight>(
+		glm::vec3(1, 1, 1),
+		glm::vec3(1, 0, 0),
+		600.f
+	));
+
 	m_last_frame_time = glfwGetTime();
 
 	//
@@ -474,33 +482,63 @@ void Renderer::run() {
 			m_world_view = view * m_world;
 			m_normal_matrix = glm::transpose(glm::inverse(m_world_view));
 
+			glm::mat4 world_inverse = glm::inverse(m_world);
+
 			// Draw mesh
 
-			Program& program = m_mesh->use_pbr() ? *m_pbr_light_probe_program : *m_blinn_phong_program;
+			Program& program = m_mesh->use_pbr() ? *m_image_based_lighting_program : *m_blinn_phong_program;
 
 			program.bind();
 
-			program.set_uniform("u_world", m_world);
-			//program.set_uniform("u_view", m_view);
-			program.set_uniform("u_projection", m_projection);
-			program.set_uniform("u_world_view", m_world_view);
-			//program.set_uniform("u_normal_matrix", m_normal_matrix);
-			program.set_uniform("u_view_position", m_camera.position());
-			program.set_uniform("u_visualize", static_cast<int>(m_visualize));
-			program.set_texture("u_environment_map", m_skybox->environment_map());
+				program.set_uniform("u_world", m_world);
+				program.set_uniform("u_projection", m_projection);
+				program.set_uniform("u_world_view", m_world_view);
+				program.set_uniform("u_view_position", m_camera.position());
+				//program.set_uniform("u_visualize", static_cast<int>(m_visualize));
+				program.set_texture("u_environment_map", m_skybox->environment_map());
 
-			if (m_mesh->use_pbr()) {
+				if (m_mesh->use_pbr()) {
 
-				program.set_uniform("u_world_inverse", glm::inverse(m_world));
-				program.set_uniform("u_view_projection", m_projection * view);
+					program.set_uniform("u_world_inverse", world_inverse);
+					program.set_uniform("u_view_projection", m_projection * view);
 
-				program.set_texture("u_diffuse_irradiance_map", m_skybox->diffuse_irradiance_map());
-				program.set_texture("u_specular_irradiance_map", m_skybox->specular_irradiance_map());
-				program.set_texture("u_brdf_lut", m_skybox->brdf_lut());
+					program.set_texture("u_diffuse_irradiance_map", m_skybox->diffuse_irradiance_map());
+					program.set_texture("u_specular_irradiance_map", m_skybox->specular_irradiance_map());
+					program.set_texture("u_brdf_lut", m_skybox->brdf_lut());
 
-			}
+				}
 
-			m_mesh->draw(program);
+				m_mesh->draw(program);
+
+			program.unbind();
+
+			m_direct_lighting_program->bind();
+
+				m_direct_lighting_program->set_uniform("u_world", m_world);
+				m_direct_lighting_program->set_uniform("u_world_inverse", world_inverse);
+				m_direct_lighting_program->set_uniform("u_projection", m_projection);
+				m_direct_lighting_program->set_uniform("u_view_projection", m_projection * view);
+				m_direct_lighting_program->set_uniform("u_world_view", m_world_view);
+				m_direct_lighting_program->set_uniform("u_view_position", m_camera.position());
+
+				for (const auto& light : m_lights) {
+
+					Light* light_ptr = light.get();
+
+					switch (light->type()) {
+					case Light::Type::POINT:
+						static_cast<PointLight*>(light_ptr)->set_uniforms(*m_direct_lighting_program);
+						break;
+					case Light::Type::SPOT:
+						static_cast<SpotLight*>(light_ptr)->set_uniforms(*m_direct_lighting_program);
+						break;
+					}
+
+					m_mesh->draw(*m_direct_lighting_program);
+
+				}
+
+			m_direct_lighting_program->unbind();
 
 			// Draw skybox
 
