@@ -1,0 +1,7 @@
+\select@language {hungarian} \contentsline {chapter}{\numberline {1}Bevezet\IeC {\'e}s}{2}
+\select@language {hungarian} \contentsline {chapter}{\numberline {2}Felhaszn\IeC {\'a}l\IeC {\'o}i dokument\IeC {\'a}ci\IeC {\'o}}{4}
+\select@language {hungarian} \contentsline {section}{\numberline {2.1}kukac}{4}
+\select@language {hungarian} \contentsline {chapter}{\numberline {3}Fejleszt\IeC {\H o}i dokument\IeC {\'a}ci\IeC {\'o}}{5}
+\select@language {hungarian} \contentsline {section}{\numberline {3.1}A 3D-s megjelen\IeC {\'\i }t\IeC {\'e}s elm\IeC {\'e}leti h\IeC {\'a}ttere}{5}
+\select@language {hungarian} \contentsline {subsection}{\numberline {3.1.1}A megjelen\IeC {\'\i }t\IeC {\'e}si egyenlet}{5}
+\select@language {hungarian} \contentsline {subsection}{\numberline {3.1.2}A megjelen\IeC {\'\i }t\IeC {\'e}si egyenlet}{5}
