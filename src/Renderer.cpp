@@ -12,42 +12,10 @@
 
 using namespace nanogui;
 
-float GLHalfToFloat(GLushort bits) {
-	GLuint magic = 126 << 23;
-	GLuint fp32 = (bits & 0x8000);
-	GLuint mant = (bits & 0x000003ff);
-	GLint exp = (bits >> 10) & 0x0000001f;
-
-	if (exp == 0) {
-		fp32 = magic + mant;
-		(*(float*)&fp32) -= (*(float*)&magic);
-	} else {
-		mant <<= 13;
-
-		if (exp == 31)
-			exp = 255;
-		else
-			exp += 127 - 15;
-
-		fp32 |= (exp << 23);
-		fp32 |= mant;
-	}
-
-	return *((float*)&fp32);
-}
-
 void APIENTRY Renderer::_on_gl_message(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *user_data) {
 
 	(void)length;
 	(void)user_data;
-
-	/*
-	switch (id)
-	{
-	case 131169: // The driver allocated storage for renderbuffer
-	case 131185: // glBufferData
-	return;
-	}*/
 
 	std::stringstream s;
 
@@ -196,18 +164,6 @@ void Renderer::_adapt_luminance() {
 
 		m_fullscreen_quad.draw();
 
-		#if 0 //def _DEBUG
-		GLushort bits;
-
-		glReadPixels(0, 0, 1, 1, GL_RED, GL_HALF_FLOAT, &bits);
-
-		float d = GLHalfToFloat(bits);
-		std::cout << d << std::endl;
-		//DEBUG_exposure = 1.0f / (9.6f * GLHalfToFloat(bits));
-
-		//std::cout << "avg lum: " << DEBUG_avglum << ", exposure: " << DEBUG_exposure << "\n";
-		#endif
-	
 	m_luminance_adapter_program->unbind();
 	m_current_adapted_luminance_fb->unbind();
 
@@ -225,15 +181,7 @@ void Renderer::_setup_gui() {
 		m_window.set_vsync(state);
 	});
 	vsync_checkbox->setChecked(m_window.vsync());
-	/*
-	new Label(renderer_settings, "Visualize");
-	auto visualize = new ComboBox(renderer_settings, {
-		"Nothing", "Positions", "Normals", "Tangents", "Ambient", "Diffuse", "Normal map", "Specularity", "Reflectivity"
-	});
-	visualize->setCallback([this](int index) {
-		m_visualize = static_cast<Visualize>(index);
-	});
-	*/
+
 	new Label(renderer_settings, "Skybox");
 	auto load_skybox = new Button(renderer_settings, "Load skybox");
 	load_skybox->setCallback([&] {
@@ -268,6 +216,7 @@ void Renderer::_setup_gui() {
 
 	m_exposure_slider = new Slider(renderer_settings);
 	m_exposure_slider->setValue(m_exposure * -1 / exposure_multiplier);
+	m_exposure_slider->setEnabled(m_exposure >= 0);
 	m_exposure_slider->setCallback([this, exposure_multiplier](float value) {
 		m_exposure = value * exposure_multiplier;
 	});
@@ -405,26 +354,28 @@ Renderer::Renderer(const Settings& settings) :
 
 	m_average_luminance_fb = std::make_unique<FrameBuffer>(glm::uvec2(64, 64));
 	m_average_luminance_fb->bind();
-	size_t texture_id = m_average_luminance_fb->attach_color_texture(Texture::InternalFormat::R_16_FLOAT);
-	m_average_luminance_fb->validate();
-	m_average_luminance_fb->color_texture(texture_id).generate_mipmap();
+		size_t texture_id = m_average_luminance_fb->attach_color_texture(Texture::InternalFormat::R_16_FLOAT);
+		m_average_luminance_fb->validate();
+		m_average_luminance_fb->color_texture(texture_id).generate_mipmap();
+	m_average_luminance_fb->unbind();
 
 	m_previous_adapted_luminance_fb = std::make_unique<FrameBuffer>(glm::uvec2(1, 1));
 	m_previous_adapted_luminance_fb->bind();
-	m_previous_adapted_luminance_fb->attach_color_texture(Texture::InternalFormat::R_16_FLOAT);
-	m_previous_adapted_luminance_fb->validate();
+		m_previous_adapted_luminance_fb->attach_color_texture(Texture::InternalFormat::R_16_FLOAT);
+		m_previous_adapted_luminance_fb->validate();
+	m_previous_adapted_luminance_fb->unbind();
 
 	m_current_adapted_luminance_fb = std::make_unique<FrameBuffer>(glm::uvec2(1, 1));
 	m_current_adapted_luminance_fb->bind();
-	m_current_adapted_luminance_fb->attach_color_texture(Texture::InternalFormat::R_16_FLOAT);
-	m_current_adapted_luminance_fb->validate();
-	glClearColor(0.5f, 0.4f, 0.3f, 1.0f);
+		m_current_adapted_luminance_fb->attach_color_texture(Texture::InternalFormat::R_16_FLOAT);
+		m_current_adapted_luminance_fb->validate();
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 	//	m_current_adapted_luminance_fb->unbind();
 
 	// Load the default mesh
 	
-	m_mesh = std::make_unique<Mesh>("data/meshes/handgun/Handgun_obj.obj", m_gui.get());
+	m_mesh = std::make_unique<Mesh>("data/meshes/sphere.obj", m_gui.get());
 	m_mesh->upload();
 
 	// Load the default skybox
@@ -434,8 +385,11 @@ Renderer::Renderer(const Settings& settings) :
 	// Set up lights
 
 	m_lights.push_back(std::make_unique<PointLight>(
+		// Position
 		glm::vec3(1, 1, 1),
+		// Color
 		glm::vec3(1, 0, 0),
+		// Luminous flux
 		600.f
 	));
 
@@ -463,8 +417,8 @@ void Renderer::run() {
 
 		render_target->bind_for_drawing();
 
+			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-			glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 
 			if (m_rotate_mesh) {
 				m_mesh_rotation += static_cast<float>(glfwGetTime() - m_last_frame_time) / 2.f;
@@ -484,7 +438,10 @@ void Renderer::run() {
 
 			glm::mat4 world_inverse = glm::inverse(m_world);
 
-			// Draw mesh
+			//glEnable(GL_BLEND);
+			//glBlendFunc(GL_ONE, GL_ONE);
+
+			// Draw mesh with image based lighting
 
 			Program& program = m_mesh->use_pbr() ? *m_image_based_lighting_program : *m_blinn_phong_program;
 
@@ -511,6 +468,8 @@ void Renderer::run() {
 				m_mesh->draw(program);
 
 			program.unbind();
+
+			// Draw mesh with direct lights
 
 			m_direct_lighting_program->bind();
 
@@ -540,6 +499,8 @@ void Renderer::run() {
 
 			m_direct_lighting_program->unbind();
 
+			glDisable(GL_BLEND);
+
 			// Draw skybox
 
 			glm::mat4 view_without_translation = glm::mat4(glm::mat3(view));
@@ -550,6 +511,7 @@ void Renderer::run() {
 		render_target->unbind();
 
 		if (m_msaa_fb) {
+			// Resolve the MSAA buffer
 			m_msaa_fb->blit(*m_main_fb, GL_DEPTH_BUFFER_BIT);
 			m_msaa_fb->blit(*m_main_fb, GL_COLOR_BUFFER_BIT);
 		}
@@ -564,8 +526,8 @@ void Renderer::run() {
 		glm::uvec2 screen_size = m_window.size();
 		glViewport(0, 0, screen_size.x, screen_size.y);
 
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-		glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 
 		if (m_tone_map != ToneMap::OFF) {
 
@@ -593,6 +555,7 @@ void Renderer::run() {
 
 		m_gui->drawAll();
 		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
 
 		m_window.swap_buffers();
 
