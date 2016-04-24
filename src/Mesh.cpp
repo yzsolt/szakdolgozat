@@ -664,7 +664,7 @@ void Mesh::upload() {
 
 }
 
-void Mesh::draw(Program& program) {
+void Mesh::draw(Program* program) {
 
 	m_vao.bind();
 	m_vbo.bind();
@@ -678,30 +678,33 @@ void Mesh::draw(Program& program) {
 
 		if (m_draw_shape[i]) {
 
-			int material_id = m_material_map[i];
+			if (program) {
 
-			if (material_id > -1) {
-				
-				if (m_use_pbr) {
+				int material_id = m_material_map[i];
 
-					auto& material = m_pb_materials[material_id];
-					
-					if (material.use_default < 0) {
-						material.set_uniforms(program);
+				if (material_id > -1) {
+
+					if (m_use_pbr) {
+
+						auto& material = m_pb_materials[material_id];
+
+						if (material.use_default < 0) {
+							material.set_uniforms(*program);
+						} else {
+							m_default_pb_materials[material.use_default].set_uniforms(*program);
+						}
+
 					} else {
-						m_default_pb_materials[material.use_default].set_uniforms(program);
+						m_bp_materials[material_id].set_uniforms(*program);
 					}
 
 				} else {
-					m_bp_materials[material_id].set_uniforms(program);
+					// TODO: add a default material
 				}
 
-			} else {
-				// TODO: add a default material
 			}
 
 			glDrawElements(GL_TRIANGLES, m_shapes[i].mesh.indices.size(), GL_UNSIGNED_INT, (void*)index_buffer_size);
-			//glDrawElementsBaseVertex(GL_TRIANGLES, m_shapes[i].mesh.indices.size(), GL_UNSIGNED_INT, (void*)index_buffer_size, vertex_buffer_size);
 
 		}
 

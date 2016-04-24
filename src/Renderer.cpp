@@ -311,7 +311,9 @@ Renderer::Renderer(const Settings& settings) :
 	m_luminance_adapter_program = std::make_unique<Program>("simple_2d.vs.glsl", "luminance_adapter.fs.glsl");
 	m_tone_map_program = std::make_unique<Program>("simple_2d.vs.glsl", "tone_map.fs.glsl");
 
-	m_blinn_phong_program = std::make_unique<Program>("pass_through.vs.glsl", "blinn_phong.fs.glsl");
+	m_basic_color_program = std::make_unique<Program>("basic_color.vs.glsl", "basic_color.fs.glsl");
+
+	m_blinn_phong_program = std::make_unique<Program>("blinn_phong.vs.glsl", "blinn_phong.fs.glsl");
 
 	m_image_based_lighting_program = std::make_unique<Program>("pbr_light_probe.vs.glsl", "image_based_lighting.fs.glsl");
 	m_direct_lighting_program = std::make_unique<Program>("direct_lighting.vs.glsl", "direct_lighting.fs.glsl");
@@ -369,9 +371,9 @@ Renderer::Renderer(const Settings& settings) :
 	m_current_adapted_luminance_fb->bind();
 		m_current_adapted_luminance_fb->attach_color_texture(Texture::InternalFormat::R_16_FLOAT);
 		m_current_adapted_luminance_fb->validate();
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
-	//	m_current_adapted_luminance_fb->unbind();
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+	m_current_adapted_luminance_fb->unbind();
 
 	// Load the default mesh
 	
@@ -386,7 +388,7 @@ Renderer::Renderer(const Settings& settings) :
 
 	m_lights.push_back(std::make_unique<PointLight>(
 		// Position
-		glm::vec3(1, 1, 1),
+		glm::vec3(0.8f, 0.8f, 0.8f),
 		// Color
 		glm::vec3(1, 0, 0),
 		// Luminous flux
@@ -413,12 +415,12 @@ void Renderer::run() {
 
 		m_window.poll_events();
 
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+
 		FrameBuffer* render_target = m_msaa_fb ? m_msaa_fb.get() : m_main_fb.get();
 
 		render_target->bind_for_drawing();
-
-			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 			if (m_rotate_mesh) {
 				m_mesh_rotation += static_cast<float>(glfwGetTime() - m_last_frame_time) / 2.f;
@@ -437,9 +439,35 @@ void Renderer::run() {
 			m_normal_matrix = glm::transpose(glm::inverse(m_world_view));
 
 			glm::mat4 world_inverse = glm::inverse(m_world);
+			glm::mat4 view_projection = m_projection * view;
 
-			//glEnable(GL_BLEND);
-			//glBlendFunc(GL_ONE, GL_ONE);
+			// Depth-only prepass
+
+			glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+
+			glDisable(GL_BLEND);
+			glDepthMask(GL_TRUE);
+
+			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+			m_basic_color_program->bind();
+
+				m_basic_color_program->set_uniform("u_world", m_world);
+				m_basic_color_program->set_uniform("u_view_projection", view_projection);
+
+				m_mesh->draw();
+
+			m_basic_color_program->unbind();
+
+			glDepthMask(GL_FALSE);
+			
+			glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+			glDepthFunc(GL_EQUAL);
+
+			if (m_msaa_fb) {
+				m_msaa_fb->blit(*m_main_fb, GL_DEPTH_BUFFER_BIT);
+			}
 
 			// Draw mesh with image based lighting
 
@@ -457,49 +485,62 @@ void Renderer::run() {
 				if (m_mesh->use_pbr()) {
 
 					program.set_uniform("u_world_inverse", world_inverse);
-					program.set_uniform("u_view_projection", m_projection * view);
+					program.set_uniform("u_view_projection", view_projection);
 
 					program.set_texture("u_diffuse_irradiance_map", m_skybox->diffuse_irradiance_map());
 					program.set_texture("u_specular_irradiance_map", m_skybox->specular_irradiance_map());
 					program.set_texture("u_brdf_lut", m_skybox->brdf_lut());
 
+				} else {
+
+					// Lights
+
 				}
 
-				m_mesh->draw(program);
+				m_mesh->draw(&program);
 
 			program.unbind();
 
-			// Draw mesh with direct lights
+			glDepthMask(GL_FALSE);
 
-			m_direct_lighting_program->bind();
+			if (m_mesh->use_pbr()) {
 
-				m_direct_lighting_program->set_uniform("u_world", m_world);
-				m_direct_lighting_program->set_uniform("u_world_inverse", world_inverse);
-				m_direct_lighting_program->set_uniform("u_projection", m_projection);
-				m_direct_lighting_program->set_uniform("u_view_projection", m_projection * view);
-				m_direct_lighting_program->set_uniform("u_world_view", m_world_view);
-				m_direct_lighting_program->set_uniform("u_view_position", m_camera.position());
+				// Draw mesh with direct lights
 
-				for (const auto& light : m_lights) {
+				glEnable(GL_BLEND);
+				glBlendFunc(GL_ONE, GL_ONE);
 
-					Light* light_ptr = light.get();
+				m_direct_lighting_program->bind();
 
-					switch (light->type()) {
-					case Light::Type::POINT:
-						static_cast<PointLight*>(light_ptr)->set_uniforms(*m_direct_lighting_program);
-						break;
-					case Light::Type::SPOT:
-						static_cast<SpotLight*>(light_ptr)->set_uniforms(*m_direct_lighting_program);
-						break;
+					m_direct_lighting_program->set_uniform("u_world", m_world);
+					m_direct_lighting_program->set_uniform("u_world_inverse", world_inverse);
+					m_direct_lighting_program->set_uniform("u_projection", m_projection);
+					m_direct_lighting_program->set_uniform("u_view_projection", view_projection);
+					m_direct_lighting_program->set_uniform("u_world_view", m_world_view);
+					m_direct_lighting_program->set_uniform("u_view_position", m_camera.position());
+
+					for (const auto& light : m_lights) {
+
+						Light* light_ptr = light.get();
+
+						switch (light->type()) {
+						case Light::Type::POINT:
+							static_cast<PointLight*>(light_ptr)->set_uniforms(*m_direct_lighting_program);
+							break;
+						case Light::Type::SPOT:
+							static_cast<SpotLight*>(light_ptr)->set_uniforms(*m_direct_lighting_program);
+							break;
+						}
+
+						m_mesh->draw(m_direct_lighting_program.get());
+
 					}
 
-					m_mesh->draw(*m_direct_lighting_program);
+				m_direct_lighting_program->unbind();
 
-				}
+				glDisable(GL_BLEND);
 
-			m_direct_lighting_program->unbind();
-
-			glDisable(GL_BLEND);
+			}
 
 			// Draw skybox
 
@@ -511,10 +552,11 @@ void Renderer::run() {
 		render_target->unbind();
 
 		if (m_msaa_fb) {
-			// Resolve the MSAA buffer
-			m_msaa_fb->blit(*m_main_fb, GL_DEPTH_BUFFER_BIT);
 			m_msaa_fb->blit(*m_main_fb, GL_COLOR_BUFFER_BIT);
 		}
+
+		glDepthMask(GL_TRUE);
+		glDisable(GL_DEPTH_TEST);
 
 		// Measure average luminance, then adapt
 
@@ -554,8 +596,6 @@ void Renderer::run() {
 		// Draw GUI
 
 		m_gui->drawAll();
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE);
 
 		m_window.swap_buffers();
 

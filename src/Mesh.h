@@ -80,7 +80,7 @@ public:
 
 	void upload();
 
-	void draw(Program& program);
+	void draw(Program* program = nullptr);
 
 	float scale() const;
 

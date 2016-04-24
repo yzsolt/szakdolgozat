@@ -94,6 +94,8 @@ private:
 	std::unique_ptr<Program> m_luminance_adapter_program;
 	std::unique_ptr<Program> m_tone_map_program;
 
+	std::unique_ptr<Program> m_basic_color_program;
+
 	std::unique_ptr<Program> m_blinn_phong_program;
 
 	std::unique_ptr<Program> m_image_based_lighting_program;
