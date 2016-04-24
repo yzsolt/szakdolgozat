@@ -10,14 +10,14 @@
 uniform PhysicallyBasedMaterial u_pbm;
 
 vec3 F_Schlick(vec3 f0, float u) {
-	return f0 + (vec3(1.0) - f0) * pow(1.0 - u, 5.0);
+	return f0 + (vec3(1) - f0) * pow(1 - u, 5);
 }
 
 float D_GGX(float ndoth, float roughness) {
 
 	float m = roughness * roughness;
 	float m2 = m * m;
-	float d = (ndoth * m2 - ndoth) * ndoth + 1.0;
+	float d = (ndoth * m2 - ndoth) * ndoth + 1;
 
 	return m2 / max(PI * d * d, 1e-8);
 
@@ -25,7 +25,7 @@ float D_GGX(float ndoth, float roughness) {
 
 float Vis_Schlick(float ndotl, float ndotv, float roughness) {
 	// = G_Schlick / (4 * ndotv * ndotl)
-	float a = roughness + 1.0;
+	float a = roughness + 1;
 	float k = a * a * 0.125;
 
 	float Vis_SchlickV = ndotv * (1 - k) + k;
@@ -43,7 +43,7 @@ vec4 BRDF_Lambertian(vec2 tex) {
 
     float metalness = u_pbm.metalness.use_texture ? texture(u_pbm.metalness.texture, vs_out_texture).r : u_pbm.metalness.color.r;
 
-	color.rgb = mix(color.rgb, vec3(0.0), metalness);
+	color.rgb = mix(color.rgb, vec3(0), metalness);
 	color.rgb *= ONE_OVER_PI;
 
 	return color;
@@ -65,19 +65,20 @@ vec3 BRDF_CookTorrance(float ldoth, float ndoth, float ndotv, float ndotl, float
 
 }
 
-vec3 CosineSample(float xi1, float xi2)
-{
+vec3 CosineSample(float xi1, float xi2) {
+
     float phi = 2 * PI * xi1;
     float costheta = sqrt(1 - xi2);                  // mert P(θ) = 1 - cos2 θ
     float sintheta = sqrt(1 - costheta * costheta);  // mert sin2 x + cos2 x = 1
 
     // PDF = costheta / PI
     return vec3(sintheta * cos(phi), sintheta * sin(phi), costheta);
+
 }
 
-vec3 GGXSample(float xi1, float xi2, float roughness)
-{
-    float alpha2 = pow(roughness, 4.0); // eml.: Disney-féle α = roughness2
+vec3 GGXSample(float xi1, float xi2, float roughness) {
+
+    float alpha2 = pow(roughness, 4); // eml.: Disney-féle α = roughness2
 
     float phi = 2 * PI * xi1;
     float costheta = sqrt((1 - xi2) / (1 + (alpha2 - 1) * xi2));
@@ -85,24 +86,5 @@ vec3 GGXSample(float xi1, float xi2, float roughness)
 
     // PDF = (D(h) * dot(n, h)) / (4 * dot(v, h))
     return vec3(sintheta * cos(phi), sintheta * sin(phi), costheta);
+
 }
-
-/*
-float VarianceShadow2D(sampler2D shadowmap, vec4 cpos, vec2 nf)
-{
-	vec2 projpos = (cpos.xy / cpos.w) * 0.5 + 0.5;
-	vec2 moments = texture(shadowmap, projpos).xy;
-
-	float d01		= (cpos.z * 0.5 + 0.5);
-	float z			= ((cpos.w < 0.0) ? -cpos.w : d01);
-	float d			= (z - nf.x) / (nf.y - nf.x);
-	float mean		= moments.x;
-	float variance	= max(moments.y - moments.x * moments.x, 1e-5);
-	float md		= mean - d;
-	float pmax		= variance / (variance + md * md);
-
-	pmax = smoothstep(0.3, 1.0, pmax);
-
-	return max(d <= mean ? 1.0 : 0.0, pmax);
-}
-*/
