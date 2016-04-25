@@ -243,6 +243,7 @@ void Mesh::_update_pb_material_info(int material_id, bool predefined) {
 	roughness_slider->setCallback([material](float value) {
 		material->roughness.color.r = value;
 	});
+	roughness_slider->setEnabled(!material->roughness.use_texture);
 
 	new Label(material_grid, "Roughness texture:", "sans-bold");
 	split_panel = new Widget(material_grid);
@@ -255,8 +256,9 @@ void Mesh::_update_pb_material_info(int material_id, bool predefined) {
 		use_roughness_texture->setEnabled(false);
 	} else {
 		use_roughness_texture->setChecked(material->roughness.use_texture);
-		use_roughness_texture->setCallback([material](bool value) {
+		use_roughness_texture->setCallback([material, roughness_slider](bool value) {
 			material->roughness.use_texture = value;
+			roughness_slider->setEnabled(!value);
 		});
 	}
 	
@@ -266,6 +268,7 @@ void Mesh::_update_pb_material_info(int material_id, bool predefined) {
 	metalness_slider->setCallback([material](float value) {
 		material->metalness.color.r = value;
 	});
+	metalness_slider->setEnabled(!material->metalness.use_texture);
 
 	new Label(material_grid, "Metalness texture:", "sans-bold");
 	split_panel = new Widget(material_grid);
@@ -278,8 +281,9 @@ void Mesh::_update_pb_material_info(int material_id, bool predefined) {
 		use_metalness_texture->setEnabled(false);
 	} else {
 		use_metalness_texture->setChecked(material->metalness.use_texture);
-		use_metalness_texture->setCallback([material](bool value) {
+		use_metalness_texture->setCallback([material, metalness_slider](bool value) {
 			material->metalness.use_texture = value;
+			metalness_slider->setEnabled(!value);
 		});
 	}
 
