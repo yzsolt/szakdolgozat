@@ -16,56 +16,37 @@ void main() {
 
     if (u_step == 0) {
 
-    	float logsum = 0.0;
+    	float log_sum = 0;
 
-    	logsum += log(0.0001 + dot(texture(u_luminance_texture, vs_out_texture + vec2(-0.5, -0.5) * u_texel_size).rgb, LUMINANCE_VECTOR));
-    	logsum += log(0.0001 + dot(texture(u_luminance_texture, vs_out_texture + vec2(-0.5, 0.5) * u_texel_size).rgb, LUMINANCE_VECTOR));
-    	logsum += log(0.0001 + dot(texture(u_luminance_texture, vs_out_texture + vec2(-0.5, 1.5) * u_texel_size).rgb, LUMINANCE_VECTOR));
-    	logsum += log(0.0001 + dot(texture(u_luminance_texture, vs_out_texture + vec2(0.5, -0.5) * u_texel_size).rgb, LUMINANCE_VECTOR));
-    	logsum += log(0.0001 + dot(texture(u_luminance_texture, vs_out_texture + vec2(0.5, 0.5) * u_texel_size).rgb, LUMINANCE_VECTOR));
-    	logsum += log(0.0001 + dot(texture(u_luminance_texture, vs_out_texture + vec2(0.5, 1.5) * u_texel_size).rgb, LUMINANCE_VECTOR));
-    	logsum += log(0.0001 + dot(texture(u_luminance_texture, vs_out_texture + vec2(1.5, -0.5) * u_texel_size).rgb, LUMINANCE_VECTOR));
-    	logsum += log(0.0001 + dot(texture(u_luminance_texture, vs_out_texture + vec2(1.5, 0.5) * u_texel_size).rgb, LUMINANCE_VECTOR));
-    	logsum += log(0.0001 + dot(texture(u_luminance_texture, vs_out_texture + vec2(1.5, 1.5) * u_texel_size).rgb, LUMINANCE_VECTOR));
+		for (float x = -0.5; x < 1.5; x += 1) {
+			for (float y = -0.5; y < 1.5; y += 1) {
+				log_sum += log(0.0001 + dot(texture(u_luminance_texture, vs_out_texture + vec2(x, y) * u_texel_size).rgb, LUMINANCE_VECTOR));
+			}
+		}
 
-    	logsum /= 9.0;
+    	log_sum /= 9;
 
-    	out_color = vec4(logsum, 0.0, 0.0, 1.0);
+    	out_color = vec4(log_sum, 0, 0, 1);
 
     }
 
     if (u_step > 0) {
 
-    	ivec2 loc = ivec2(gl_FragCoord.xy);
-    	float sum = 0.0;
+    	ivec2 location = ivec2(gl_FragCoord.xy);
+    	float sum = 0;
 
-    	sum += texelFetch(u_luminance_texture, loc * 4 + ivec2(0, 0), u_previous_level).r;
-    	sum += texelFetch(u_luminance_texture, loc * 4 + ivec2(0, 1), u_previous_level).r;
-    	sum += texelFetch(u_luminance_texture, loc * 4 + ivec2(0, 2), u_previous_level).r;
-    	sum += texelFetch(u_luminance_texture, loc * 4 + ivec2(0, 3), u_previous_level).r;
+		for (int x = 0; x < 4; x++) {
+			for (int y = 0; y < 4; y++) {
+				sum += texelFetch(u_luminance_texture, location * 4 + ivec2(x, y), u_previous_level).r;
+			}
+		}
 
-    	sum += texelFetch(u_luminance_texture, loc * 4 + ivec2(1, 0), u_previous_level).r;
-    	sum += texelFetch(u_luminance_texture, loc * 4 + ivec2(1, 1), u_previous_level).r;
-    	sum += texelFetch(u_luminance_texture, loc * 4 + ivec2(1, 2), u_previous_level).r;
-    	sum += texelFetch(u_luminance_texture, loc * 4 + ivec2(1, 3), u_previous_level).r;
-
-    	sum += texelFetch(u_luminance_texture, loc * 4 + ivec2(2, 0), u_previous_level).r;
-    	sum += texelFetch(u_luminance_texture, loc * 4 + ivec2(2, 1), u_previous_level).r;
-    	sum += texelFetch(u_luminance_texture, loc * 4 + ivec2(2, 2), u_previous_level).r;
-    	sum += texelFetch(u_luminance_texture, loc * 4 + ivec2(2, 3), u_previous_level).r;
-
-    	sum += texelFetch(u_luminance_texture, loc * 4 + ivec2(3, 0), u_previous_level).r;
-    	sum += texelFetch(u_luminance_texture, loc * 4 + ivec2(3, 1), u_previous_level).r;
-    	sum += texelFetch(u_luminance_texture, loc * 4 + ivec2(3, 2), u_previous_level).r;
-    	sum += texelFetch(u_luminance_texture, loc * 4 + ivec2(3, 3), u_previous_level).r;
-
-    	sum *= 0.0625;
+    	sum /= 16;
 
         if (u_step == 1) {
-        	out_color = vec4(sum, 0.0, 0.0, 1.0);
+        	out_color = vec4(sum, 0, 0, 1);
         } else if (u_step == 2) {
-        	// final
-        	out_color = vec4(exp(sum), 0.0, 0.0, 1.0);
+        	out_color = vec4(exp(sum), 0, 0, 1);
         }
 
     }
