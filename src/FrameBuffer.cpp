@@ -7,8 +7,10 @@ std::unordered_map<Texture::InternalFormat, Texture::Format> FrameBuffer::s_inte
 	{ Texture::InternalFormat::RGB_8,			Texture::Format::RGB },
 	{ Texture::InternalFormat::RGB_8_A_8,		Texture::Format::RGBA },
 	{ Texture::InternalFormat::R_16_FLOAT,		Texture::Format::R },
+	{ Texture::InternalFormat::RG_16_FLOAT,		Texture::Format::RG },
 	{ Texture::InternalFormat::RGB_16_FLOAT,	Texture::Format::RGB },
 	{ Texture::InternalFormat::RGBA_16_FLOAT,	Texture::Format::RGBA },
+	{ Texture::InternalFormat::RG_32_FLOAT,		Texture::Format::RG },
 	{ Texture::InternalFormat::RGB_32_FLOAT,	Texture::Format::RGB },
 	{ Texture::InternalFormat::RGBA_32_FLOAT,	Texture::Format::RGBA },
 };
@@ -19,8 +21,10 @@ std::unordered_map<Texture::InternalFormat, Texture::DataType> FrameBuffer::s_in
 	{ Texture::InternalFormat::RGB_8,			Texture::DataType::UNSIGNED_8 },
 	{ Texture::InternalFormat::RGB_8_A_8,		Texture::DataType::UNSIGNED_8 },
 	{ Texture::InternalFormat::R_16_FLOAT,		Texture::DataType::HALF },
+	{ Texture::InternalFormat::RG_16_FLOAT,		Texture::DataType::HALF },
 	{ Texture::InternalFormat::RGB_16_FLOAT,	Texture::DataType::HALF },
 	{ Texture::InternalFormat::RGBA_16_FLOAT,	Texture::DataType::HALF },
+	{ Texture::InternalFormat::RG_32_FLOAT,		Texture::DataType::FLOAT },
 	{ Texture::InternalFormat::RGB_32_FLOAT,	Texture::DataType::FLOAT },
 	{ Texture::InternalFormat::RGBA_32_FLOAT,	Texture::DataType::FLOAT },
 };

@@ -227,7 +227,7 @@ void Skybox::_precompute_brdf() {
 
 	brdf_fb.bind();
 
-		brdf_fb.attach_color_texture(Texture::InternalFormat::RGB_32_FLOAT);
+		brdf_fb.attach_color_texture(Texture::InternalFormat::RG_32_FLOAT);
 		brdf_fb.validate();
 
 		glClearColor(0, 0, 0, 1);
@@ -236,13 +236,13 @@ void Skybox::_precompute_brdf() {
 		m_precompute_brdf.bind();
 		temp_vao.draw_arrays(GL_TRIANGLE_STRIP, temp_vbo.vertex_count());
 
-		std::unique_ptr<float[]> buffer(new float[brdf_size.x * brdf_size.y * 3]);
+		std::unique_ptr<float[]> buffer(new float[brdf_size.x * brdf_size.y * 2]);
 		brdf_fb.color_texture(0).bind();
 
-		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_FLOAT, buffer.get());
+		glGetTexImage(GL_TEXTURE_2D, 0, GL_RG, GL_FLOAT, buffer.get());
 
 		std::string output_name = m_directory + m_name + ".brdf.hdr";
-		stbi_write_hdr(output_name.c_str(), brdf_size.x, brdf_size.y, 3, buffer.get());
+		stbi_write_hdr(output_name.c_str(), brdf_size.x, brdf_size.y, 2, buffer.get());
 
 	brdf_fb.unbind();
 
@@ -250,7 +250,7 @@ void Skybox::_precompute_brdf() {
 
 	m_brdf_lut.bind();
 		m_brdf_lut.set_wrap_mode(Texture::WrapMode::CLAMP_TO_EDGE, Texture::WrapMode::CLAMP_TO_EDGE);
-		m_brdf_lut.upload(Texture::InternalFormat::RGB_32_FLOAT, brdf_size, Texture::Format::RGB, Texture::DataType::FLOAT, buffer.get());
+		m_brdf_lut.upload(Texture::InternalFormat::RG_32_FLOAT, brdf_size, Texture::Format::RG, Texture::DataType::FLOAT, buffer.get());
 	m_brdf_lut.unbind();
 
 }
@@ -309,6 +309,8 @@ void Skybox::reset_panorama(const std::string& hdr_panorama) {
 	_precompute_brdf();
 
 	m_diffuse_irradiance_map.upload_hdr_sides(m_directory, m_name + ".diffuse_irradiance");
+
+	//m_specular_irradiance_map.reset(new TextureCubeMap());
 	m_specular_irradiance_map.upload_hdr_sides_and_mips(m_directory, m_name + ".specular_irradiance", 8);
 
 }
