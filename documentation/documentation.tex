@@ -120,9 +120,9 @@ Valósidejű grafikában a geometriák leírásához háromszöghálókat haszn�
 %TODO: ezt inkább a gyakorlati részhez, a vertex definíciójával együtt?
 Ezeket legegyszerűbben a háromszögeket alkotó pontokkal együtt tárolhatjuk, majd ezeket menet közben interpolálva kaphatjuk meg a háromszög által meghatározott felület tetszőleges pontján vett normálvektort.
 
-\subsection{A megjelenítési egyenlet}
+\subsection{Az árnyalási egyenlet}
 
-A számítógépes grafika egyik alaptételének tekinthető megjelenítési egyenletet (\textit{rendering equation}) David Immel et al. és James Kajiya írta le 1986-ban. Az egyenlet segítségével meghatározható a felület egy adott pontját elhagyó sugárzás a felület által kibocsátott ill. visszavert sugárzás összegének geometriai optika alapú közelítésével:
+A számítógépes grafika egyik alaptételének tekinthető árnyalási egyenletet (\textit{rendering equation}) David Immel et al. és James Kajiya írta le 1986-ban. Az egyenlet segítségével meghatározható a felület egy adott pontját elhagyó sugárzás a felület által kibocsátott ill. visszavert sugárzás összegének geometriai optika alapú közelítésével:
 
 \[
 L_0(\mathbf{x},\mathbf{v}) = L_e(\mathbf{x},\mathbf{v}) + \int_\Omega f_r(\mathbf{x},\mathbf{l},\mathbf{v}) L_i(\mathbf{x},\mathbf{l}) (-\mathbf{l} \cdot \mathbf{n})\,\mathrm{d}\mathbf{l}
