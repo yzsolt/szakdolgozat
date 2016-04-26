@@ -84,6 +84,8 @@ private:
 	bool m_rotate_mesh = true;
 	float m_mesh_rotation = 0.f;
 
+	bool m_use_ibl = true;
+
 	Visualize m_visualize = Visualize::NOTHING;
 
 	// Programs

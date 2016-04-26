@@ -33,11 +33,23 @@ uniform PointLight u_point_light;
 struct SpotLight {
     Light parent;
     vec3 direction;
-    float inner;
-    float outer;
+    float inner_cone_angle;
+    float outer_cone_angle;
 };
 
 uniform SpotLight u_spot_light;
+
+float get_angle_attenuation(vec3 l, SpotLight spot_light) {
+
+    float angle_scale = 1 / max(0.001f, spot_light.inner_cone_angle - spot_light.outer_cone_angle);
+    float angle_offset = -spot_light.outer_cone_angle * angle_scale;
+
+	float cosa = -dot(l, spot_light.direction);
+	float attenuation = clamp(cosa * angle_scale + angle_offset, 0, 1);
+
+	return attenuation * attenuation;
+
+}
 
 void main() {
 
@@ -89,12 +101,16 @@ void main() {
 	float dist2		= max(dot(light_direction, light_direction), 1e-4);
 	float falloff   = (luminous_intensity / dist2) * max(0, 1 - dist * inverse_radius);
 
+    if (u_light_type == SPOT_LIGHT) {
+        falloff *= get_angle_attenuation(l, u_spot_light);
+    }
+
 	float fade		= max(0, (fd.a - 0.75) * 4);
 	float shadow	= mix(1, falloff, fade);
 
-	vec3 final_color = (fd.rgb * fd.a + fs) * ndotl * color;//(fd.rgb * fd.a + fs) * ndotl * shadow;
+	vec3 final_color = (fd.rgb * fd.a + fs) * ndotl * shadow * color;
 
 	out_color.rgb = final_color;
-	out_color.a = 1;//fd.a;
+	out_color.a = fd.a;
 
 }

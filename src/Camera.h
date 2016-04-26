@@ -30,7 +30,8 @@ public:
 	void set_left_button_pressed(bool left_button_pressed);
 	void set_right_button_pressed(bool right_button_pressed);
 
-	const glm::vec3 position() const;
+	glm::vec3 position() const;
+	glm::vec3 direction() const;
 
 	void move(const glm::vec2& movement);
 

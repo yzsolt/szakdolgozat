@@ -48,8 +48,12 @@ void Camera::set_right_button_pressed(bool right_button_pressed) {
 	m_right_button_pressed = right_button_pressed;
 }
 
-const glm::vec3 Camera::position() const {
+glm::vec3 Camera::position() const {
 	return m_position;
+}
+
+glm::vec3 Camera::direction() const {
+	return glm::normalize(m_look_at - m_position);
 }
 
 void Camera::move(const glm::vec2& movement) {

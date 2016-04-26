@@ -173,6 +173,8 @@ void Renderer::_setup_gui() {
 
 	m_gui = std::make_unique<GUI>(&m_window);
 
+	// Renderer settings
+
 	auto renderer_settings = new nanogui::Window(m_gui.get(), "Renderer settings");
 	renderer_settings->setPosition(Eigen::Vector2i(5, 5));
 	renderer_settings->setLayout(new GroupLayout());
@@ -203,8 +205,6 @@ void Renderer::_setup_gui() {
 		m_tone_map = static_cast<ToneMap>(index);
 	});
 
-	// Exposure control
-
 	new Label(renderer_settings, "Exposure");
 	auto auto_exposure_checkbox = new CheckBox(renderer_settings, "Automatic exposure", [this](bool state) {
 		m_exposure *= -1;
@@ -220,8 +220,6 @@ void Renderer::_setup_gui() {
 	m_exposure_slider->setCallback([this, exposure_multiplier](float value) {
 		m_exposure = value * exposure_multiplier;
 	});
-
-	// Mesh settings
 
 	new Label(renderer_settings, "Mesh settings");
 	auto rotate_mesh_checkbox = new CheckBox(renderer_settings, "Rotate mesh", [this](bool state) {
@@ -240,6 +238,91 @@ void Renderer::_setup_gui() {
 		}
 
 	});
+
+	// Lighting settings
+
+	auto lighting_settings = new nanogui::Window(m_gui.get(), "Lighting settings");
+	lighting_settings->setPosition(Eigen::Vector2i(400, 5));
+	lighting_settings->setLayout(new GroupLayout());
+
+	auto ibl_checkbox = new CheckBox(lighting_settings, "Use IBL", [this](bool state) {
+		m_use_ibl = state;
+	});
+	ibl_checkbox->setChecked(m_use_ibl);
+
+	auto grid_layout = new GridLayout(Orientation::Horizontal, 2, Alignment::Middle, 15, 5);
+	grid_layout->setColAlignment({ Alignment::Maximum, Alignment::Fill });
+	grid_layout->setSpacing(0, 10);
+
+	new Label(lighting_settings, "Point light");
+
+	PointLight* point_light = static_cast<PointLight*>(m_lights[0].get());
+
+	auto point_light_grid = new Widget(lighting_settings);
+	point_light_grid->setLayout(grid_layout);
+
+	new Label(point_light_grid, "Use:", "sans-bold");
+	auto use_point_light = new CheckBox(point_light_grid, "", [point_light](bool state) {
+		point_light->set_on(state);
+	});
+	use_point_light->setChecked(point_light->is_on());
+
+	new Label(point_light_grid, "Color:", "sans-bold");
+	auto point_light_color = new ColorPicker(point_light_grid, GUI::vec3_to_eigen4f(point_light->color()));
+	point_light_color->setCallback([point_light](const Color& color) {
+		point_light->set_color(GUI::eigen4f_to_vec3(color));
+	});
+	point_light_color->setColor(GUI::vec3_to_eigen4f(point_light->color()));
+
+	new Label(point_light_grid, "Luminous flux:", "sans-bold");
+	auto point_light_flux = new Slider(point_light_grid);
+	point_light_flux->setCallback([point_light](float value) {
+		point_light->set_luminous_flux(value * 1000.f);
+	});
+	point_light_flux->setValue(point_light->luminous_flux() / 1000.f);
+
+	new Label(lighting_settings, "Spot light");
+
+	SpotLight* spot_light = static_cast<SpotLight*>(m_lights[1].get());
+
+	auto spot_light_grid = new Widget(lighting_settings);
+	spot_light_grid->setLayout(grid_layout);
+
+	new Label(spot_light_grid, "Use:", "sans-bold");
+	auto use_spot_light = new CheckBox(spot_light_grid, "", [spot_light](bool state) {
+		spot_light->set_on(state);
+	});
+	use_spot_light->setChecked(spot_light->is_on());
+
+	new Label(spot_light_grid, "Color:", "sans-bold");
+	auto spot_light_color = new ColorPicker(spot_light_grid, GUI::vec3_to_eigen4f(spot_light->color()));
+	spot_light_color->setCallback([spot_light](const Color& color) {
+		spot_light->set_color(GUI::eigen4f_to_vec3(color));
+	});
+	spot_light_color->setColor(GUI::vec3_to_eigen4f(spot_light->color()));
+
+	new Label(spot_light_grid, "Luminous flux:", "sans-bold");
+	auto spot_light_flux = new Slider(spot_light_grid);
+	spot_light_flux->setCallback([spot_light](float value) {
+		spot_light->set_luminous_flux(value * 1000.f);
+	});
+	spot_light_flux->setValue(spot_light->luminous_flux() / 1000.f);
+
+	const float D = glm::pi<float>() * 4;
+
+	new Label(spot_light_grid, "Inner cone angle:", "sans-bold");
+	auto spot_light_inner = new Slider(spot_light_grid);
+	spot_light_inner->setCallback([spot_light, D](float value) {
+		spot_light->set_inner_cone_angle(value * D);
+	});
+	spot_light_inner->setValue(spot_light->inner_cone_angle() / D);
+
+	new Label(spot_light_grid, "Outer cone angle:", "sans-bold");
+	auto spot_light_outer = new Slider(spot_light_grid);
+	spot_light_outer->setCallback([spot_light, D](float value) {
+		spot_light->set_outer_cone_angle(value * D);
+	});
+	spot_light_outer->setValue(spot_light->outer_cone_angle() / D);
 
 }
 
@@ -260,6 +343,36 @@ Renderer::Renderer(const Settings& settings) :
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 	glDebugMessageCallback(_on_gl_message, nullptr);
 	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+
+	// Add lights
+
+	m_lights.push_back(std::make_unique<PointLight>(
+		// Position
+		glm::vec3(0.8f, 0.8f, 0.8f),
+		// Color
+		glm::vec3(1, 0, 0),
+		// Radius
+		9.f,
+		// Luminous flux
+		600.f
+	));
+
+	m_lights.push_back(std::make_unique<SpotLight>(
+		// Position
+		m_camera.position(),
+		// Color
+		glm::vec3(0, 0, 1),
+		// Radius
+		9.f,
+		// Luminous flux
+		600.f,
+		// Inner
+		2.5f,
+		// Outer
+		3.f
+	));
+
+	// Setup GUI
 
 	_setup_gui();
 
@@ -384,17 +497,6 @@ Renderer::Renderer(const Settings& settings) :
 
 	m_skybox = std::make_unique<Skybox>(Skybox::ROOT_DIRECTORY + "at_the_window/at_the_window.hdr");
 
-	// Set up lights
-
-	m_lights.push_back(std::make_unique<PointLight>(
-		// Position
-		glm::vec3(0.8f, 0.8f, 0.8f),
-		// Color
-		glm::vec3(1, 0, 0),
-		// Luminous flux
-		600.f
-	));
-
 	m_last_frame_time = glfwGetTime();
 
 	//
@@ -416,7 +518,7 @@ void Renderer::run() {
 		m_window.poll_events();
 
 		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE);
+		glDisable(GL_CULL_FACE);
 
 		FrameBuffer* render_target = m_msaa_fb ? m_msaa_fb.get() : m_main_fb.get();
 
@@ -443,13 +545,13 @@ void Renderer::run() {
 
 			// Depth-only prepass
 
+			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
 			glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 
 			glDisable(GL_BLEND);
 			glDepthMask(GL_TRUE);
-
-			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 			m_basic_color_program->bind();
 
@@ -471,35 +573,39 @@ void Renderer::run() {
 
 			// Draw mesh with image based lighting
 
-			Program& program = m_mesh->use_pbr() ? *m_image_based_lighting_program : *m_blinn_phong_program;
+			if (m_use_ibl) {
 
-			program.bind();
+				Program& program = m_mesh->use_pbr() ? *m_image_based_lighting_program : *m_blinn_phong_program;
 
-				program.set_uniform("u_world", m_world);
-				program.set_uniform("u_projection", m_projection);
-				program.set_uniform("u_world_view", m_world_view);
-				program.set_uniform("u_view_position", m_camera.position());
-				//program.set_uniform("u_visualize", static_cast<int>(m_visualize));
-				program.set_texture("u_environment_map", m_skybox->environment_map());
+				program.bind();
 
-				if (m_mesh->use_pbr()) {
+					program.set_uniform("u_world", m_world);
+					program.set_uniform("u_projection", m_projection);
+					program.set_uniform("u_world_view", m_world_view);
+					program.set_uniform("u_view_position", m_camera.position());
+					//program.set_uniform("u_visualize", static_cast<int>(m_visualize));
+					program.set_texture("u_environment_map", m_skybox->environment_map());
 
-					program.set_uniform("u_world_inverse", world_inverse);
-					program.set_uniform("u_view_projection", view_projection);
+					if (m_mesh->use_pbr()) {
 
-					program.set_texture("u_diffuse_irradiance_map", m_skybox->diffuse_irradiance_map());
-					program.set_texture("u_specular_irradiance_map", m_skybox->specular_irradiance_map());
-					program.set_texture("u_brdf_lut", m_skybox->brdf_lut());
+						program.set_uniform("u_world_inverse", world_inverse);
+						program.set_uniform("u_view_projection", view_projection);
 
-				} else {
+						program.set_texture("u_diffuse_irradiance_map", m_skybox->diffuse_irradiance_map());
+						program.set_texture("u_specular_irradiance_map", m_skybox->specular_irradiance_map());
+						program.set_texture("u_brdf_lut", m_skybox->brdf_lut());
 
-					// Lights
+					} else {
 
-				}
+						// Lights
 
-				m_mesh->draw(&program);
+					}
 
-			program.unbind();
+					m_mesh->draw(&program);
+
+				program.unbind();
+
+			}
 
 			glDepthMask(GL_FALSE);
 
@@ -523,16 +629,23 @@ void Renderer::run() {
 
 						Light* light_ptr = light.get();
 
-						switch (light->type()) {
-						case Light::Type::POINT:
-							static_cast<PointLight*>(light_ptr)->set_uniforms(*m_direct_lighting_program);
-							break;
-						case Light::Type::SPOT:
-							static_cast<SpotLight*>(light_ptr)->set_uniforms(*m_direct_lighting_program);
-							break;
-						}
+						if (light_ptr->is_on()) {
 
-						m_mesh->draw(m_direct_lighting_program.get());
+							switch (light->type()) {
+							case Light::Type::POINT:
+								static_cast<PointLight*>(light_ptr)->set_uniforms(*m_direct_lighting_program);
+								break;
+							case Light::Type::SPOT:
+								SpotLight* spot_light = static_cast<SpotLight*>(light_ptr);
+								spot_light->set_uniforms(*m_direct_lighting_program);
+								spot_light->set_direction(m_camera.direction());
+								spot_light->set_position(m_camera.position());
+								break;
+							}
+
+							m_mesh->draw(m_direct_lighting_program.get());
+
+						}
 
 					}
 
