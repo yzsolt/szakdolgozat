@@ -567,10 +567,6 @@ void Renderer::run() {
 			glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 			glDepthFunc(GL_EQUAL);
 
-			if (m_msaa_fb) {
-				m_msaa_fb->blit(*m_main_fb, GL_DEPTH_BUFFER_BIT);
-			}
-
 			// Draw mesh with image based lighting
 
 			if (m_use_ibl) {
@@ -665,6 +661,7 @@ void Renderer::run() {
 		render_target->unbind();
 
 		if (m_msaa_fb) {
+			m_msaa_fb->blit(*m_main_fb, GL_DEPTH_BUFFER_BIT);
 			m_msaa_fb->blit(*m_main_fb, GL_COLOR_BUFFER_BIT);
 		}
 
