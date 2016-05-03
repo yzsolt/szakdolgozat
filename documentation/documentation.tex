@@ -156,10 +156,31 @@ Az \(L_i\) függvény a felület adott pontjára \(-\mathbf{l}\) irányból beé
 \section{Gyakorlati megvalósítás}
 \subsection{A felhasznált nyílt forráskódú könyvtárak bemutatása}
 \subsection{A megjelenítő felépítése}
+
 \subsection{Nagy dinamikatartományú megjelenítés}
+
+A jelenleg elterjedt kijelzők túlnyomó többsége 24 bites RGB bemenet alapján dolgozik. Ez azt jelenti, hogy a képernyőn látható színek vörös, zöld és kék komponensekből állnak, ahol minden komponensre \(2^8\) bit jut, azaz 256 különböző értéket vehetnek fel. Elméletben tehát \(3 \cdot 2^8\), azaz körülbelül 16,7 millió különböző színt tudunk megjeleníteni. A valóságban ténylegesen megjelenített színmennyiség a kijelzők különböző fizikai paramétereitől függően változik, de az emberi szem csupán körülbelül 10 millió színt képes megkülönböztetni egymástól~\cite{judd1975color}, így ebben a tekintetben a technológia az emberi érzékelés előtt áll.
+
+Van azonban egy másik nagyon fontos, megjelenítőt és érzékelőt egyaránt jellemző tulajdonság, a kontrasztarány, amit a legvilágosabb (fehér) és a legsötétebb (fekete) megjeleníteni/érzékelni képes szín közötti arányként definiálunk. Míg egy modern LCD kijelző a 24 bites színtér által meghatározott 256:1 bemenő kontrasztarányból kb. 1000:1 kimenő arányt tud megjeleníteni, addig az emberi szem különböző fényviszonyokhoz való rendkívül jó alkalmazkodóképességének köszönhetően ennél jóval nagyobb, kb. 1000:1 - 15000:1 kontrasztarány érzékelésére is képes. (hivatkozás?)
+
+A nagy dinamikatartomány (\textit{high-dynamic-range, HDR}) fogalma először a fényképészet területén jelent meg. A probléma az volt - illetve mind a mai napig az, hogy a fényképezőgépek felépítéséből adódóan egyetlen expozícióval nem lehet olyan képet készíteni, amely visszaadja az emberi szem által érzékelhető dinamikatartományt. A fényképészek ezt úgy oldották meg, hogy az expozíciós időt - és ezzel a bejövő fénymennyiséget - változtatva több képet készítettek ugyanarról a jelenetről, majd egy végső lépésben (színleképezés, \textit{tone mapping}) ezeket egy meghatározott metodika alapján egy képpé kombinálták. A fényképészet a dinamikatartományt ún. expozíciós értékkel (\textit{exposure value, EV}) méri, ahol EV eggyel való növekedése a beérkező fénymennyiség megkétszereződését jelenti.
+
+Ahhoz tehát, hogy az általunk a valóságban érzékelhető fényerősség különbségeket érzékeltetni tudjuk, először is el kell szakadjunk az ebben minket korlátozó 24 bites színtértől. A modern grafikus kártyák már hardveresen támogatják a lebegőpontos (komponensenként 16 vagy 32 bites) puffereket, így ezeket használhatjuk HDR megjelenítésre. A fényképészettel ellentétben továbbra is csak egy leképezési lépésre van szükségünk, amely során egy ilyen lebegőpontos pufferbe számolunk, amelyben a korábbi maximális 255-nél fényerősségtől függően jóval nagyobb értékek is szerepelhetnek. A kijelzők azonban továbbra is a 24 bites, alacsony dinamikatartományú RGB színtérben várják a bemenetet, ezért HDR megjelenítésnél is szükség van egy színleképezési lépésre, amely során egy ún. színleképezési operátor segítségével a pufferben szereplő értékeket ismét "beszorítjuk" a \([0-1]\) tartományba. Színleképezés során az alapvető cél az eredeti, HDR kép lokális kontrasztarányainak minél jobb megtartása. Több ilyen operátor létezik, az egyik legegyszerűbb ezek közül a Reinhard operátor~\cite{reinhard2002photographic}:
+
+\[
+L_ldr = { L_hdr(x, y) \over 1 + L_hdr(x, y) }
+\]
+
+ahol ...
+
+Adaptáció?
+
 \subsection{Kép alapú megvilágítás}
 \subsection{Pont- és zseblámpa fények}
 
 \section{Tesztelés}
+
+\bibliography{documentation}{}
+\bibliographystyle{plain}
 
 \end{document} 
