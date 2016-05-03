@@ -28,7 +28,6 @@ void VertexArray::unbind() {
 void VertexArray::set_vertex_format(const VertexFormatDescriptor& vertex_format_descriptor) {
 			
 	GLuint location = 0;
-	GLuint binding_index = 0;
 
 	for (const auto& attribute : vertex_format_descriptor.m_attributes) {
 
