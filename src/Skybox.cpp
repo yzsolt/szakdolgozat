@@ -184,6 +184,8 @@ void Skybox::_precompute_irradiance(bool specular) {
 
 				} else {
 
+					glViewport(0, 0, side_size.x, side_size.y);
+
 					temp_vao.draw_arrays(GL_TRIANGLE_STRIP, temp_vbo.vertex_count());
 
 					std::unique_ptr<float[]> buffer(new float[side_size.x * side_size.y * 4]);
@@ -233,6 +235,8 @@ void Skybox::_precompute_brdf() {
 		glClearColor(0, 0, 0, 1);
 		glClear(GL_COLOR_BUFFER_BIT);
 
+		glViewport(0, 0, brdf_size.x, brdf_size.y);
+
 		m_precompute_brdf.bind();
 		temp_vao.draw_arrays(GL_TRIANGLE_STRIP, temp_vbo.vertex_count());
 
@@ -255,7 +259,7 @@ void Skybox::_precompute_brdf() {
 
 }
 
-Skybox::Skybox(const std::string& hdr_panorama) : 
+Skybox::Skybox(const std::string& hdr_panorama) :
 	m_draw_program("skybox.vs.glsl", "skybox.fs.glsl") ,
 	m_precompute_brdf("precompute_brdf.vs.glsl", "precompute_brdf.fs.glsl"),
 	m_precompute_diffuse_irradiance("precompute_irradiance.vs.glsl", "precompute_diffuse_irradiance.fs.glsl"),

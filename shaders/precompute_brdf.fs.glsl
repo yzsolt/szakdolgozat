@@ -52,29 +52,27 @@ vec2 IntegrateBRDF(float Roughness, float NoV) {
 
 		if (NoL > 0) {
 
-			// PDF = (D * NoH) / (4 * VoH)
-			float G = Vis_SmithJointApprox(Roughness, NoV, NoL);
-			//float G_mul_pdf = saturate((G * VoH) / (NoV * NoH));
+			float G = Vis_Smith(Roughness, NoV, NoL);
+			//float G = Vis_SmithJointApprox(Roughness, NoV, NoL);
 			float G_Vis = saturate(G * VoH / (NoH * NoV));
 
 			float Fc = pow(1 - VoH, 5);
 
-			AB.x += (1 - Fc) * G_Vis;
-			AB.y += Fc * G_Vis;
+			AB += vec2(1 - Fc, Fc) * G_Vis;
+
 		}
 
 	}
 
-	AB.x /= float(NUM_SAMPLES);
-	AB.y /= float(NUM_SAMPLES);
+	AB /= NUM_SAMPLES;
 
 	return AB;
 }
 
 void main() {
 
-	vec2 ndc = gl_FragCoord.xy / 256;
-	//vec2 ndc = vs_out_position * 0.5 + 0.5;
+	//vec2 ndc = gl_FragCoord.xy / 256;
+	vec2 ndc = vs_out_position * 0.5 + 0.5;
 
 	out_color.rg = IntegrateBRDF(ndc.y, ndc.x);
 
