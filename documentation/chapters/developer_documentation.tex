@@ -1,0 +1,379 @@
+
+\section{Elméleti alapozás}
+
+Mielőtt a konkrét implementáció ismertetésére térnénk, fontosnak tartok néhány alapvető matematikai és fizikai fogalmat tisztázni, hiszen a fizikai megjelenítés igen komoly matematikai hátterű elmélete ezekre épül, és a későbbiekben gyakran találkozhatunk velük.
+
+felületi integrál, kapcsolódó fogalmak
+
+radiometriai fogalmak
+
+\subsection{Bevezetés}
+
+Tetszőleges térbeli jelenet leképezéséhez alapvetően három dolog szükséges:
+
+\begin{itemize}[noitemsep]
+\item a jelenet geometriájának leírása,
+\item egy pont a térben, ahonnan "nézzük" a jelenetet, továbbá
+\item legalább egy fényforrás, ill. annak pozíciója.
+\end{itemize}
+
+Valósidejű grafikában a geometriák leírásához háromszöghálókat használunk, mivel a GPU-k térbeli háromszögeken dolgoznak. Domború felületek leírásához ezen háromszögháló felbontását növeljük addig, amíg a végeredmény szempontjából elfogadható közelítést kapunk. Ezt a folyamatot tesszelációnak hívjuk. Az "elfogadhatóság" teljesen szubjektív tulajdonság, így az egyetlen objektív behatároló tényező a grafikus hardver teljesítménye, amelynek folyamatos fejlődése ezen a téren a következő ábrán jól megfigyelhető.
+
+\begin{figure}[!ht]
+    \label{fig:tomb_raider_evolution}
+    \centering
+    \includegraphics[width=1.0\textwidth]{images/tomb_raider_evolution.png}
+    \caption{A Tomb Raider játéksorozat főszereplőjének evolúciója 1996 és 2008 között. Figyeljük meg, az évek alatt mennyivel részletesebb, a valóságos alakot egyre jobban visszaadó lett a karakter geometriája. }
+\end{figure}
+
+Önmagukban a háromszögeket meghatározó térbeli pozíciók még nem elégségesek. Ismernünk kell a felület tetszőleges pontjának irányultságát, amelyet egy, a felületből "kifelé" álló, egység hosszúságú vektorral írunk le és felületi normálvektornak hívunk. Jelölése: \(\mathbf{n}\). Ezeket legegyszerűbben a háromszögeket alkotó pontokkal együtt tárolhatjuk, majd menet közben interpolálva őket kaphatjuk meg a háromszög által meghatározott felület tetszőleges pontján vett normálvektort.
+
+\subsection{Az árnyalási egyenlet}
+
+A számítógépes grafika egyik alaptételének tekinthető árnyalási egyenletet (\textit{rendering equation}) David Immel et al.~\cite{immel1986radiosity} és James Kajiya~\cite{kajiya1986rendering} írta le 1986-ban. Az egyenlet segítségével meghatározható a felület egy adott pontját elhagyó sugárzás a felület által kibocsátott ill. visszavert sugárzás összegének geometriai optika alapú közelítésével:
+
+\[
+L_{out}(\mathbf{x},\mathbf{v}) = L_{emit}(\mathbf{x},\mathbf{v}) + \int_\Omega f_r(\mathbf{x},\mathbf{l},\mathbf{v}) L_{in}(\mathbf{x},\mathbf{l}) (-\mathbf{l} \cdot \mathbf{n})\,\mathrm{d}\mathbf{l}
+\]
+
+\noindent
+ahol a paraméterek:
+
+\begin{itemize}[noitemsep]
+\item \(\mathbf{x}\) a felület egy pontja,
+\item \(\mathbf{v}\) a felület egy pontjából a nézeti pozícióba mutató normálvektor (nézeti vektor),
+\item \(\mathbf{n}\) a korábban bevezetett felületi normálvektor,
+\item \(\mathbf{l}\) pedig a felület egy pontjából a fényforrás felé mutató normálvektor.
+\end{itemize}
+
+\noindent
+\textit{Megjegyzés: az eredeti egyenlet figyelembe veszi még az időt és a fény hullámhosszát is. Az egyenlet paraméterei az idő előrehaladtával ritkán változnak, és ebben az esetben is előre kiszámolhatóak, ezért gyakorlati alkalmazás esetén az időt állandónak tekinthetjük, amely így kiesik az egyenletből. Mivel számítógépes grafikánál RGB színtérben dolgozunk, és ennek 3 összetevőjét külön-külön számolhatjuk, így a hullámhossz paraméter is elhagyható. A továbbiakban ezért fény alatt a fény színét és erősségét értjük.}
+
+A könnyebb érthetőség kedvéért bontsuk részekre az egyenletet. A bal oldalon szereplő \(L_{out}\) az eredmény: a felület egy pontjából érkező fényt határozza meg a nézeti vektor függvényében, később ez lesz a ténylegesen megjelenített színérték. A jobb oldal első tagja, \(L_{emit}\) a felület egy pontjából kisugárzott fényt adja meg. Ez az érték a gyakorlatban jellemzően 0, mert kevés emisszív anyag létezik, de pl. a fényforrások megjelenítéséhez szükség van rá. A következő tag az integrál, amelyben az \(\Omega\) a felületi normálvektor körül vett félgömböt jelenti, ami az összes lehetséges \(\mathbf{l}\) vektort tartalmazza, amelyen integrálni kell a tartalmazott függvényeket. Mint később látni fogjuk, az integrálás lesz az egyik sarkalatos pontja az egyenlet gyakorlati alkalmazásának, ugyanis az integrálnak nem minden fényforrás esetén van analitikus megoldása - ilyenkor közelítést fogunk alkalmazni. \(f_r\) az ún. kétirányú visszaverődési eloszlásfüggvény (bi-directional reflection distribution function, röviden BRDF), amelyről a következő alfejezetben lesz részletesen szó. \(L_in\) a felület adott pontjára \(-\mathbf{l}\) irányból beérkező fényt adja meg. Fontos megjegyezni, hogy ez a fény nem csak direkt, hanem indirekt forrásból is érkezhet (pl. már valahol tükröződött fény, ld. globális/kép alapú megvilágítás). Az utolsó tag, \(-\mathbf{l} \cdot \mathbf{n}\) a beérkező fény iránya és a felületi normálvektor által bezárt szög koszinusza alapján csökkenti a kisugárzott fény erősségét.
+
+\subsection{Mikrofelület elmélet, diffúz és spekuláris tükröződés}
+
+A fizikai alapú megjelenítés egyik alapköve a mikrofelület elmélet (\textit{microfacet theory}), ami szerint a nem tökéletesen sima felületeket úgy kell elképzelni, mintha sok apró tökéletesen tükröző lapkából állnának. Ezen lapkák normálvektora a közelítő sima felület normálvektora körül oszlik el, és a kettő közötti eltérés mértékét hívjuk rücskösségnek vagy durvaságnak (\textit{roughness}), ami jellemzően egy \([0; 1]\) intervallumba eső érték (0 = tökéletesen sima, 1 = legdurvább).
+
+Mielőtt a mikrofelületekkel tovább haladnánk, tisztáznunk kell, mit jelent a diffúz és a spekuláris tükröződés fogalma, ill. miben különbözik a kettő egymástól.
+
+\begin{figure}[!ht]
+    \centering
+    \begin{subfigure}[b]{0.4\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/specular_reflection.png}
+        \caption{Spekuláris visszaverődés}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.4\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/diffuse_reflection.png}
+        \caption{Diffúz visszaverődés}
+    \end{subfigure}
+
+    \caption{A fénysugarak visszaverődése diffúz és spekuláris esetben.}
+\end{figure}
+
+Spekuláris tükröződésről akkor beszélünk, amikor egy sima felületre érkező fénysugarak mindegyike ugyanabba az irányba halad tovább a visszaverődés után. Diffúz tükröződés akkor történik, amikor egy durva felület különböző irányokba veri vissza, szórja szét a beérkező fénysugarakat. A mikrofelület elmélet segítségével ezt úgy képzelhetjük el, hogy a fénysugarak különböző irányultságú lapkákról verődnek vissza, így értelemszerűen különböző irányokba szóródnak szét. 
+
+Fontos megjegyezni, hogy spekuláris tükröződés nem csak tökéletesen sima felületek esetén fordul elő: ahogy a felület durvasága nő, úgy szóródnak egyre több irányba a fénysugarak, tehát annál kevésbé koncentráltan érik el a kamerát, ezáltal a "csillanás" annál nagyobb méretű és halványabb lesz. A gyakorlatban a diffúz és a spekuláris tükröződést egymástól külön, különböző BRDF-fel számoljuk.
+
+\subsection{A Blinn-Phong visszaverődési modell}
+
+Mielőtt rátérnénk a fizikai alapú megjelenítés elméletére, fontos megismernünk a három dimenziós megjelenítésben a PBR előtt széles körben elterjedt, gyakorlatilag sztenderdnek nevezhető árnyalási modellt.
+
+Bui Tuong Phong 1973-ban publikálta a később róla elnevezett visszaverődési és árnyalási modelljeit~\cite{phong1975illumination}, amelyekre az utókor előszeretettel tekint együtt, egyszerűen a "Phong árnyalási modell" elnevezést használva. A valódi, különálló Phong árnyalási modell lényegében a bevezetésben már említett felületi normálvektor interpolációt írja le: a vertexenként megadott normálvektorokból a felület bármely pontján interpolációval kiszámolható egy olyan normálvektor, amivel a visszaverődést számolva a kapott felület az őt alkotó geometriához képest sokkal simábbnak tűnik. Lényegében ez az elgondolás alapozta meg a képpontonkénti megvilágítást (\textit{per-pixel lighting}), amely csak valamivel később, ennek számolására külön hardveres gyorsítással rendelkező grafikus kártyák megjelenésével vált elterjedtté és a korábban használt, vertexenként (és emiatt gyorsabban) számolható sík ill. Gouraud árnyaláshoz képest jelentős vizuális előrelépést jelentett.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/flat_gouraud_phong.png}
+    \caption{Sík, Gouraud és Phong árnyalás összehasonlítása. }
+\end{figure}
+
+A Phong visszaverődési (vagy megvilágítási) modell egy tapasztalati modell egy felület pontjainak lokális megvilágításának kiszámítására. A felület \(p\) pontjából visszavert fény a Phong modell szerint a következőképpen számolható:
+
+\[
+L_{p} = k_a i_a + \sum_{m \in \textrm{lights}} {\left( k_d (L_m \cdot N) i_{m,d} + k_s(R_m \cdot V)^\alpha i_{m,s} \right)}
+\]
+
+ahol a jelenetben szereplő összes anyagmodellre definiálva van
+
+\begin{itemize}[noitemsep]
+\item \(k_a\) ambiens visszaverődési állandó,
+\item \(k_s\) spekuláris visszaverődési állandó,
+\item \(k_d\) diffúz visszaverődési állandó,
+\item \(\alpha\) ragyogási állandó, amely sima felületeken nagyobb, és ilyenkor kis, koncentrált csillanást eredményez.
+\end{itemize}
+
+A visszaverődési állandók a beérkező fény az anyag felszínéről történő visszaverődésének mértékét adják meg. Az ambiens, vagy "elérhető" fény a jelenet leképezése során implicit létező (napfény, holdfény, villámlás) megvilágítást jelenti.
+
+Ezen kívül
+
+\begin{itemize}[noitemsep]
+\item \(lights\) a fényforrások halmaza,
+\item \(L_m\) a felület \(p\) pontjából az adott fényforrás irányába mutató vektor,
+\item \(N\) a felületi normálvektor,
+\item \(R_m\) a tükröződési vektor, és
+\item \(V\) a nézeti vektor.
+\end{itemize}
+
+\textit{Megjegyzés: az \(L_m\), \(N\), \(R_m\) és \(V\) vektorok egység hosszúságúak.}
+
+A Blinn-Phong visszaverődési modell a Phong modell James F. Blinn által módosított változata~\cite{blinn1977models}: az \(R_m \cdot V\) skalárszorzat helyett \(N \cdot H\)-t használ, ahol a \(H\) egy ún. félszög vektor (\textit{half-angle vector}) a nézeti és a fényforrás irányába mutató vektorok között.
+
+\[
+H = {{ L + V } \over { \| L + V \| }}
+\]
+
+Ennek előnye megjelenésének idején elsősorban az volt, hogy a \(H\) vektort gyorsabban ki lehetett számolni, mint az \(R\)-t. Végül ez a modell vált a de-facto sztenderd árnyalási modellé, mind az OpenGL, mind a DirectX fix-funkciós (?) csővezetéke ezt a modellt használja. További előnye az eredeti Phong modellel szemben, hogy sík felületen történő tükröződéskor kis szögű vézeti vektor esetén a csillanás "megnyúlik", elliptikus alakot vesz fel, így jobban közelítve a valóságban tapasztalható jelenséget (szemben a Phong modellel, amely mindig kör alakú csillanást eredményez), továbbá a \(H\) vektorral történő számolás a később tárgyalt, fizikai alapú megjelenítést megalapozó mikrofelületi modellhez hasonlatos.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.4\textwidth]{images/blinn_vectors.eps}
+    \caption{A Phong és a Blinn-Phong visszaverődési modell vektorai.}
+\end{figure}
+
+A gyakorlatban a \(k\) anyagparaméterekre színvektorokat használunk, így lényegében egyszerre számoljuk a vörös, zöld és kék fények visszaverődését. A modell definíciójából látható, hogy az anyagparaméterek mindegyike tapasztalaki alapon kitalált, nincs egzakt fizikai mértékegységük, hiszen nem konkrét fizikai modellen alapulnak. Az anyag által meghatározott ambiens visszaverődési érték is furcsának hat, hiszen logikusan gondolkozva ezt a megvilágítást a jelenet alapján kellene kiszámítani, itt mégis az anyagtulajdonságok között szerepel. A Blinn-Phong modell egyik nagy hátránya is ebből fakad: egy adott jelenet, megvilágítás mellett elkészített, szemmel jónak ítélt anyagmodellt más megvilágítás alá helyezve "elromlik" a megjelenítés, a fix és fizikai alapot nélkülöző paraméterek miatt.
+
+\subsection{A kétirányú visszaverődési eloszlásfüggvény}
+
+Idézzük fel újra az árnyalási egyenletet, de most az emisszív komponens nélkül:
+
+\[
+L_{out}(\mathbf{x},\mathbf{v}) = \int_\Omega f_r(\mathbf{x},\mathbf{l},\mathbf{v}) L_{in}(\mathbf{x},\mathbf{l}) (-\mathbf{l} \cdot \mathbf{n})\,\mathrm{d}\mathbf{l}
+\]
+
+Az így kapott egyenletet tükröződési egyenletnek (\textit{reflectance equation}) nevezzük, és a továbbiak során ennek megoldására koncentrálunk. Ezen belül is elsősorban a kétirányú visszaverődési eloszlásfüggvényre (az egyenletben \(f_r\), a továbbiakban BRDF), amely nézeti irányba visszavert fény és a fényforrás felől besugárzott fény arányát adja meg. A BRDF nagy előnye, hogy fizikailag mérhető: az interneten található MERL adatbázis 100 különböző anyag visszaverődési függvényét tartalmazza.
+
+Tulajdonságai:
+
+\begin{itemize}[noitemsep]
+\item pozitív: \(f_r(\mathbf{x},\mathbf{l},\mathbf{v}) \geq 0\)
+\item szimmetrikus: \(f_r(\mathbf{x},\mathbf{l},\mathbf{v}) = f_r(\mathbf{x},\mathbf{v},\mathbf{l})\)
+\item teljesíti az energiamegmaradás törvényét: \(\int_\Omega f_r(\mathbf{x},\mathbf{l},\mathbf{v}) (-\mathbf{l} \cdot \mathbf{n})\,\mathrm{d}\mathbf{l} \leq 1\)
+\end{itemize}
+
+TODO: d dot l -> cos omega l
+
+A Blinn-Phong modellhez hasonlóan a fizikai alapú megjelenítés során is külön számoljuk a diffúz és a spekuláris megvilágítást, emiatt minden megvilágítási típushoz két megfelelő, diffúz és spekuláris BRDF-et kell találjunk.
+
+A valósidejű grafikában minimáis számításigénye miatt leggyakrabban használt diffúz BRDF a Lambert-féle tükröződésen alapuló "Lambert BRDF", amely a következőképpen definiált:
+
+\[
+f_{Lambert}(\mathbf{l}, \mathbf{v}) = { c_{diff} \over \pi }
+\]
+
+ahol \(c_{diff}\) az anyag diffúz visszaverődési aránya, gyakorlati megvalósítás során a színe. A \(\pi\)-vel való osztás az energiamegmaradás miatt szükséges, ugyanis:
+
+\[
+\int_\Omega { cos(\omega_l) \mathrm{d}\mathbf{l} } = \pi
+\]
+
+tehát \(\pi\) kiesik, \(c_{diff}\) állandó integrálja pedig értelemszerűen már teljesíti az energiamegmaradás törvényét.
+
+A Lambert-féle tükröződés Johann Heinrich Lambert nevéhez fűződik, aki 1760-ban írta le ezt a jelenséget Photometria c. könyvében~\cite{klett1760ih}. A Lambert-féle tükröződés szerint egy ideális diffúzan tükröző, azaz matt felület (Lambert felület) a nézeti pozíciótól függetlenül ugyanolyan fényesnek látszik, vagyis teljesíti Lambert koszinusz törvényét, ami szerint az ilyen felületek megfigyelhető fényessége közvetlenül arányos az \(\mathbf{l}\) és \(\mathbf{n}\) vektorok által bezárt szög koszinuszával.
+
+A Lambert BRDF jól használható diffúz felületek megvilágításának közelítésére, azonban tudnunk kell, hogy nagyon kevés tökéletes Lambert felület létezik, így nem-valósidejű megjelenítésnél, ahol nem ennyire hangsúlyos tényező a futásidő, érdemes más, a valóságban gyakran előforduló rücskös felületek megjelenését jobban közelítő BRDF-et választani. Két lehetséges alternatíva a Disney által kifejlesztett Burley~\cite{burley2012physically} illetve az Oren-Nayar visszaverődési modell~\cite{oren1994generalization}, amely a felület rücskösségét is figyelembe veszi.
+
+\begin{figure}[!ht]
+    \centering
+    \begin{subfigure}[b]{0.25\textwidth}
+        %\right
+        \includegraphics[width=\textwidth]{images/vase_a.png}
+        \caption{A valódi váza}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.25\textwidth}
+        %\centering
+        \includegraphics[width=\textwidth]{images/vase_b.png}
+        \caption{Phong}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.25\textwidth}
+        %\left
+        \includegraphics[width=\textwidth]{images/vase_c.png}
+        \caption{Oren-Nayar}
+    \end{subfigure}
+
+    \caption{Egy valódi váza és annak számítógéppel megjelenített változatai különböző diffúz modellekkel.}
+\end{figure}
+
+A spekuláris BRDF-re, azaz a visszaverődő fény által létrehozott csillanás kiszámolására rengeteg modell létezik. Ebből egyet már ismerünk, ami a Blinn-Phong visszaverődési modellben található spekuláris komponens kiszámítására vonatkozó részlet. A valós idejű fizikai alapú megjelenítők túlnyomó többsége azonban az ún. Cook-Torrance modellt használja, amit R. Cook és K. Torrance dolgozott ki 1981-ben~\cite{cook1981reflectance}.
+
+\[
+f_{CookTorrance}(\mathbf{l}, \mathbf{v}) = { {D(\mathbf{h}) F(\mathbf{l}, \mathbf{h}) G(\mathbf{l}, \mathbf{v}, \mathbf{h})} \over {4(\mathbf{n} \cdot \mathbf{l})(\mathbf{n} \cdot \mathbf{v})} }
+\]
+
+ahol
+
+\begin{itemize}[noitemsep]
+\item \(D(\mathbf{h})\) a mikrofelület normálvektorainak eloszlásfüggvénye,
+\item \(F(\mathbf{l}, \mathbf{h})\) a Fresnel tényező, és
+\item \(G(\mathbf{l}, \mathbf{v}, \mathbf{h})\) a geometriai halványító tényező.
+\end{itemize}
+
+Nézzük először a Fresnel-tényezőt. Az Augustin-Jean Fresnel által kikövetkeztetett Fresnel egyenletek a fény viselkedését írják le két különböző törésmutatójú közeg közti áthaladása során: ilyenkor mind tükröződés, mind fénytörés előfordulhat. A Fresnel egyenletek leírják, hogy a fény mekkora része tükröződik és mekkora része törik meg ilyenkor. A fény tükröződése, amit az egyenletek megjósolnak Fresnel tükröződésként is ismert. Mivel a Fresnel egyenletek túl bonyolultak ahhoz, hogy valósidőben számoljunk velük, ezért valósidejű megjelenítőknél a Christophe Schlick által kifejlesztett közelítést használják a spekuláris tükröződés Fresnel tényezőjének kiszámítására.~\cite{schlick1994inexpensive}
+
+\[
+F_{Schlick}(\mathbf{l}, \mathbf{h}) = F_0 + (1 - F_0)(1 - \mathbf{l} \cdot \mathbf{h})^5
+\]
+
+ahol \(F_0\) a tükröződési együttható a felületi normálvektorral párhuzamos beérkező fényekre, és a következőképpen számolható:
+
+\[
+F_0 = \left( {n_1 - n_2} \over {n_1 + n_2} \right)^2
+\]
+
+Itt \(n_1\) és \(n_2\) a két közeg törésmutatója. Mivel számítógépes grafikában az egyik közeg szinte mindig a levegő, ezért \(n_1\) 1-gyel helyettesíthető. A szigetelő anyagok többségének törésmutatója 1,5 körül mozog, ezért ezekre az anyagokra \(F_0\)-nak 0,04 jó közelítése. Fémeknél \(F_0\) a fém színével ekvivalens.
+
+Az eredeti Cook-Torrance modell \(D\)-re a Beckmann eloszlást~\cite{beckmann1987scattering} használja, amely egy fizikai alapú modell a mikrofelületi eloszlásra.
+
+\[
+D_{Beckmann}(\mathbf{n}, \mathbf{h}) = { { exp(-tan(\alpha)^2 / m^2) } \over { \pi m^2 cos(\alpha)^4 } }
+\]
+
+ahol
+
+\begin{itemize}[noitemsep]
+\item \(\alpha = arccos(\mathbf{n} \cdot \mathbf{h})\), és
+\item \(m\) a mikrofelület lapkáinak négyzetes közepének meredeksége (a felület rücskössége).
+\end{itemize}
+
+Ugyan a képlet még egyszerűsíthető, ezzel együtt is szemmel láthatóan nagy a számításigénye. Ezért a gyakorlatban az ún. GGX eloszlásfüggvényt használjuk:~\cite{walter2007microfacet}
+
+\[
+D_{GGX}(\mathbf{n}, \mathbf{h}) = { \alpha \over { \pi ((\mathbf{n} \cdot \mathbf{h})^2 (\alpha^2 - 1) + 1)^2 } }
+\]
+
+ahol \(\alpha = {roughness}^2\) (roughness = rücskösség).
+
+\section{Gyakorlati megvalósítás}
+
+Egy háromdimenziós megjelenítő fejlesztésekor mind programozási nyelv, mind megjelenítő API szempontjából több választási lehetőség áll előttünk. Valósidejű megjelenítőről lévén szó azonban nagyon fontos, hogy a választott programozási környezet járulékos lassító tényezői (pl. menedzselt nyelvek - Java, C\#, stb. - esetén a futtatókörnyezet, ill. szemétgyűjtő futási sebességre és felhasznált memóriára vonatkozó negatív hatása) minél kevésbé befolyásolja a program futását. Ezért - követve az iparág nagy szereplőit - választásom a C++ programozási nyelvre esett. A C++ fordított nyelv, azaz forráskódunkból a processzor által közvetlenül végrehajtható, a fordító által erősen optimalizált gépi kód készül. Ennek egyik hátránya, hogy processzor architektúrához és operációs rendszerhez kötődő futtatható állományt kapunk, azaz minden kívánt platformra külön le kell fordítsuk forráskódunkat - ellentétben pl. a Java-val, amely platformfüggetlen bájtkódot állít elő, és azt a gépre előre telepített, platformspecifikus futtatókörnyezet hajtja végre. Előnye viszont, hogy minden platformra külön optimalizált futtathatót készíthetünk, ami valósidejű megjelenítésnél a futási sebesség szempontjából fontos lehet. A C++ eléggé alacsonyszintű ahhoz, hogy minden teljesítmény szempontjából számító befolyásoló tényezőt (pl. memóriafoglalás, annak pontos ideje és mérete) a kezünkben tarthassunk, de közben eléggé magasszintű ahhoz, hogy az objektum-orientált programozást lehetővé tevő nyelvi eszközei és standard könyvtára (\textit{standard template library, STL}) segítségével hatékonyan írhassunk benne összetett programokat. A megjelenítő fejlesztése során igyekeztem minél jobban igénybe venni az új C++ szabványok (C++11, C++14) által bevezetett szintaktikai és STL-t érintő újdonságokat (okos mutatók, új tömb tároló, automatikus típuslevezetés, stb.), illetve a "modern C++" meghatározó eszközeit (kivételkezelés, RAII), amelyek segítségével egy átlátható, könnyedén bővíthető, robosztus kódbázis született.
+
+Az asztali számítógépeken a két legelterjedtebb grafikus API a DirectX és az OpenGL. Okostelefonokon az OpenGL speciális, kisebb tudású, áramvonalasított változata, az OpenGL ES az egyeduralkodó API. A konzolokon jellemzően erősen a célhardverre specializált alacsonyszintű programozási felületek állnak rendelkezésre, amelyek elérése külön feltételekhez kötött, így ezekről kevés információnk áll rendelkezésre. A két rivális asztali API közül azért az OpenGL-re esett a választásom, mert volt már vele tapasztalatom, és mert keresztplatformos, míg a DirectX csak Microsoft Windows rendszereken érhető el.
+
+Habár az OpenGL a 3-as főverzióval komoly ráncfelvarrást kapott, felépítésében továbbra is egy erősen egy szálon futó állapotgép maradt. A modern GPU-k azonban architekturálisan már tovább fejlődtek ennél: akár több szálról is feltölthető parancspuffereket használnak, így a kirajzolási hívásszám-limitált jelenetekben (pl. részecskerendszerek kirajzolása) az OpenGL-el nem lehet teljes mértékben kihasználni a modern GPU-k képességeit. További lassító tényező az OpenGL magasszintűsége, ami a fejlesztőknek ugyan valamekkora kényelmet és időbeli nyereséget jelenthet, azonban egyrészt emiatt a grafikus kártya meghajtóprogramjának kell sok olyan dolgot általános módon implementálnia (pl. biztonságos videomemória-kezelés), amit sok esetben a fejlesztők a saját igényeiket és céljaikat ismerve optimálisabban is meg tudnának írni, másrészt a meghajtóprogram sok ellenőrzést is végrehajt a kapott inputokon, ami processzor oldalon felesleges többletterhelést jelenthet. A szakdolgozat írásának idején megjelent új API-k - DirectX 12, Vulkan (lényegében az OpenGL revolúciós folytatása), Metal (Apple rendszereken) - ezeket a problémákat küszöbölik ki: alacsony szintűek, explicitek és erősen támogatják a többszálúságot.
+
+\subsection{A felhasznált nyílt forráskódú könyvtárak bemutatása}
+
+Munkám során a fejlesztést megkönnyítendő, és a programozás egyik alapvető tételét, az újrafelhasználást figyelembe véve a fizikai megjelenítéshez szorosan nem kapcsolódó részeket nyílt forráskódú könyvtárak segítségével valósítottam meg. A megjelenítő ablakának ill. az OpenGL környezet létrehozását, továbbá az ehhez kapcsolódó eseménykezelést (egérmozgás, billentyűzet kezelés, ablakesemények) a C-ben írt, keresztplatformos GLFW könyvtár végzi. Ahhoz, hogy az OpenGL bővítményeit használni tudjam, a Python alapú GLAD OpenGL függvénymutató-betöltővel generáltam C forrásfájlt, amelyben a legújabb, 4.5-ös OpenGL verzióig az összes függvénymutató, ill. az ezeket inicializáló mechanizmus megtalálható. Grafikus alkalmazásoknál, kiváltképp három dimenzióban elkerülhetetlen a lineáris algebra használata. Ehhez a népszerű GLM fejléc alapú C++ sablonkönyvtárat választottam, amely az OpenGL árnyalónyelve, a GLSL mintájára készült, és a legfontosabb lineáris algebrai konstrukciók (egész és lebegőpontos vektorok, mátrixok, kvaterniók) mellett többek közt az ezek között definiált műveletek megvalósítását és sok hasznos segédfüggvényt (pl. vetítési, nézeti mátrix létrehozása) is tartalmaz. A megjelenítő elsődleges bemenetét képező 3D-s Wavefront OBJ formátumú modellek betöltését a tinyobjloader C++ könyvtár végzi, amely a hozzájuk csatolt anyagtulajdonság-leíró fájlokat (.mtl kiterjesztéssel) is feldolgozza. A felhasználói felület megjelenítéséért és kezeléséért az OpenGL alapú NanoGUI könyvtár felel, amely a NanoVG (szintén OpenGL-alapú) közvetlen módú vektorgrafikus rajzoló könyvtárra épül. Ezen könyvtárak mindegyike nyílt forráskódú és folyamatos fejlesztés alatt áll, így probléma esetén a szükséges módosításokat végre tudtam hajtani rajtuk, ami - mindamellett, hogy segítségükkel a fizikai megjelenítés konkrét implementációjára koncentrálhattam - nagy segítséget jelentett a fejlesztés során.
+
+\subsection{A megjelenítő felépítése}
+
+TODO: ábra
+
+Ugyan az OpenGL egy meglehetősen magas szintű grafikus programozási felület, a kódismétlés elkerülése és az átláthatóság könnyítése érdekében több egyszerű burkoló objektumot is létrehoztam a leggyakrabban használt OpenGL objektumok köré.
+
+\subsection{Anyagok és modellek leírása}
+
+Ahogyan az elméleti alapozás bevezetőjében elhangzott, a valósidejű megjelenítők térbeli háromszögekből építik fel a kirajzolt 3D-s modelleket, hiszen a GPU-k is ezeken dolgoznak hardver szinten. Ahhoz, hogy ezeket a modelleket ki tudjuk rajzolni, az őket leíró geometriát előbb fel kell tölteni a videomemóriába a használt grafikus API segítségével. Ezeket a geometriákat ún. vertexekkel adjuk meg. Egy vertex egy térbeli ponthoz rendelt attribútumok csoportja, minimálisan a pont pozícióját megadó vektort tartalmazza, de a háromszögháló adott pontjához tartozó normálvektort és textúrakoordinátát is a vertexben szokás tárolni. Értelemszerűen három vertex határoz meg egy térbeli háromszöget.
+
+Textúrakoordinátákra akkor van szükség, ha a modellt textúrázni szeretnénk, azaz egy kétdimenziós képet rá szeretnénk feszíteni kirajzolás során a háromszöghálóra.
+
+Ezeket a vertexhalmazokat "beégethetjük" a kódba (ld. skybox kocka), vagy betölthetjük külső forrásból a program futása közben. Számos különböző modellformátum létezik, az elkészített megjelenítő ezek közül a Wavefront által kifejlesztett OBJ formátumú modellek betöltésére képes a tinyobjloader könyvtár segítségével. Egy OBJ fájlban a modellt alkotó háromszögháló csúcspontjainak pozíciói (illetve opcionálisan normálvektorok és textúrakoordináták) szöveges adatként szerepelnek. Ennek előnye, hogy akár kézzel, egy szövegszerkesztővel is módosíthatóak ezek az adatok, hátránya viszont, hogy a beolvasást jelentősen lassítja a szövegből lebegőpontos számmá konvertálás folyamata.
+
+Az OBJ fájlok mellé opcionálisan tartozhatnak MTL (material) fájlok is, amelyek a felhasznált anyagok tulajdonságait írják le. 
+
+\subsection{Nagy dinamikatartományú megjelenítés}
+
+A jelenleg elterjedt kijelzők túlnyomó többsége 24 bites RGB bemenet alapján dolgozik. Ez azt jelenti, hogy a képernyőn látható színek vörös, zöld és kék komponensekből állnak, ahol minden komponensre \(2^8\) bit jut, azaz 256 különböző értéket vehetnek fel. Elméletben tehát \(3 \cdot 2^8\), azaz körülbelül 16,7 millió különböző színt tudunk megjeleníteni. A valóságban ténylegesen megjelenített színmennyiség a kijelzők különböző fizikai paramétereitől függően változik, de az emberi szem csupán körülbelül 10 millió színt képes megkülönböztetni egymástól~\cite{judd1975color}, így ebben a tekintetben a technológia az emberi érzékelés előtt áll.
+
+Van azonban egy másik nagyon fontos, megjelenítőt és érzékelőt egyaránt jellemző tulajdonság, a kontrasztarány, amit a legvilágosabb (fehér) és a legsötétebb (fekete) megjeleníteni/érzékelni képes szín közötti arányként definiálunk. Míg egy modern LCD kijelző a 24 bites színtér által meghatározott 256:1 bemenő kontrasztarányból kb. 1000:1 kimenő arányt tud megjeleníteni, addig az emberi szem különböző fényviszonyokhoz való rendkívül jó alkalmazkodóképességének köszönhetően ennél jóval nagyobb, kb. 1000:1 - 15000:1 kontrasztarány érzékelésére is képes. (hivatkozás?)
+
+A nagy dinamikatartomány (\textit{high-dynamic-range, HDR}) fogalma először a fényképészet területén jelent meg. A probléma az volt - illetve mind a mai napig az, hogy a fényképezőgépek felépítéséből adódóan egyetlen expozícióval nem lehet olyan képet készíteni, amely a teljes emberi szem által érzékelhető dinamikatartományt visszaadja. A fényképészek ezt úgy oldották meg, hogy az expozíciós időt - és ezzel a bejövő fénymennyiséget - változtatva több képet készítettek ugyanarról a jelenetről, majd egy végső lépésben (amelyet színleképezésnek [\textit{tone mapping}] hívnak) ezeket egy meghatározott metodika alapján egy képpé kombinálták. A fényképészet a dinamikatartományt ún. expozíciós értékkel (\textit{exposure value, EV}) méri, ahol EV eggyel való növekedése a beérkező fénymennyiség megkétszereződését jelenti.
+
+Ahhoz tehát, hogy az általunk a valóságban érzékelhető fényerősség különbségeket érzékeltetni tudjuk, először is el kell szakadjunk az ebben minket korlátozó 24 bites színtértől. A modern grafikus kártyák már hardveresen támogatják a lebegőpontos (komponensenként 16 vagy 32 bites) puffereket, így ezeket használhatjuk HDR megjelenítésre. A fényképészettel ellentétben továbbra is csak egy leképezési lépésre van szükségünk, amely során egy ilyen lebegőpontos pufferbe számolunk, amelyben a korábbi maximális 255-nél fényerősségtől függően jóval nagyobb értékek is szerepelhetnek. A kijelzők azonban továbbra is a 24 bites, alacsony dinamikatartományú RGB színtérben várják a bemenetet, ezért HDR megjelenítésnél is szükség van egy színleképezési lépésre, amely során egy ún. színleképezési operátor segítségével a pufferben szereplő értékeket ismét "beszorítjuk" a \([0; 1]\) intervallumba. Színleképezés során az alapvető cél az eredeti HDR kép lokális kontrasztarányainak minél jobb megtartása. Több ilyen operátor létezik, az egyik legegyszerűbb ezek közül a Reinhard operátor~\cite{reinhard2002photographic}:
+
+\[
+L_{ldr} = { L_{hdr}(x, y) \over 1 + L_{hdr}(x, y) }
+\]
+
+ahol \(L_{hdr}(x, y)\) a (kétdimenziós) HDR puffer \((x, y)\) koordinátájában található érték.
+
+Az elkészített megjelenítő három választható színleképezési operátort tartalmaz, amelyek megvalósítása a tone\_map.fs.glsl árnyalóban található. Az első az alapértelmezett Uncharted 2, amelyet készítői "filmszerűnek" hívnak mozi-szerű színvilága miatt. Ezen kívül a fent említett Reinhard, illetve az Unreal Engine 4 alapértelmezett operátora került megvalósítása. Míg az előbbi igen fakó kimenetet ad, addig az utóbbi jelentősen megnöveli a színtelítettséget.
+
+Nagy dinamikatartományú megjelenítéssel tehát jól modellezhetők a való világban tapasztalható fényviszonyok. Ugyanakkor egy új probléma is felmerül, mégpedig a fényviszonyokhoz történő adaptáció. Amikor például egy sötét szobából hirtelen kilépünk egy napsütötte teraszra, a szemünk - bizonyítva rendkívüli alkalmazkodóképességét - alkalmazkodik a hirtelen megváltozott fényerőhöz, pupillánk összeszűkül, hiszen a megnövekedett fénysűrűség miatt elég kisebb területen mintát vennie a színek megállapításához. Ezen effektus megvalósítása szinte kötelező egy HDR megjelenítő esetén, ugyanis hiába használunk nagy dinamikatartományt, enélkül a kevéssé vagy erősen megvilágított jelenetek természetellenesen sötétnek vagy világosnak hatnának.
+
+A megvalósításhoz szükségünk van a jelenet átlagos fénysűrűségére, amely Erik Reinhard módszerével~\cite{reinhard2002photographic} a következőképpen számolható:
+
+\[
+L_{avg} = exp\left( { 1 \over N } \displaystyle\sum_{x, y} log(\delta + L_{rel}(x, y)) \right)
+\]
+
+ahol
+
+\begin{itemize}[noitemsep]
+\item \(N\) a HDR puffer képpontjainak száma,
+\item \(\delta\) egy kis érték \(log(0)\) elkerülésére abban az esetben, ha van fekete pixel a pufferben,
+\item \(L_{rel}\) pedig a puffer \((x, y)\) pontjában vett relatív fényerősség.
+\end{itemize}
+
+Ennek implementációja az average\_luminance.fs.glsl árnyalóban található, lépései a következők: először egy \(64 \times 64\)-es textúrába számoljuk ki a logaritmus komponens értékeit, majd ezt egyszerű átlagszámítással csökkentjük előbb \(16 \times 16\)-os, majd \(4 \times 4\)-es és végül \(1 \times 1\)-es méretűre. Utolsó lépésként ezen az egy értéken a természetes alapú hatványt elvégezve kapjuk \(L_{avg}\)-t. Az első lépéshez szükségünk van a relatív fényerősségre, amely egy \([0; 1]\) intervallumba eső érték. RGB színtér esetén háromelemű színvektorral dolgozunk, ebből triviálisan átlagot számolva (\( { R + G + B } \over 3 \)) kaphatunk ilyen értéket. Szemünk viszont nem egyformán érzékeli a három alapszínt: az ún. fényerősség függvény (\textit{luminosity function}) alapján a zöld színre sokkal érzékenyebbek vagyunk, mint a vörösre vagy a kékre. Ezt figyelembe véve a fényerősség függvény és az azon alapuló sRGB konverzióból~\cite{stokes2012standard} származó konstans fényerősség vektor segítségével a következőképpen számolhatjuk a relatív fényerősséget:
+
+\[
+L_{rel} = [0.2126, 0.7152, 0.0722] \cdot L_{hdr}
+\]
+
+Mivel a színleképezés expozíció alapján működik, ezért az átlagos fénysűrűségből ezt valahogyan ki kell számoljuk. A DICE prezentációja~\cite{dice_moving_frostbite_to_pbr} alapján:
+
+\[
+EV = log_2\left({ L_{avg} \cdot S } \over K\right)
+\]
+
+ahol
+
+\begin{itemize}[noitemsep]
+\item \(S\) a kamera ISO értéke,
+\item \(K\) pedig egy eszközfüggő kalibrációs állandó.
+\end{itemize}
+
+Ebből látható, hogy az expozíciós érték definíciója függ az ISO értéktől. Mivel a mi esetünkben \(EV\)-t fénymennyiség mérésére használjuk, ezért az ISO-t 100-ban rögzítjük, és ezentúl \(EV_{100}\)-ként hivatkozunk rá. A \(K\) állandó értékét az ISO 2720:1974 szabvány 10,6 és 13,4 között javasolja meghatározni. Én - a legtöbb modern 3D megjelenítőhöz hasonlóan - 12,5-nek választottam, így
+
+\[
+EV_{100} = log_2\left({ L_{avg} \cdot 100 } \over 12,5\right)
+\]
+
+Az expozíció ebből a DICE prezentációja alapján a következőképpen számolható:
+
+\[
+exposition = { 1 \over { 1,2 \cdot 2^{EV_{100}} } } = { 1 \over { 9,6 \cdot L_{avg} } }
+\]
+
+A színleképezés bemenetét képező \(L_{hdr}\) vektort ezzel az expozícióval megszorozva a fényerő-adaptáció működésbe lép.
+
+A valóban élethű fényerősség adaptációhoz még egy dolog szükséges: a késleltetés. Szemünk ugyanis nem azonnal, hanem a változás mértékével arányosan lassan, fokozatosan alkalmazkodik a megváltozott fényviszonyokhoz. Ehhez el kell tároljuk a legutóbbi képkoca kirajzolása során mért átlagos fénysűrűséget, így a legutóbbi és az éppen kirajzolt állapot között az eltelt idő függvényében interpolációval kiszámolható az adaptáció aktuális mértéke, ezáltal szemünkhöz hasonlóan lassítva a folyamatot. Az adaptáció implementációja a luminance\_adapter.fs.glsl árnyalóban található, a használt interpoláció pedig a következő:
+
+\[
+L_{cur} = L_{prev} + (L_{avg} - L_{prev}) \cdot (1 - 0,98^{S_a \cdot t_{\delta}})
+\]
+
+ahol
+
+\begin{itemize}[noitemsep]
+\item \(L_{prev}\) az előző képkocka kirajzolása során mért átlagos fénysűrűség,
+\item \(L_{avg}\) az aktuális képkoca átlagos fénysűrűsége,
+\item \(S_a\) állandó, amellyel az adaptáció sebessége szabályozható,
+\item \(t_{\delta}\) az előző képkocka kirajzolása eltelt idő.
+\end{itemize}
+
+Az \(S_a\) állandónak az implementációban 60-as értéket adtam, ezzel a szemünkhöz hasonló gyorsasággal történik az adaptáció. Az eltelt idővel való szorzás azért szükséges, hogy ezzel függetlenítsük az algoritmust (az adaptáció sebességét) a kirajzolás sebességétől.
+
+\subsection{Kép alapú megvilágítás}
+
+
+
+\subsection{Pont- és zseblámpa fények}
+
+\section{Tesztelés}
+
+Egy 3D megjelenítő tesztelésénél némileg el kell térnünk a manapság széles körben elterjedt automatikus egységtesztelés módszertanától. Ennek oka az, hogy a megjelenítő által előállított kimenet nem egy könnyen ellenőrizhető, másik helyes kimenettel egy az egyben összehasonlítható eredmény (pl. szöveg), hanem egy kép. Ugyan léteznek módszerek két kép objektív összehasonlítására, ha ilyen módszerhez folyamodunk, felmerül a kérdés, hogy mit tekintünk helyes megoldásnak, \textit{referenciának}? Egy, az iparág által fizikai alapú megjelenítők esetében használt módszer a valósidejű mellé egy ugyanazon bemenetet használó, szintén fizikai alapú, de sugárkövetésen alapuló megjelenítőt fejleszteni, amellyel aztán a valósidejű megjelenítéshez használt megoldások, közelítések helyessége ellenőrizhető. Fontos kiemelni, hogy itt sem számítógép általi, automatikus összehasonlításról van szó: azt a kimenetet tekintjük helyesnek, amely "ránézésre" jónak, fizikailag plauzibilisnek tűnik. Mivel egy külön sugárkövetéses megjelenítő fejlesztése csupán a tesztelés céljából bőven túlmutat ezen szakdolgozat keretein, ezért a kimenet tesztelésénél a szememre hagyatkoztam, és referenciának egy neves PBR alapú eszközt, a Marmoset Toolbag 2-t használtam.
+
+\subsection{Alapvető funkciók helyes működésének ellenőrzése}
+
+Mielőtt rátérnénk a kimenet tesztelésére, fontos leellenőriznünk, hogy a felhasználói interakció során a program helyesen működik, véd az alapvető felhasználói hibák ellen, illetve a különböző bemeneteket jól kezeli.
+
+\subsection{A kimenet ellenőrzése}
+
+\bibliography{documentation}{}
+\bibliographystyle{plain} 
