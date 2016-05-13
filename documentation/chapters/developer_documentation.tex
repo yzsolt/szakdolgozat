@@ -76,7 +76,7 @@ Fontos megjegyezni, hogy spekuláris tükröződés nem csak tökéletesen sima 
 
 Mielőtt rátérnénk a fizikai alapú megjelenítés elméletére, fontos megismernünk a három dimenziós megjelenítésben a PBR előtt széles körben elterjedt, gyakorlatilag sztenderdnek nevezhető árnyalási modellt.
 
-Bui Tuong Phong 1973-ban publikálta a később róla elnevezett visszaverődési és árnyalási modelljeit~\cite{phong1975illumination}, amelyekre az utókor előszeretettel tekint együtt, egyszerűen a "Phong árnyalási modell" elnevezést használva. A valódi, különálló Phong árnyalási modell lényegében a bevezetésben már említett felületi normálvektor interpolációt írja le: a vertexenként megadott normálvektorokból a felület bármely pontján interpolációval kiszámolható egy olyan normálvektor, amivel a visszaverődést számolva a kapott felület az őt alkotó geometriához képest sokkal simábbnak tűnik. Lényegében ez az elgondolás alapozta meg a képpontonkénti megvilágítást (\textit{per-pixel lighting}), amely csak valamivel később, ennek számolására külön hardveres gyorsítással rendelkező grafikus kártyák megjelenésével vált elterjedtté és a korábban használt, vertexenként (és emiatt gyorsabban) számolható sík ill. Gouraud árnyaláshoz képest jelentős vizuális előrelépést jelentett.
+Bui Tuong Phong 1973-ban publikálta a később róla elnevezett tükröződési és árnyalási modelljeit~\cite{phong1975illumination}, amelyekre az utókor előszeretettel tekint együtt, egyszerűen a "Phong árnyalási modell" elnevezést használva. A valódi, különálló Phong árnyalási modell lényegében a bevezetésben már említett felületi normálvektor interpolációt írja le: a vertexenként megadott normálvektorokból a felület bármely pontján interpolációval kiszámolható egy olyan normálvektor, amivel a tükröződést számolva a kapott felület az őt alkotó geometriához képest sokkal simábbnak tűnik. Lényegében ez az elgondolás alapozta meg a képpontonkénti megvilágítást (\textit{per-pixel lighting}), amely csak valamivel később, ennek számolására külön hardveres gyorsítással rendelkező grafikus kártyák megjelenésével vált elterjedtté és a korábban használt, vertexenként (és emiatt gyorsabban) számolható sík ill. Gouraud árnyaláshoz képest jelentős vizuális előrelépést jelentett.
 
 \begin{figure}[!ht]
     \centering
@@ -84,9 +84,7 @@ Bui Tuong Phong 1973-ban publikálta a később róla elnevezett visszaverődés
     \caption{Sík, Gouraud és Phong árnyalás összehasonlítása. }
 \end{figure}
 
-TODO: visszaverődés -> tükröződés
-
-A Phong visszaverődési (vagy megvilágítási) modell egy tapasztalati modell egy felület pontjainak lokális megvilágításának kiszámítására. A felület \(p\) pontjából visszavert fény a Phong modell szerint a következőképpen számolható:
+A Phong tükröződési (vagy megvilágítási) modell egy tapasztalati modell egy felület pontjainak lokális megvilágításának kiszámítására. A felület \(p\) pontjából visszavert fény a Phong modell szerint a következőképpen számolható:
 
 \[
 L_{p} = k_a i_a + \sum_{m \in \textrm{lights}} {\left( k_d (L_m \cdot N) i_{m,d} + k_s(R_m \cdot V)^\alpha i_{m,s} \right)}
@@ -95,13 +93,13 @@ L_{p} = k_a i_a + \sum_{m \in \textrm{lights}} {\left( k_d (L_m \cdot N) i_{m,d}
 ahol a jelenetben szereplő összes anyagmodellre definiálva van
 
 \begin{itemize}[noitemsep]
-\item \(k_a\) ambiens visszaverődési állandó,
-\item \(k_s\) spekuláris visszaverődési állandó,
-\item \(k_d\) diffúz visszaverődési állandó,
+\item \(k_a\) ambiens tükröződési állandó,
+\item \(k_s\) spekuláris tükröződési állandó,
+\item \(k_d\) diffúz tükröződési állandó,
 \item \(\alpha\) ragyogási állandó, amely sima felületeken nagyobb, és ilyenkor kis, koncentrált csillanást eredményez.
 \end{itemize}
 
-A visszaverődési állandók a beérkező fénynek az anyag felszínéről történő visszaverődésének mértékét adják meg. Az ambiens, vagy "elérhető" fény a jelenet leképezése során implicit létező (napfény, holdfény, villámlás) megvilágítást jelenti.
+A tükröződési állandók a beérkező fénynek az anyag felszínéről történő tükröződésének mértékét adják meg. Az ambiens, vagy "elérhető" fény a jelenet leképezése során implicit létező (napfény, holdfény, villámlás) megvilágítást jelenti.
 
 Ezen kívül
 
@@ -115,7 +113,7 @@ Ezen kívül
 
 \textit{Megjegyzés: az \(L_m\), \(N\), \(R_m\) és \(V\) vektorok egység hosszúságúak.}
 
-A Blinn-Phong visszaverődési modell~\cite{blinn1977models} a Phong modell James F. Blinn által módosított változata: az \(R_m \cdot V\) skalárszorzat helyett \(N \cdot H\)-t használ, ahol a \(H\) egy ún. félszög vektor (\textit{half-angle vector}) a nézeti és a fényforrás irányába mutató vektorok között.
+A Blinn-Phong tükröződési modell~\cite{blinn1977models} a Phong modell James F. Blinn által módosított változata: az \(R_m \cdot V\) skalárszorzat helyett \(N \cdot H\)-t használ, ahol a \(H\) egy ún. félszög vektor (\textit{half-angle vector}) a nézeti és a fényforrás irányába mutató vektorok között.
 
 \[
 H = {{ L + V } \over { \| L + V \| }}
@@ -129,12 +127,12 @@ Ennek előnye megjelenésének idején elsősorban az volt, hogy a \(H\) vektort
     \caption{A Phong és a Blinn-Phong visszaverődési modell vektorai.}
 \end{figure}
 
-A gyakorlatban a \(k\) anyagparaméterekre színvektorokat használunk, így lényegében egyszerre számoljuk a vörös, zöld és kék fények visszaverődését. A modell definíciójából látható, hogy az anyagparaméterek mindegyike tapasztalaki alapon kitalált, nincs egzakt fizikai mértékegységük, hiszen nem konkrét fizikai modellen alapulnak. Az anyag által meghatározott ambiens visszaverődési érték is furcsának hat, hiszen logikusan gondolkozva ezt a megvilágítást a jelenet alapján kellene kiszámítani, itt mégis az anyagtulajdonságok között szerepel. A Blinn-Phong modell egyik nagy hátránya is ebből fakad: egy adott megvilágítás mellett elkészített, szemmel jónak ítélt anyagmodellt más megvilágítás alá helyezve "elromlik" a megjelenítés, a fix és fizikai alapot nélkülöző paraméterek miatt.
+A gyakorlatban a \(k\) anyagparaméterekre színvektorokat használunk, így lényegében egyszerre számoljuk a vörös, zöld és kék fények tükröződését. A modell definíciójából látható, hogy az anyagparaméterek mindegyike tapasztalaki alapon kitalált, nincs egzakt fizikai mértékegységük, hiszen nem konkrét fizikai modellen alapulnak. Az anyag által meghatározott ambiens tükröződési érték is furcsának hat, hiszen logikusan gondolkozva ezt a megvilágítást a jelenet alapján kellene kiszámítani, itt mégis az anyagtulajdonságok között szerepel. A Blinn-Phong modell egyik nagy hátránya is ebből fakad: egy adott megvilágítás mellett elkészített, szemmel jónak ítélt anyagmodellt más megvilágítás alá helyezve "elromlik" a megjelenítés, a fix és fizikai alapot nélkülöző paraméterek miatt.
 
 \subsection{Matematikai és fizikai alapfogalmak}
 \label{subsec:matbase}
 
-TODO: térszög
+TODO: térszög leírása
 
 A radiometria az elektromágneses sugárzás (esetünkben a látható fény) mérésével foglalkozik. A következő definíciókban a könnyebb érthetőséget és a későbbi gyakorlati megvalósítást szem előtt tartva nem mindig az eredeti, fizikai definíciókban szereplő jelöléseket, hanem a korábban bevezetett vektortípusokat használtam.
 
@@ -169,8 +167,10 @@ L(\mathbf{v}) = { { d^2\phi } \over { dA cos\theta d\mathbf{v} } }
 
 ahol \(\theta\) a felületi normálvektor és a nézeti vektor által bezárt szög.
 
+A besugárzás kiszámítására a következő képlet ad lehetőséget:
+
 \[
-dE(\mathbf{l}) = d { {d\phi} \over {dA} } (\mathbf{l} = L_{in}(\mathbf{l} d\mathbf{l}
+dE(\mathbf{l}) = d { {d\phi} \over {dA} } (\mathbf{l}) = L_{in}(\mathbf{l}) cos\theta_l d\mathbf{l}
 \]
 
 \subsection{A kétirányú visszaverődési eloszlásfüggvény}
@@ -265,7 +265,7 @@ Itt \(n_1\) és \(n_2\) a két közeg törésmutatója. Mivel számítógépes g
 Az eredeti Cook-Torrance modell \(D\)-re a Beckmann eloszlást~\cite{beckmann1987scattering} használja, amely egy fizikai alapú modell a mikrofelületi eloszlásra.
 
 \[
-D_{Beckmann}(\mathbf{n}, \mathbf{h}) = { { exp(-tan(\alpha)^2 / m^2) } \over { \pi m^2 cos(\alpha)^4 } }
+D_{Beckmann}(\mathbf{n}, \mathbf{h}) = { { e^{ -tan(\alpha)^2 \over m^2 } } \over { \pi m^2 cos(\alpha)^4 } }
 \]
 
 ahol
@@ -442,7 +442,7 @@ következik.
 Ez lényegében az ún. inverz négyzet törvény, azaz a besugárzott teljesítmény a fényforrástól való távolság négyzetével csökken. Gyakorlati megvalósítás szempontjából problémát jelent, hogy ez alapján \(L_{out}\) sosem éri el a 0-t, azaz elesünk egy fontos optimalizációs lehetőségtől, a nem látható fények kivágásától. Ezért egy halványítási tényezőt is bevezetünk az árnyalóban:
 
 \[
-attenuation = { I \over {dist}^2 } max(0, 1 - dist \over r)
+attenuation = { I \over {dist}^2 } max(0, 1 - { dist \over r })
 \]
 
 ahol \(dist\) a fényforrástól való távolság, \(r\) pedig egy sugár, amin kívül a pontfény hatását nem vesszük figyelembe.
@@ -465,13 +465,43 @@ Az elkészült program a megjelenített modell környezetét környezeti térké
 
 TODO: elrendezések ábra
 
-Kép alapú megvilágítás esetén ebből a kockatérképből szeretnénk a megvilágítást kiszámolni. Pont és zseblámpa fények esetén könnyű dolgunk volt, hiszen a kimenő sugárzás kiszámolására használt integrálnak volt analitikus megoldása. Kép alapú megvilágításnál viszont a felület rücskössége miatt nem tudunk analitikus megoldást adni, az integrál értékét ezért numerikus módszerekkel kell közelítenünk.
+Kép alapú megvilágítás esetén ebből a kockatérképből szeretnénk a megvilágítást kiszámolni. Pont és zseblámpa fények esetén könnyű dolgunk volt, hiszen a kimenő sugárzás kiszámolására használt integrálnak volt analitikus megoldása. Kép alapú megvilágításnál viszont a felület rücskössége miatt nem tudunk analitikus megoldást adni, az integrál értékét ezért valamilyen numerikus módszerrel kell közelítenünk. Az egyik legelterjedtebb ilyen módszer a Monte-Carlo integrálás. Ennek során az integrálandó függvényből \(N\) mintát veszünk, ezeket a mintákat elosztjuk egy valószínűségi sűrűségfüggvénnyel (\textit{probability density function, PDF}), majd összeadjuk őket:
+
+\[
+L_{out}(\mathbf{v}) = \int_{\Omega} { f_r(\mathbf{l}, \mathbf{v}) L_{in}(\mathbf{l})(-\mathbf{l} \cdot \mathbf{n}) d\mathbf{l} } \approx { 1 \over N } \sum_{k=1}^{N} { { f_r(\mathbf{l}, \mathbf{v}) L_{in}(\mathbf{l})(-\mathbf{l} \cdot \mathbf{n}) d\mathbf{l} } \over { p_r(\mathbf{v}, \mathbf{l}_k) } }
+\]
+
+Itt \(p_r\) az \(\mathbf{l}_k\) sűrűségfüggvénye. Egyenletes eloszlás esetén \(p_r = 1 \over {2\pi}\), hiszen félgömbön integrálunk.
+
+TODO: importance sampling
+
+Sugárkövetésen alapuló megjelenítőkhöz már felhasználhatóak ezek a képletek, valósidejű megjelenítéshez azonban a fontossági mintavételezés ellenére is túl nagy számításigényűek: a rücskösség növelésével egyre több mintát kellene vennünk. Ezért a kép alapú megvilágítást az Unreal Engine 4-ben használt technikával~\cite{karis2013real} valósítottam meg, aminek segítségével a besugárzás és a BRDF speciális textúrákba előre kiszámolható, és az \(\mathbf{n} = \mathbf{v} = \mathbf{l}\) feltételezésen alapszik:
+
+\[
+{ 1 \over N } \sum_{k=1}^{N} { { f_r(\mathbf{l}, \mathbf{v}) L_{in}(\mathbf{l})(-\mathbf{l} \cdot \mathbf{n}) d\mathbf{l} } \over { p_r(\mathbf{v}, \mathbf{l}_k) } } \approx
+\]
+\[
+\approx { { 1 \over \sum_{k=1}^{N} cos{\theta_l}_k } \sum_{k=1}^{N} L_{in}(\mathbf{l}_k)cos{\theta_l}_k } + { 1 \over N \sum_{k=1}^{N} { { f_r(\mathbf{v}, \mathbf{l}_k) cos{\theta_l}_k} \over { p_r(\mathbf{v}, \mathbf{l}_k) } } }
+\]
+
+Az első tagot a rücskösség értékétől függően egy kockatérkép mip szintjeibe számolhatjuk ki. Ezt a textúrát besugárzási kockatérképnek hívjuk. A második tag egy ún. lookup textúrába számolható, azonban jelenleg 3 paramétertől (\(F_0\), rücskösség, \(\mathbf{n} \cdot \mathbf{v}\)) függ, így további egyszerűsítésre van szükség:
+
+\[
+\int_{\Omega} { f_r(\mathbf{l}, \mathbf{v}) cos\theta_l d\mathbf{l} } = 
+\]
+= \[F_0 \int_{\Omega} { { f_r(\mathbf{l}, \mathbf{v}) \over F(\mathbf{v}, \mathbf{h}) } (1 - (1 - \mathbf{v} \cdot \mathbf{h})^5) cos\theta_l d\mathbf{l} } + \int_{\Omega} { { f_r(\mathbf{l}, \mathbf{v}) \over F(\mathbf{v}, \mathbf{h}) } (1 - \mathbf{v} \cdot \mathbf{h})^5 cos\theta_l d\mathbf{l} }
+\]
+
+Ezzel az \(F_0\)-tól való függést megszüntettük, és a két integrál értéke a kétdimenziós lookup textúra vörös és zöld csatornájában tárolható.
+
+Mindezek segítségével valósidőben, mindössze két textúraolvasással kiszámolható a kép alapú megvilágításból származó sugárzás. Sőt, a két besugárzási kockatérképet (diffúz és spekuláris) és a BRDF lookup textúrát nem muszáj előre kiszámolni, dinamikus tükröződés megvalósításához kevesebb mintával menet közben is generálhatók. Az \(\mathbf{n} = \mathbf{v} = \mathbf{l}\) feltételezés azonban szemmel látható hibákat okoz: elsősorban sík felületeknél észrevehető, hogy a valóságban "megnyúlt" tükröződések emiatt itt nem jelennek meg.
 
 \subsection{Továbbfejlesztési lehetőségek}
 
-területi fény
-spekuláris envmap javítása
-textúranézet
+TODO: 
+területi fények,
+spekuláris envmap javítása,
+textúranézet,
 több formátum assimp-pel
 
 \section{Tesztelés}
