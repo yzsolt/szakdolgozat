@@ -1,12 +1,6 @@
 
 \section{Elméleti alapozás}
 
-Mielőtt a konkrét implementáció ismertetésére térnénk, fontosnak tartok néhány alapvető matematikai és fizikai fogalmat tisztázni, hiszen a fizikai megjelenítés igen komoly matematikai hátterű elmélete ezekre épül, és a későbbiekben gyakran találkozhatunk velük.
-
-felületi integrál, kapcsolódó fogalmak
-
-radiometriai fogalmak
-
 \subsection{Bevezetés}
 
 Tetszőleges térbeli jelenet leképezéséhez alapvetően három dolog szükséges:
@@ -71,10 +65,10 @@ Mielőtt a mikrofelületekkel tovább haladnánk, tisztáznunk kell, mit jelent 
         \caption{Diffúz visszaverődés}
     \end{subfigure}
 
-    \caption{A fénysugarak visszaverődése diffúz és spekuláris esetben.}
+    \caption{A fénysugarak visszaverődése spekuláris és diffúz esetben.}
 \end{figure}
 
-Spekuláris tükröződésről akkor beszélünk, amikor egy sima felületre érkező fénysugarak mindegyike ugyanabba az irányba halad tovább a visszaverődés után. Diffúz tükröződés akkor történik, amikor egy durva felület különböző irányokba veri vissza, szórja szét a beérkező fénysugarakat. A mikrofelület elmélet segítségével ezt úgy képzelhetjük el, hogy a fénysugarak különböző irányultságú lapkákról verődnek vissza, így értelemszerűen különböző irányokba szóródnak szét. 
+Spekuláris tükröződésről akkor beszélünk, amikor egy sima felületre érkező fénysugarak mindegyike ugyanabba az irányba halad tovább a visszaverődés után. Diffúz tükröződés akkor történik, amikor egy durva felület különböző irányokba veri vissza, szórja szét a beérkező fénysugarakat. A mikrofelület elmélet segítségével ezt úgy képzelhetjük el, hogy a fénysugarak különböző irányultságú lapkákról verődnek vissza, így értelemszerűen különböző irányokba szóródnak szét.
 
 Fontos megjegyezni, hogy spekuláris tükröződés nem csak tökéletesen sima felületek esetén fordul elő: ahogy a felület durvasága nő, úgy szóródnak egyre több irányba a fénysugarak, tehát annál kevésbé koncentráltan érik el a kamerát, ezáltal a "csillanás" annál nagyobb méretű és halványabb lesz. A gyakorlatban a diffúz és a spekuláris tükröződést egymástól külön, különböző BRDF-fel számoljuk.
 
@@ -89,6 +83,8 @@ Bui Tuong Phong 1973-ban publikálta a később róla elnevezett visszaverődés
     \includegraphics[width=0.7\textwidth]{images/flat_gouraud_phong.png}
     \caption{Sík, Gouraud és Phong árnyalás összehasonlítása. }
 \end{figure}
+
+TODO: visszaverődés -> tükröződés
 
 A Phong visszaverődési (vagy megvilágítási) modell egy tapasztalati modell egy felület pontjainak lokális megvilágításának kiszámítására. A felület \(p\) pontjából visszavert fény a Phong modell szerint a következőképpen számolható:
 
@@ -105,7 +101,7 @@ ahol a jelenetben szereplő összes anyagmodellre definiálva van
 \item \(\alpha\) ragyogási állandó, amely sima felületeken nagyobb, és ilyenkor kis, koncentrált csillanást eredményez.
 \end{itemize}
 
-A visszaverődési állandók a beérkező fény az anyag felszínéről történő visszaverődésének mértékét adják meg. Az ambiens, vagy "elérhető" fény a jelenet leképezése során implicit létező (napfény, holdfény, villámlás) megvilágítást jelenti.
+A visszaverődési állandók a beérkező fénynek az anyag felszínéről történő visszaverődésének mértékét adják meg. Az ambiens, vagy "elérhető" fény a jelenet leképezése során implicit létező (napfény, holdfény, villámlás) megvilágítást jelenti.
 
 Ezen kívül
 
@@ -119,7 +115,7 @@ Ezen kívül
 
 \textit{Megjegyzés: az \(L_m\), \(N\), \(R_m\) és \(V\) vektorok egység hosszúságúak.}
 
-A Blinn-Phong visszaverődési modell a Phong modell James F. Blinn által módosított változata~\cite{blinn1977models}: az \(R_m \cdot V\) skalárszorzat helyett \(N \cdot H\)-t használ, ahol a \(H\) egy ún. félszög vektor (\textit{half-angle vector}) a nézeti és a fényforrás irányába mutató vektorok között.
+A Blinn-Phong visszaverődési modell~\cite{blinn1977models} a Phong modell James F. Blinn által módosított változata: az \(R_m \cdot V\) skalárszorzat helyett \(N \cdot H\)-t használ, ahol a \(H\) egy ún. félszög vektor (\textit{half-angle vector}) a nézeti és a fényforrás irányába mutató vektorok között.
 
 \[
 H = {{ L + V } \over { \| L + V \| }}
@@ -133,27 +129,67 @@ Ennek előnye megjelenésének idején elsősorban az volt, hogy a \(H\) vektort
     \caption{A Phong és a Blinn-Phong visszaverődési modell vektorai.}
 \end{figure}
 
-A gyakorlatban a \(k\) anyagparaméterekre színvektorokat használunk, így lényegében egyszerre számoljuk a vörös, zöld és kék fények visszaverődését. A modell definíciójából látható, hogy az anyagparaméterek mindegyike tapasztalaki alapon kitalált, nincs egzakt fizikai mértékegységük, hiszen nem konkrét fizikai modellen alapulnak. Az anyag által meghatározott ambiens visszaverődési érték is furcsának hat, hiszen logikusan gondolkozva ezt a megvilágítást a jelenet alapján kellene kiszámítani, itt mégis az anyagtulajdonságok között szerepel. A Blinn-Phong modell egyik nagy hátránya is ebből fakad: egy adott jelenet, megvilágítás mellett elkészített, szemmel jónak ítélt anyagmodellt más megvilágítás alá helyezve "elromlik" a megjelenítés, a fix és fizikai alapot nélkülöző paraméterek miatt.
+A gyakorlatban a \(k\) anyagparaméterekre színvektorokat használunk, így lényegében egyszerre számoljuk a vörös, zöld és kék fények visszaverődését. A modell definíciójából látható, hogy az anyagparaméterek mindegyike tapasztalaki alapon kitalált, nincs egzakt fizikai mértékegységük, hiszen nem konkrét fizikai modellen alapulnak. Az anyag által meghatározott ambiens visszaverődési érték is furcsának hat, hiszen logikusan gondolkozva ezt a megvilágítást a jelenet alapján kellene kiszámítani, itt mégis az anyagtulajdonságok között szerepel. A Blinn-Phong modell egyik nagy hátránya is ebből fakad: egy adott megvilágítás mellett elkészített, szemmel jónak ítélt anyagmodellt más megvilágítás alá helyezve "elromlik" a megjelenítés, a fix és fizikai alapot nélkülöző paraméterek miatt.
+
+\subsection{Matematikai és fizikai alapfogalmak}
+\label{subsec:matbase}
+
+TODO: térszög
+
+A radiometria az elektromágneses sugárzás (esetünkben a látható fény) mérésével foglalkozik. A következő definíciókban a könnyebb érthetőséget és a későbbi gyakorlati megvalósítást szem előtt tartva nem mindig az eredeti, fizikai definíciókban szereplő jelöléseket, hanem a korábban bevezetett vektortípusokat használtam.
+
+\begin{itemize}[noitemsep]
+\item \(\phi\): sugárzási teljesítmény (\textit{radiant flux}),
+\item \(E\): besugárzott teljesítmény (\textit{irradiance}),
+\item \(I\): sugárzási intenzitás (\textit{radiant intensity}),
+\item \(L\): sugárzás (\textit{radiance}).
+\end{itemize}
+
+A sugárzási teljesítmény egy tartományon egységnyi idő alatt átáramló sugárzási energiát jelöli és Wattban (W) mérjük. A besugárzott teljesítmény az egységnyi területre beérkező sugárzási teljesítmény adja meg. Mértékegysége \(W \over m^2\), és a következőképpen számolható:
+
+\[
+E = { { d\phi } \over { dA } }
+\]
+
+ahol \(d\) a parciális derivált szimbóluma, \(\phi\) a sugárzási teljesítmény és \(A\) a terület.
+
+A sugárzási intenzitás az egységnyi térszögben terjedő sugárzási teljesítményt adja meg, mértékegysége \(W \over {sr}\), definíciója pedig:
+
+\[
+I = { { d\phi } \over { d\omega } }
+\]
+
+ahol \(\omega\) ?.
+
+A sugárzás az egységnyi vetített területre egységnyi térszögben beérkező sugárzási teljesítményt határozza meg. Ez a legfontosabb fogalom a felsoroltak közül, ugyanis a megjelenítés során ezt az értéket, azaz a megjelenítendő felület egy adott pontját adott irányban elhagyó sugárzást kell kiszámoljuk. Mértékegysége \(W \over {m^2sr}\), és a következőképpen definiáljuk:
+
+\[
+L(\mathbf{v}) = { { d^2\phi } \over { dA cos\theta d\mathbf{v} } }
+\]
+
+ahol \(\theta\) a felületi normálvektor és a nézeti vektor által bezárt szög.
+
+\[
+dE(\mathbf{l}) = d { {d\phi} \over {dA} } (\mathbf{l} = L_{in}(\mathbf{l} d\mathbf{l}
+\]
 
 \subsection{A kétirányú visszaverődési eloszlásfüggvény}
 
-Idézzük fel újra az árnyalási egyenletet, de most az emisszív komponens nélkül:
+A kétirányú visszaverődési eloszlásfüggvényt, azaz BRDF-et Fred Nicodemus definiálta először~\cite{nicodemus1965directional}, és arra a feltevésre épül, hogy a nézeti irányba visszavert fény arányos a fényforrás által besugárzott fényhez. Ezek alapján definíciója a következő:
 
 \[
-L_{out}(\mathbf{x},\mathbf{v}) = \int_\Omega f_r(\mathbf{x},\mathbf{l},\mathbf{v}) L_{in}(\mathbf{x},\mathbf{l}) (-\mathbf{l} \cdot \mathbf{n})\,\mathrm{d}\mathbf{l}
+f_r(\mathbf{l}, \mathbf{v}) = { { dL_{out}(\mathbf{v}) } \over {dE(\mathbf{l})} }
 \]
 
-Az így kapott egyenletet tükröződési egyenletnek (\textit{reflectance equation}) nevezzük, és a továbbiak során ennek megoldására koncentrálunk. Ezen belül is elsősorban a kétirányú visszaverődési eloszlásfüggvényre (az egyenletben \(f_r\), a továbbiakban BRDF), amely nézeti irányba visszavert fény és a fényforrás felől besugárzott fény arányát adja meg. A BRDF nagy előnye, hogy fizikailag mérhető: az interneten található MERL adatbázis 100 különböző anyag visszaverődési függvényét tartalmazza.
+A BRDF egyik előnye, hogy fizikailag mérhető: az interneten található MERL adatbázis 100 különböző anyag visszaverődési függvényét tartalmazza.
 
 Tulajdonságai:
 
 \begin{itemize}[noitemsep]
-\item pozitív: \(f_r(\mathbf{x},\mathbf{l},\mathbf{v}) \geq 0\)
-\item szimmetrikus: \(f_r(\mathbf{x},\mathbf{l},\mathbf{v}) = f_r(\mathbf{x},\mathbf{v},\mathbf{l})\)
-\item teljesíti az energiamegmaradás törvényét: \(\int_\Omega f_r(\mathbf{x},\mathbf{l},\mathbf{v}) (-\mathbf{l} \cdot \mathbf{n})\,\mathrm{d}\mathbf{l} \leq 1\)
+\item pozitív: \(f_r(\mathbf{l},\mathbf{v}) \geq 0\)
+\item szimmetrikus: \(f_r(\mathbf{l},\mathbf{v}) = f_r(\mathbf{v},\mathbf{l})\)
+\item teljesíti az energiamegmaradás törvényét: \(\int_\Omega f_r(\mathbf{l},\mathbf{v}) (-\mathbf{l} \cdot \mathbf{n})\,\mathrm{d}\mathbf{l} \leq 1\)
 \end{itemize}
-
-TODO: d dot l -> cos omega l
 
 A Blinn-Phong modellhez hasonlóan a fizikai alapú megjelenítés során is külön számoljuk a diffúz és a spekuláris megvilágítást, emiatt minden megvilágítási típushoz két megfelelő, diffúz és spekuláris BRDF-et kell találjunk.
 
@@ -166,7 +202,7 @@ f_{Lambert}(\mathbf{l}, \mathbf{v}) = { c_{diff} \over \pi }
 ahol \(c_{diff}\) az anyag diffúz visszaverődési aránya, gyakorlati megvalósítás során a színe. A \(\pi\)-vel való osztás az energiamegmaradás miatt szükséges, ugyanis:
 
 \[
-\int_\Omega { cos(\omega_l) \mathrm{d}\mathbf{l} } = \pi
+\int_\Omega { (-\mathbf{l} \cdot \mathbf{n}) \mathrm{d}\mathbf{l} } = \int_\Omega { cos(\omega_l) \mathrm{d}\mathbf{l} } = \pi
 \]
 
 tehát \(\pi\) kiesik, \(c_{diff}\) állandó integrálja pedig értelemszerűen már teljesíti az energiamegmaradás törvényét.
@@ -239,7 +275,7 @@ ahol
 \item \(m\) a mikrofelület lapkáinak négyzetes közepének meredeksége (a felület rücskössége).
 \end{itemize}
 
-Ugyan a képlet még egyszerűsíthető, ezzel együtt is szemmel láthatóan nagy a számításigénye. Ezért a gyakorlatban az ún. GGX eloszlásfüggvényt használjuk:~\cite{walter2007microfacet}
+Ugyan a képlet még egyszerűsíthető, ezzel együtt is szemmel láthatóan nagy a számításigénye. Ezért a gyakorlatban az ún. GGX eloszlásfüggvényt~\cite{walter2007microfacet} használjuk:
 
 \[
 D_{GGX}(\mathbf{n}, \mathbf{h}) = { \alpha \over { \pi ((\mathbf{n} \cdot \mathbf{h})^2 (\alpha^2 - 1) + 1)^2 } }
@@ -269,11 +305,23 @@ Ugyan az OpenGL egy meglehetősen magas szintű grafikus programozási felület,
 
 Ahogyan az elméleti alapozás bevezetőjében elhangzott, a valósidejű megjelenítők térbeli háromszögekből építik fel a kirajzolt 3D-s modelleket, hiszen a GPU-k is ezeken dolgoznak hardver szinten. Ahhoz, hogy ezeket a modelleket ki tudjuk rajzolni, az őket leíró geometriát előbb fel kell tölteni a videomemóriába a használt grafikus API segítségével. Ezeket a geometriákat ún. vertexekkel adjuk meg. Egy vertex egy térbeli ponthoz rendelt attribútumok csoportja, minimálisan a pont pozícióját megadó vektort tartalmazza, de a háromszögháló adott pontjához tartozó normálvektort és textúrakoordinátát is a vertexben szokás tárolni. Értelemszerűen három vertex határoz meg egy térbeli háromszöget.
 
-Textúrakoordinátákra akkor van szükség, ha a modellt textúrázni szeretnénk, azaz egy kétdimenziós képet rá szeretnénk feszíteni kirajzolás során a háromszöghálóra.
+Textúrakoordinátákra (szokás UV-nak is nevezni őket) akkor van szükség, ha a modellt textúrázni szeretnénk, azaz egy kétdimenziós képet rá szeretnénk feszíteni kirajzolás során a háromszöghálóra. Ilyenkor egy jellemzően négyzetes textúrát használunk, amelynek pontjaira egy \([0; 1]\) intervallumba eső koordinátával hivatkozunk, és ezeket tároljuk el a vertexekben. Egyszerű geometriáknál (pl. síkbeli négyzet) kézzel is megadhatóak ezek a koordináták, bonyolultabb modellek esetén azonban a 3D művészek, modellezők készítik el a textúrákat és állítják be pontosan a koordinátákat a használt modellező szoftver (Blender, Autodesk 3ds Max, Maya, stb.) segítségével.
 
-Ezeket a vertexhalmazokat "beégethetjük" a kódba (ld. skybox kocka), vagy betölthetjük külső forrásból a program futása közben. Számos különböző modellformátum létezik, az elkészített megjelenítő ezek közül a Wavefront által kifejlesztett OBJ formátumú modellek betöltésére képes a tinyobjloader könyvtár segítségével. Egy OBJ fájlban a modellt alkotó háromszögháló csúcspontjainak pozíciói (illetve opcionálisan normálvektorok és textúrakoordináták) szöveges adatként szerepelnek. Ennek előnye, hogy akár kézzel, egy szövegszerkesztővel is módosíthatóak ezek az adatok, hátránya viszont, hogy a beolvasást jelentősen lassítja a szövegből lebegőpontos számmá konvertálás folyamata.
+Ezeket a vertexhalmazokat "beégethetjük" a kódba (ld. skybox kocka), vagy betölthetjük külső forrásból a program futása közben. Számos különböző modellformátum létezik, az elkészített megjelenítő ezek közül a Wavefront által kifejlesztett OBJ formátumú modellek betöltésére képes a tinyobjloader könyvtár segítségével. Egy OBJ fájlban a modellt alkotó háromszögháló csúcspontjainak pozíciói (illetve opcionálisan normálvektorok és textúrakoordináták) szöveges adatként szerepelnek. Ennek előnye, hogy akár kézzel, egy szövegszerkesztővel is módosíthatóak ezek az adatok, hátránya viszont, hogy a beolvasást jelentősen lassítja a szövegből lebegőpontos számmá konvertálás folyamata. Egy OBJ fájlban lehetőség van a modellt kisebb részegységekre, alakzatokra (\textit{shape}) bontani. A megjelenítő külön-külön, egymás után rajzolja ki ezeket az alakzatokat, így lehetőség van a megjelenítésüket egyenként ki/bekapcsolni.
 
-Az OBJ fájlok mellé opcionálisan tartozhatnak MTL (material) fájlok is, amelyek a felhasznált anyagok tulajdonságait írják le. 
+Az OBJ fájlok mellé opcionálisan tartozhatnak MTL (material) fájlok is, amelyek a felhasznált anyagok tulajdonságait írják le. Habár az OBJ formátum lehetőséget ad rá, hogy akár háromszög-szinten különböző anyagokat használjunk, az egyszerűség kedvéért a megjelenítő csak az alakzatokhoz tud külön anyagot rendelni. Az eredeti fájlformátumban az anyagtulajdonságok elsősorban a Blinn-Phong árnyalási modell paraméterei (ambiens, diffúz, spekuláris tükröződési állandó, stb.), azonban a formátum egyszerű felépítése miatt könnyű saját paramétereket hozzáadni a leíráshoz. Ezért a mellékelt példamodellek anyagleíróiba bekerült két egyedi tulajdonság, a map\_Roughness és a map\_Metalness, amelyek a rücskösségi ill. fémességi textúratérkép (\textit{texture map}) elérhetőségeit tartalmazzák.
+
+De mi is pontosan a textúra/textúratérkép? Tegyük fel, hogy egy téglafalat szeretnénk számítógéppel megjeleníteni. Adja magát az ötlet, hogy készítsünk egy olyan háromszöghálót, ami a maltertől kezdve a téglák repedésein át az egyenetlen felületekig mindent nagy részletességgel tartalmaz, majd az egyes háromszögeknek csak egy színt adva (tégla: vörös, malter: szürke) jelenítsük meg ezt a geometriát. Az elméletben jó ötlet a gyakorlatban kevésbé működőképes: egy ilyen részletességű háromszögháló megjelenítése, pláne valósidőben túl költséges a mai hardverek számára. Csinálhatjuk viszont a következőt: készítsünk egy egyszerű téglalap geometriát (maximum 6 vertexből megoldható), fotózzunk le merőlegesen egy téglafalat, majd az elkészült képet egyszerűen feszítsük rá geometriánkra a textúrakoordináták segítségével.
+
+A textúrázás alapvető lényege tehát egy valódi felület élethű megjelenítéséhez túl alacsony felbontású geometria részletességének trükkös növelése egy ráfeszített kép segítségével. Jó minőségű textúra esetén az így megjelenített téglafal igazán élethű, de csak ha szemből nézünk rá. Minél kisebb szögben nézünk a téglalapunkra, annál szembetűnőbb lesz, hogy csak egy sík felületet látunk, "hiányzik" az igazi téglafal domborúsága. Tudnunk kell azonban, hogy egy textúrában nem csak a felület színeit tárolhatjuk el. Ha például tudjuk (vagy modellezőprogram segítségével előállítjuk) egy felület minden egyes pontjának felületi normálvektorát, akkor ezeket a normálvektorokat kis átalakítás után eltárolhatjuk egy hagyományos RGB textúrában, amit normáltérképnek hívnak. Ha a kirajzolás során ebből a textúrából olvassuk ki az adott pont normálvektorát, akkor az árnyalás már emlékeztetni fog a valódi téglafalra, a csillanások és árnyékok növelni fogják valóságérzetünket.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/brick_texture_maps.png}
+    \caption{Diffúz, normál és spekuláris textúratérképek.}
+\end{figure}
+
+Számtalan a normáltérképhez (\textit{normal map}) hasonló "trükkös" textúrázás létezik még. Az elkészített megjelenítő a felület alapszínét jelentő diffúz értékeken kívül kívül Blinn-Phong árnyalás esetén az ambiens színt és a spekuláris tükröződési állandót, fizikai alapú árnyalás esetén pedig a rücskösség és fémesség értékeket képes textúrából olvasni. PBR esetén különösen látványos a textúrázás hatása: a mellékelt fegyver modellen jól megfigyelhető a változó rücskösség által okozott tükröződés-elmosódás, illetve a fém és szigetelő részeken eltérő spekuláris csillanás.
 
 \subsection{Nagy dinamikatartományú megjelenítés}
 
@@ -282,6 +330,12 @@ A jelenleg elterjedt kijelzők túlnyomó többsége 24 bites RGB bemenet alapj�
 Van azonban egy másik nagyon fontos, megjelenítőt és érzékelőt egyaránt jellemző tulajdonság, a kontrasztarány, amit a legvilágosabb (fehér) és a legsötétebb (fekete) megjeleníteni/érzékelni képes szín közötti arányként definiálunk. Míg egy modern LCD kijelző a 24 bites színtér által meghatározott 256:1 bemenő kontrasztarányból kb. 1000:1 kimenő arányt tud megjeleníteni, addig az emberi szem különböző fényviszonyokhoz való rendkívül jó alkalmazkodóképességének köszönhetően ennél jóval nagyobb, kb. 1000:1 - 15000:1 kontrasztarány érzékelésére is képes. (hivatkozás?)
 
 A nagy dinamikatartomány (\textit{high-dynamic-range, HDR}) fogalma először a fényképészet területén jelent meg. A probléma az volt - illetve mind a mai napig az, hogy a fényképezőgépek felépítéséből adódóan egyetlen expozícióval nem lehet olyan képet készíteni, amely a teljes emberi szem által érzékelhető dinamikatartományt visszaadja. A fényképészek ezt úgy oldották meg, hogy az expozíciós időt - és ezzel a bejövő fénymennyiséget - változtatva több képet készítettek ugyanarról a jelenetről, majd egy végső lépésben (amelyet színleképezésnek [\textit{tone mapping}] hívnak) ezeket egy meghatározott metodika alapján egy képpé kombinálták. A fényképészet a dinamikatartományt ún. expozíciós értékkel (\textit{exposure value, EV}) méri, ahol EV eggyel való növekedése a beérkező fénymennyiség megkétszereződését jelenti.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=1.0\textwidth]{images/hdr_process.png}
+    \caption{HDR kép előállítása túl-, semlegesen és alulexponált fotókból.}
+\end{figure}
 
 Ahhoz tehát, hogy az általunk a valóságban érzékelhető fényerősség különbségeket érzékeltetni tudjuk, először is el kell szakadjunk az ebben minket korlátozó 24 bites színtértől. A modern grafikus kártyák már hardveresen támogatják a lebegőpontos (komponensenként 16 vagy 32 bites) puffereket, így ezeket használhatjuk HDR megjelenítésre. A fényképészettel ellentétben továbbra is csak egy leképezési lépésre van szükségünk, amely során egy ilyen lebegőpontos pufferbe számolunk, amelyben a korábbi maximális 255-nél fényerősségtől függően jóval nagyobb értékek is szerepelhetnek. A kijelzők azonban továbbra is a 24 bites, alacsony dinamikatartományú RGB színtérben várják a bemenetet, ezért HDR megjelenítésnél is szükség van egy színleképezési lépésre, amely során egy ún. színleképezési operátor segítségével a pufferben szereplő értékeket ismét "beszorítjuk" a \([0; 1]\) intervallumba. Színleképezés során az alapvető cél az eredeti HDR kép lokális kontrasztarányainak minél jobb megtartása. Több ilyen operátor létezik, az egyik legegyszerűbb ezek közül a Reinhard operátor~\cite{reinhard2002photographic}:
 
@@ -359,11 +413,66 @@ ahol
 
 Az \(S_a\) állandónak az implementációban 60-as értéket adtam, ezzel a szemünkhöz hasonló gyorsasággal történik az adaptáció. Az eltelt idővel való szorzás azért szükséges, hogy ezzel függetlenítsük az algoritmust (az adaptáció sebességét) a kirajzolás sebességétől.
 
+\subsection{Pont és zseblámpa fények}
+
+A valóságban szinte mindig érkezik valamilyen fény a szemünkbe, még a legsötétebb éjszakákon is. Az aggteleki Baradla-barlangot végigjáró turistacsoportoknak a túravezetők előszeretettel mutatják meg, milyen az abszolút sötétség: a túra egy pontján a fényképezők, telefonok kikapcsolása után a barlangi világítást is lekapcsolják. A számítógépes megjelenítésben ez a kiindulópont. Ahhoz, hogy egy jelenetből lássunk is valamit, szükségünk van legalább egy fényforrásra.
+
+A legegyszerűbb fényforrások a pont fények, amelyek egy pozícióval és intenzitással adottak. Mivel nincs területük, a sugárzást nem tudjuk értelmezni rajtuk. A sugárzási teljesítményt viszont fel tudjuk írni a sugárzási intenzitás segítségével, ha a pont fény körüli egységgömbön integrált számítunk:
+
+\[
+\phi = \int_S { I d\omega } = I \int_0^{2\pi} { \int_0^\pi { sin\theta d\theta d\Phi } } = I 4\pi
+\]
+
+ahol S a pont fény körüli egységgömb.
+
+A ~\ref{subsec:matbase} fejezetben megadott képletek alapján:
+
+\[
+E = { { d\phi } \over { dA } } = I { { d\omega } \over { dA } } = I { { cos\theta } \over { dist }^2 }
+\]
+
+Ebből pedig már
+
+\[
+L_{out}(\mathbf{v}) = f_r(\mathbf{l}, \mathbf{v}) E = f_r(\mathbf{l}, \mathbf{v}) {}
+\]
+
+következik.
+
+Ez lényegében az ún. inverz négyzet törvény, azaz a besugárzott teljesítmény a fényforrástól való távolság négyzetével csökken. Gyakorlati megvalósítás szempontjából problémát jelent, hogy ez alapján \(L_{out}\) sosem éri el a 0-t, azaz elesünk egy fontos optimalizációs lehetőségtől, a nem látható fények kivágásától. Ezért egy halványítási tényezőt is bevezetünk az árnyalóban:
+
+\[
+attenuation = { I \over {dist}^2 } max(0, 1 - dist \over r)
+\]
+
+ahol \(dist\) a fényforrástól való távolság, \(r\) pedig egy sugár, amin kívül a pontfény hatását nem vesszük figyelembe.
+
+A zseblámpa fényeknek (\textit{spot light}) pozíción és intenzitáson kívül iránya és nyitási szöge is van. Pontszerű mivolta miatt itt sem értelmezhető a sugárzás, de a pontfényekhez hasonló módon, csak gömb helyett kúpon véve az integrált a sugárzási teljesítmény kiszámolható:
+
+\[
+\phi = I \int_0^{2\pi} { \int_0^\theta { sin\theta d\theta d\Phi } } = I 2\pi (1 - cos\theta)
+\]
+
+ahol \(\theta\) a zseblámpa (külső) nyitási félszöge. A valódi zseblámpák fényéhez hasonló, a kivetített fénykör széléhez közeledve történő elhalványulást egy új paraméter felvételével szimulálhatjuk. Ezt a paramétert belső nyitási félszögnek nevezzük, ami legfeljebb \(\theta\) lehet. A belső és nyitási félszög között fokozatosan elhalványítjuk a lámpa fényét.
+
+A pont és zseblámpa fények megvalósítása a direct\_lighting.fs.glsl árnyalóban található.
+
 \subsection{Kép alapú megvilágítás}
 
+A kép alapú megvilágítás egy gyakran használt módszer a globális megvilágítás szimulálására. Globális megvilágításnak azokat a fényeket hívjuk, amelyek egy adott felületet indirekt módon (valahonnan már egyszer visszaverődve) érnek. Kép alapú megvilágításnál kicsit tovább megyünk ennél, és egy előre elkészített textúrából olvassuk ki a felület adott ponjtját érő összes sugárzást.
 
+Az elkészült program a megjelenített modell környezetét környezeti térképezéssel (\textit{environment mapping}), egy ún. skybox ("égdoboz") segítségével szimulálja. Ezt úgy kell elképzelni, mintha egy végtelen nagyságú kocka közepére állnánk, és ezen kocka belső oldallapjaira felfestenénk, amit az adott oldal középpontjára merőlegesen nézve látunk a köryezetünkből. A program a skybox.vs.glsl árnyaló segítségével transzformálja úgy a kocka csúcspontjait, hogy azok a nézeti pozíciótól függetlenek legyenek. A skybox.fs.glsl-ben pedig egy egyszerű textúraolvasással rajzoljuk ki a kocka oldalait. Ez a textúra viszont speciális, kockatérkép (\textit{cube map} típusú, amit a program Radiance HDR típusú nagy dinamikatartományú képekből olvas, amelyben függőleges kereszt elrendezésben találhatóak a kocka oldallapjainak textúrái.
 
-\subsection{Pont- és zseblámpa fények}
+TODO: elrendezések ábra
+
+Kép alapú megvilágítás esetén ebből a kockatérképből szeretnénk a megvilágítást kiszámolni. Pont és zseblámpa fények esetén könnyű dolgunk volt, hiszen a kimenő sugárzás kiszámolására használt integrálnak volt analitikus megoldása. Kép alapú megvilágításnál viszont a felület rücskössége miatt nem tudunk analitikus megoldást adni, az integrál értékét ezért numerikus módszerekkel kell közelítenünk.
+
+\subsection{Továbbfejlesztési lehetőségek}
+
+területi fény
+spekuláris envmap javítása
+textúranézet
+több formátum assimp-pel
 
 \section{Tesztelés}
 
