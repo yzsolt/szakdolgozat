@@ -1,5 +1,9 @@
 
 data/*
+
+build/*
+dependencies/*build/
+
 documentation/*
 !documentation/documentation.tex
 !documentation/documentation.bib
@@ -242,5 +246,3 @@ _Pvt_Extensions
 
 # FAKE - F# Make
 .fake/
-
-*build/
