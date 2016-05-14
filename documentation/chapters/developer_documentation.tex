@@ -301,6 +301,8 @@ TODO: ábra
 
 Ugyan az OpenGL egy meglehetősen magas szintű grafikus programozási felület, a kódismétlés elkerülése és az átláthatóság könnyítése érdekében több egyszerű burkoló objektumot is létrehoztam a leggyakrabban használt OpenGL objektumok köré.
 
+TODO
+
 \subsection{Anyagok és modellek leírása}
 
 Ahogyan az elméleti alapozás bevezetőjében elhangzott, a valósidejű megjelenítők térbeli háromszögekből építik fel a kirajzolt 3D-s modelleket, hiszen a GPU-k is ezeken dolgoznak hardver szinten. Ahhoz, hogy ezeket a modelleket ki tudjuk rajzolni, az őket leíró geometriát előbb fel kell tölteni a videomemóriába a használt grafikus API segítségével. Ezeket a geometriákat ún. vertexekkel adjuk meg. Egy vertex egy térbeli ponthoz rendelt attribútumok csoportja, minimálisan a pont pozícióját megadó vektort tartalmazza, de a háromszögháló adott pontjához tartozó normálvektort és textúrakoordinátát is a vertexben szokás tárolni. Értelemszerűen három vertex határoz meg egy térbeli háromszöget.
@@ -489,7 +491,7 @@ Az első tagot a rücskösség értékétől függően egy kockatérkép mip szi
 \[
 \int_{\Omega} { f_r(\mathbf{l}, \mathbf{v}) cos\theta_l d\mathbf{l} } = 
 \]
-= \[F_0 \int_{\Omega} { { f_r(\mathbf{l}, \mathbf{v}) \over F(\mathbf{v}, \mathbf{h}) } (1 - (1 - \mathbf{v} \cdot \mathbf{h})^5) cos\theta_l d\mathbf{l} } + \int_{\Omega} { { f_r(\mathbf{l}, \mathbf{v}) \over F(\mathbf{v}, \mathbf{h}) } (1 - \mathbf{v} \cdot \mathbf{h})^5 cos\theta_l d\mathbf{l} }
+\[= F_0 \int_{\Omega} { { f_r(\mathbf{l}, \mathbf{v}) \over F(\mathbf{v}, \mathbf{h}) } (1 - (1 - \mathbf{v} \cdot \mathbf{h})^5) cos\theta_l d\mathbf{l} } + \int_{\Omega} { { f_r(\mathbf{l}, \mathbf{v}) \over F(\mathbf{v}, \mathbf{h}) } (1 - \mathbf{v} \cdot \mathbf{h})^5 cos\theta_l d\mathbf{l} }
 \]
 
 Ezzel az \(F_0\)-tól való függést megszüntettük, és a két integrál értéke a kétdimenziós lookup textúra vörös és zöld csatornájában tárolható.
