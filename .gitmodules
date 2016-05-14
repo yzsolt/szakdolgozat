@@ -2,7 +2,7 @@
 	path = dependencies/glfw
 	url = https://github.com/glfw/glfw.git
 [submodule "tinyobjloader"]
-	path = tinyobjloader
+	path = dependencies/tinyobjloader
 	url = https://github.com/syoyo/tinyobjloader.git
 [submodule "stb"]
 	path = dependencies/stb
