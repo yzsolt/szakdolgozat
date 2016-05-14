@@ -14,5 +14,5 @@
 	path = dependencies/glad
 	url = https://github.com/Dav1dde/glad.git
 [submodule "nanogui"]
-	path = nanogui
+	path = dependencies/nanogui
 	url = https://github.com/wjakob/nanogui.git
