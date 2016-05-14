@@ -274,12 +274,14 @@ void Renderer::_setup_gui() {
 	});
 	point_light_color->setColor(GUI::vec3_to_eigen4f(point_light->color()));
 
+	const float L = 200.f;
+
 	new Label(point_light_grid, "Luminous flux:", "sans-bold");
 	auto point_light_flux = new Slider(point_light_grid);
-	point_light_flux->setCallback([point_light](float value) {
-		point_light->set_luminous_flux(value * 1000.f);
+	point_light_flux->setCallback([point_light, L](float value) {
+		point_light->set_luminous_flux(value * L);
 	});
-	point_light_flux->setValue(point_light->luminous_flux() / 1000.f);
+	point_light_flux->setValue(point_light->luminous_flux() / L);
 
 	new Label(lighting_settings, "Spot light");
 
@@ -303,12 +305,12 @@ void Renderer::_setup_gui() {
 
 	new Label(spot_light_grid, "Luminous flux:", "sans-bold");
 	auto spot_light_flux = new Slider(spot_light_grid);
-	spot_light_flux->setCallback([spot_light](float value) {
-		spot_light->set_luminous_flux(value * 1000.f);
+	spot_light_flux->setCallback([spot_light, L](float value) {
+		spot_light->set_luminous_flux(value * L);
 	});
-	spot_light_flux->setValue(spot_light->luminous_flux() / 1000.f);
+	spot_light_flux->setValue(spot_light->luminous_flux() / L);
 
-	const float D = glm::pi<float>() * 4;
+	const float D = glm::pi<float>() * 2;
 
 	new Label(spot_light_grid, "Inner cone angle:", "sans-bold");
 	auto spot_light_inner = new Slider(spot_light_grid);
@@ -350,22 +352,22 @@ Renderer::Renderer(const Settings& settings) :
 		// Position
 		glm::vec3(0.8f, 0.8f, 0.8f),
 		// Color
-		glm::vec3(1, 0, 0),
+		glm::vec3(0.8, 0.6, 0),
 		// Radius
 		9.f,
 		// Luminous flux
-		600.f
+		100.f
 	));
 
 	m_lights.push_back(std::make_unique<SpotLight>(
 		// Position
 		m_camera.position(),
 		// Color
-		glm::vec3(0, 0, 1),
+		glm::vec3(0.8, 0.8, 1),
 		// Radius
 		9.f,
 		// Luminous flux
-		600.f,
+		100.f,
 		// Inner
 		2.5f,
 		// Outer
@@ -490,12 +492,12 @@ Renderer::Renderer(const Settings& settings) :
 
 	// Load the default mesh
 	
-	m_mesh = std::make_unique<Mesh>("data/meshes/sphere.obj", m_gui.get());
+	m_mesh = std::make_unique<Mesh>("data/meshes/sphere/sphere.obj", m_gui.get());
 	m_mesh->upload();
 
 	// Load the default skybox
 
-	m_skybox = std::make_unique<Skybox>(Skybox::ROOT_DIRECTORY + "at_the_window/at_the_window.hdr");
+	m_skybox = std::make_unique<Skybox>(Skybox::ROOT_DIRECTORY + "doge/doge.hdr");
 
 	m_last_frame_time = glfwGetTime();
 
