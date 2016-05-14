@@ -4,17 +4,31 @@ project(szakdolgozat)
 
 set(CMAKE_CXX_STANDARD_REQUIRED 11)
 
-include_directories(glfw/include glm glad-build/include tinyobjloader stb nanogui/include nanogui/ext/Eigen)
-link_directories(glfw-build/src nanogui-build)
+set(DEPS_DIR dependencies)
+
+include_directories(
+    ${DEPS_DIR}/glfw/include
+    ${DEPS_DIR}/glm
+    ${DEPS_DIR}/glad-build/include
+    ${DEPS_DIR}/tinyobjloader
+    ${DEPS_DIR}/stb
+    ${DEPS_DIR}/nanogui/include
+    ${DEPS_DIR}/nanogui/ext/Eigen
+)
+
+link_directories(
+    ${DEPS_DIR}/glfw-build/src
+    ${DEPS_DIR}/nanogui-build
+)
 
 set(GLAD_sources
-    glad-build/include/glad/glad.h
-    glad-build/src/glad.c
+    ${DEPS_DIR}/glad-build/include/glad/glad.h
+    ${DEPS_DIR}/glad-build/src/glad.c
 )
 
 set(tinyobjloader_sources
-    tinyobjloader/tiny_obj_loader.h
-    tinyobjloader/tiny_obj_loader.cc
+    ${DEPS_DIR}/tinyobjloader/tiny_obj_loader.h
+    ${DEPS_DIR}/tinyobjloader/tiny_obj_loader.cc
 )
 
 set(SOURCES
