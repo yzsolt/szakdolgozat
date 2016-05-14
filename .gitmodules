@@ -1,5 +1,5 @@
 [submodule "glfw"]
-	path = glfw
+	path = dependencies/glfw
 	url = https://github.com/glfw/glfw.git
 [submodule "tinyobjloader"]
 	path = tinyobjloader
