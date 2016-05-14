@@ -11,7 +11,7 @@
 	path = glm
 	url = https://github.com/g-truc/glm.git
 [submodule "glad"]
-	path = glad
+	path = dependencies/glad
 	url = https://github.com/Dav1dde/glad.git
 [submodule "nanogui"]
 	path = nanogui
