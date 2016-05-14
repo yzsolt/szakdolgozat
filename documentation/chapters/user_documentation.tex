@@ -45,18 +45,28 @@ A \textit{Tone mapping} címke alatt található választógomb segítségével 
 
 Az \textit{Exposure} címke alatt lehetőségünk van az automatikus expozíciót be- vagy kikapcsolni. Ez az effektus az emberi szem eltérő fényerősséghez történő alkalmazkodását szimulálja, például amikor egy sötét szobából egy világos térbe lépünk ki. Kikapcsolt állapotában kézzel lehet állítani az expozíciót a lentebb található csúszka segítségével.
 
-Az utolsó beállítás, a \textit{Rotate mesh} jelölőmező segítségével a betöltött modell automatikus forgatását kapcsolhatjuk be/ki.
+Az utolsó beállítás, a \textit{Rotate mesh} jelölőnégyzet segítségével a betöltött modell automatikus forgatását kapcsolhatjuk be/ki.
 
 \subsection{Modell információ}
 
-\begin{wrapfigure}{l}{0.3\textwidth}
-    \begin{center}
-        \includegraphics[scale=0.6]{images/pbr_materials.png}
-    \end{center}
-\end{wrapfigure}
-
-
+TODO
 
 \subsection{Anyagtulajdonságok}
 
+\begin{wrapfigure}{l}{0.5\textwidth}
+    \begin{center}
+        \includegraphics[scale=0.5]{images/pbr_materials.png}
+    \end{center}
+\end{wrapfigure}
+
+A modellhez tartozó .mtl fájlból olvasott fizikai alapú anyagok a legfelső választógombra kattintva érhetők el, ezek valamelyikére kattintva az ablak tartalma automatikusan frissül.
+
+Amennyiben a modellhez nem volt mellékelve anyagleíró fájl, vagy csak szeretnénk kipróbálni valamilyen valódi anyagot, a \textit{Use predefines material}-t bekapcsolva elérhetővé válik az alatta levő lista, illetve ekkor a modell is a választott előre definiált anyag kinézetével jelenik meg. TODO: anyagok listája ha végleges
+
+Az első anyagtulajdonság a diffúz szín, ami megadható egyetlen színként vagy textúrával is. Ez utóbbi csak akkor elérhető, ha az anyagleíróban volt erre vonatkozó bejegyzés. A hozzátartozó kapcsolóval a beállított szín és (ha elérhető,) a betöltött textúra között válthatunk. A következő tulajdonság a normáltextúra. Ezt is az anyagleíróból olvassa a program, a mellett található jelölőnégyzettel pedig a normáltérképezés kapcsolhatjuk be/ki.
+
+Az utolsó két tulajdonság a fizikai alapú megjelenítéshez tartozik. Az első a rücskösség (\textit{roughness}), amely a felület durvaságát szimbolizálja egy 0 és 1 közé eső értékkel. A tökéletesen sima felületeknél ez az érték 0, míg a legdurvább felületek esetén 1. A diffúz színhez hasonlóan ez az érték is olvasható textúrából, ehhez egy egyedi \textit{map\_Roughness} kulcsot kell az anyagleíró fájlhoz hozzáadnunk. Az utolsó tulajdonság a fémesség (\textit{metalness}), amely a rücskösséghez nagyon hasonlóan működik, csak ennél az adható meg, hogy az anyag szigetelő-e vagy sem. Szigorúan fizikai értelemben ennek értéke csak és kizárólag 0 vagy 1 lehetne, mivel nem tudunk részben szigetelő, részben fémes anyagról. Fontos tudni, hogy ezek az anyagtulajdonságok mindig egy adott felület legkülső rétegét írják le: egy festett fémfelületnél tehát ez az érték 0 lesz, hiszen hiába fém az alapja, a fény a festékről verődik vissza, az pedig fizikailag szigetelő. A fémességet meghatározó textúrát szintén egy egyedi, \textit{map\_Metalness} kulccsal tárolhatjuk el.
+
 \subsection{Megvilágítás beállításai}
+
+TODO
