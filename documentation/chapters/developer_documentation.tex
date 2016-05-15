@@ -116,7 +116,7 @@ Ezen kívül
 A Blinn-Phong tükröződési modell~\cite{blinn1977models} a Phong modell James F. Blinn által módosított változata: az \(R_m \cdot V\) skalárszorzat helyett \(N \cdot H\)-t használ, ahol a \(H\) egy ún. félszög vektor (\textit{half-angle vector}) a nézeti és a fényforrás irányába mutató vektorok között.
 
 \[
-H = {{ L + V } \over { \| L + V \| }}
+H = \frac{ L + V }{ \| L + V \| }
 \]
 
 Ennek előnye megjelenésének idején elsősorban az volt, hogy a \(H\) vektort gyorsabban ki lehetett számolni, mint az \(R\)-t. Végül ez a modell vált a de-facto sztenderd árnyalási modellé, mind az OpenGL, mind a DirectX fix-funkciós (?) csővezetéke ezt a modellt használja. További előnye az eredeti Phong modellel szemben, hogy sík felületen történő tükröződéskor kis szögű vézeti vektor esetén a csillanás "megnyúlik", elliptikus alakot vesz fel, így jobban közelítve a valóságban tapasztalható jelenséget (szemben a Phong modellel, amely mindig kör alakú csillanást eredményez), továbbá a \(H\) vektorral történő számolás a később tárgyalt, fizikai alapú megjelenítést megalapozó mikrofelületi modellhez hasonlatos.
@@ -461,7 +461,7 @@ A pont és zseblámpa fények megvalósítása a direct\_lighting.fs.glsl árnya
 
 \subsection{Kép alapú megvilágítás}
 
-A kép alapú megvilágítás egy gyakran használt módszer a globális megvilágítás szimulálására. Globális megvilágításnak azokat a fényeket hívjuk, amelyek egy adott felületet indirekt módon (valahonnan már egyszer visszaverődve) érnek. Kép alapú megvilágításnál kicsit tovább megyünk ennél, és egy előre elkészített textúrából olvassuk ki a felület adott ponjtját érő összes sugárzást.
+A kép alapú megvilágítás egy gyakran használt módszer a globális megvilágítás szimulálására. Globális megvilágításnak azokat a fényeket hívjuk, amelyek egy adott felületet indirekt módon (valahonnan már egyszer visszaverődve) érnek. Kép alapú megvilágításnál kicsit tovább megyünk ennél, és egy előre elkészített textúrából olvassuk ki a felület adott pontját érő összes sugárzást.
 
 Az elkészült program a megjelenített modell környezetét környezeti térképezéssel (\textit{environment mapping}), egy ún. skybox ("égdoboz") segítségével szimulálja. Ezt úgy kell elképzelni, mintha egy végtelen nagyságú kocka közepére állnánk, és ezen kocka belső oldallapjaira felfestenénk, amit az adott oldal középpontjára merőlegesen nézve látunk a köryezetünkből. A program a skybox.vs.glsl árnyaló segítségével transzformálja úgy a kocka csúcspontjait, hogy azok a nézeti pozíciótól függetlenek legyenek. A skybox.fs.glsl-ben pedig egy egyszerű textúraolvasással rajzoljuk ki a kocka oldalait. Ez a textúra viszont speciális, kockatérkép (\textit{cube map} típusú, amit a program Radiance HDR típusú nagy dinamikatartományú képekből olvas, amelyben függőleges kereszt elrendezésben találhatóak a kocka oldallapjainak textúrái.
 
@@ -473,7 +473,7 @@ Kép alapú megvilágítás esetén ebből a kockatérképből szeretnénk a meg
 L_{out}(\mathbf{v}) = \int_{\Omega} { f_r(\mathbf{l}, \mathbf{v}) L_{in}(\mathbf{l})(-\mathbf{l} \cdot \mathbf{n}) d\mathbf{l} } \approx { 1 \over N } \sum_{k=1}^{N} { { f_r(\mathbf{l}, \mathbf{v}) L_{in}(\mathbf{l})(-\mathbf{l} \cdot \mathbf{n}) d\mathbf{l} } \over { p_r(\mathbf{v}, \mathbf{l}_k) } }
 \]
 
-Itt \(p_r\) az \(\mathbf{l}_k\) sűrűségfüggvénye. Egyenletes eloszlás esetén \(p_r = 1 \over {2\pi}\), hiszen félgömbön integrálunk.
+Itt \(p_r\) az \(\mathbf{l}_k\) sűrűségfüggvénye. Egyenletes eloszlás esetén \(p_r = \frac{1}{2\pi}\), hiszen félgömbön integrálunk.
 
 TODO: importance sampling
 
@@ -508,11 +508,11 @@ A megjelenítő jelenleg egyetlen modellformátumot képes betölteni. Ezen pél
 
 A fizikai alapú megjelenítés nem merül ki a kép alapú megvilágításban illetve a pont és zseblámpa fényeknél: a fejlett PBR-alapú megjelenítők gömb, kapszula (a két végén félgömbbel lezárt henger) és területi (síkbeli poligon) típusú fényforrások kezelésére is képesek. Ezek fizikai alapú, valósidőben történő megjelenítése aktív kutatási terület, a jelenleg használt közelítések nem teljesen korrektek, bizonyos tulajdonságokat (pl. energiamegmaradás) nem mindig teljesítenek. Az emberi szem meggyőzésére azonban már most is alkalmasak, ezért ezen fényforrások az aktuálisan használt közelítésekkel történő implementálása látványos eredményt hozna.
 
-\textit{Megjegyzés: az aktív kutatási terület aktualitását mi sem bizonyítja jobban, hogy a szakdolgozat írása alatt jelent meg egy viszonylag kis számításigényű módszer a területi fények közelítésére. }
+\textit{Megjegyzés: az aktív kutatási terület aktualitását mi sem bizonyítja jobban, hogy a szakdolgozat írása alatt jelent meg egy új, viszonylag kis számításigényű módszer a területi fények közelítésére. }
 
 Az elkészült megjelenítő az ún. \textit{forward rendering} technikát használja, aminek nagy hátránya, hogy egy képpont árnyalását minden egyes dinamikus fényre külön el kell végezni, azaz minden egyes dinamikus fényforráshoz újra ki kell rajzolni a jelenetet. Ezen lehetne segíteni például azzal, hogy nem az egész jelenetet, csak azokat a részeket árnyaljuk újra, amelyekre az adott fényforrás hatással van. Dinamikus fények megjelenítése szempontjából a legtöbbet azonban a \textit{deferred rendering} (késleltetett árnyalás) technikával lehetne nyerni: ezen módszer lényege, hogy egy speciális, G-Buffernek nevezett pufferben tároljuk a képpontok árnyalásához szükséges összes információt, így a fényforrások számától függetlenül, egy lépésben elvégezhető az árnyalás.
 
-Mind a forward, mind a deferred megjelenítés esetén külön lépésre lenne szükség az átlátszó felületek megjelenítésére, amit a megjelenítő jelenleg nem támogat. Ehhez először az anyagokat átlátszatlan és átlátszó csoportra kellene bontani, majd az átlátszatlanokat forward vagy deferred technikával kirajzolni, végül az átlátszóakat egy utolsó lépésben megfelelően beállított színkeverési móddal rárajzolni a meglévő képre. Tudnunk kell azonban, hogy ez csak alapszintű támogatást jelent: valósidejű grafikában a mai napig nagy kihívást jelentő probléma egymást átfedő átlátszó felületek sorrendfüggetlen megjelenítése (\textit{order-independent transparency}), a létező megoldások még túl nagy számításigényűek ahhoz, hogy komplex jelenetek megjelenítésénél használni tudjuk őket.
+Mind a forward, mind a deferred megjelenítés esetén külön lépésre lenne szükség az átlátszó felületek megjelenítéséhez, amit a megjelenítő jelenleg nem támogat. Ehhez először az anyagokat átlátszatlan és átlátszó csoportra kellene bontani, majd az átlátszatlanokat forward vagy deferred technikával kirajzolni, végül az átlátszóakat egy utolsó lépésben megfelelően beállított színkeverési móddal rárajzolni a meglévő képre. Tudnunk kell azonban, hogy ez csak alapszintű támogatást jelent: valósidejű grafikában a mai napig nagy kihívást jelentő probléma egymást átfedő átlátszó felületek sorrendfüggetlen megjelenítése (\textit{order-independent transparency}), a létező megoldások még túl nagy számításigényűek ahhoz, hogy komplex jelenetek megjelenítésénél használni tudjuk őket.
 
 \section{Tesztelés}
 

@@ -32,7 +32,21 @@ TODO
 
 A megjelenítő felhasználói felülete négy ablakból áll, ezeken különféle információkat és beállítási lehetőségeket érhetünk el. A felhasználói felület nyelve angol, ezért alapszintű angol nyelvtudás nem árt a program használatához, de a következő alpontok segítségével nyelvtudás nélkül is képesek leszünk használni a programot.
 
-A felhasználói felület hátterében látjuk magát a betöltött modellt, illetve annak panorámaképből összeállított környezetét. Az egérgörgő segítségével változtathatjuk a virtuális kamera távolságát a modelltől, azaz így közelíthetünk vagy távolodhatunk tőle. A bal egérgomb lenyomásával és nyomva tartásával egy képzeletbeli gömbön mozgathatjuk a kamerát, ami mindig a modell közepe felé néz, így a modellt minden irányból megnézhetjük.
+A felhasználói felület hátterében látjuk magát a betöltött modellt, illetve annak panorámaképből összeállított környezetét. Az egérgörgő segítségével változtathatjuk a virtuális kamera távolságát a modelltől, azaz így közelíthetünk vagy távolodhatunk tőle. A bal egérgomb lenyomásával és nyomva tartásával egy képzeletbeli gömbön mozgathatjuk a kamerát, ami mindig a modell közepe felé néz, így a modellt minden irányból megnézhetjük. A megjelenítő ablaka futás közben technikai okok miatt nem méretezhető át. Az alapértelmezett felbontás \(1280 \times 720\), de a következő, egymástól szóközzel elválasztott parancssori paraméterek segítségével elindítható a kívánt felbontáson:
+
+\begin{itemize}[noitemsep]
+\item \textbf{width}=szélesség (képpontban)
+\item \textbf{height}=magasság (képpontban)
+\end{itemize}
+
+További indítási paraméterek még:
+
+\begin{itemize}[noitemsep]
+\item \textbf{fullscreen}: ha megadjuk ezt a kulcsot, a megjelenítő teljes képernyős módban indul
+\item \textbf{msaa}=MSAA élsimítási mintaszám (kettő hatványa)
+\end{itemize}
+
+A hardver által támogatott mintaszám túllépése esetén az elérhető legnagyobb mintaszámot fogja használni a megjelenítő. Az MSAA élsimítás költsége alapesetben is jelentős, ráadásul a mintaszám növelésével tovább nő, ezért csak megfelelően erős grafikus kártya mellett ajánlott a használata. Teljes képernyős módban a tallózó párbeszédpanelek (modell vagy skybox betöltés) a háttérbe kényszerítik a megjelenítő ablakát, emiatt a párbeszédpanel bezáródása után kézzel újra az előtérbe kell hozni azt (pl. Windows operációs rendszer esetén az Alt+TAB billentyűkombinációval). Továbbá teljes képernyős módban a megjelenítő nem veszi figyelembe a megadott felbontást, a képernyő natív felbontását használja.
 
 \clearpage
 
