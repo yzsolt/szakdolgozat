@@ -498,16 +498,21 @@ Ezzel az \(F_0\)-tól való függést megszüntettük, és a két integrál ért
 
 Mindezek segítségével valósidőben, mindössze két textúraolvasással kiszámolható a kép alapú megvilágításból származó sugárzás. Sőt, a két besugárzási kockatérképet (diffúz és spekuláris) és a BRDF lookup textúrát nem muszáj előre kiszámolni, dinamikus tükröződés megvalósításához kevesebb mintával menet közben is generálhatók. Az \(\mathbf{n} = \mathbf{v} = \mathbf{l}\) feltételezés azonban szemmel látható hibákat okoz: elsősorban sík felületeknél észrevehető, hogy a valóságban "megnyúlt" tükröződések emiatt itt nem jelennek meg.
 
-\subsection{Továbbfejlesztési lehetőségek}
+\section{Továbbfejlesztési lehetőségek}
 
-TODO:
-területi fények,
-spekuláris envmap javítása,
-textúranézet,
-több formátum assimp-pel
-fejlettebb kamerakezelés
-átlátszó anyagok
-deferred rendering
+Az elkészült megjelenítő ugyan alkalmas a fizikai alapú megjelenítés bemutatására, de számtalan lehetőség van a továbbfejlesztésre mind a felhasználói felület, mind a fizikai alapú megvilágítás szempontjából.
+
+A felhasználói felületen hasznos lenne az anyagtulajdonságoknál a textúrabetöltés, ill. textúra előnézet lehetősége. Ezzel akár modellezők számára is hasznossá válna a program, egy modell elkészítése során ugyanis nagy segítséget jelentene, ha menet közben lehetne textúrát váltani, továbbá egy kis előnézeti kép is megjelenne róla. Ezen kívül a kamerakezelésen lehetne fejleszteni, például a nézet középpontjának egér jobb gombjával történő áthelyezése szabadabbá tenné a jelentben való mozgást.
+
+A megjelenítő jelenleg egyetlen modellformátumot képes betölteni. Ezen például a tinyobjloader Assimp nyílt forráskódú modellbetöltő könyvtárra cserélésével lehetne változtatni - az Assimp szinte az összes létező formátum betöltésére képes, illetve exportálási lehetőséget is tartalmaz. A skybox alapjául szolgáló HDR panorámaképek betöltését flexibilisebbé lehetne tenni, hogy ne csak függőleges kereszt, hanem más (pl. gömbtérképes) elrendezésű képeket is be tudjunk tölteni.
+
+A fizikai alapú megjelenítés nem merül ki a kép alapú megvilágításban illetve a pont és zseblámpa fényeknél: a fejlett PBR-alapú megjelenítők gömb, kapszula (a két végén félgömbbel lezárt henger) és területi (síkbeli poligon) típusú fényforrások kezelésére is képesek. Ezek fizikai alapú, valósidőben történő megjelenítése aktív kutatási terület, a jelenleg használt közelítések nem teljesen korrektek, bizonyos tulajdonságokat (pl. energiamegmaradás) nem mindig teljesítenek. Az emberi szem meggyőzésére azonban már most is alkalmasak, ezért ezen fényforrások az aktuálisan használt közelítésekkel történő implementálása látványos eredményt hozna.
+
+\textit{Megjegyzés: az aktív kutatási terület aktualitását mi sem bizonyítja jobban, hogy a szakdolgozat írása alatt jelent meg egy viszonylag kis számításigényű módszer a területi fények közelítésére. }
+
+Az elkészült megjelenítő az ún. \textit{forward rendering} technikát használja, aminek nagy hátránya, hogy egy képpont árnyalását minden egyes dinamikus fényre külön el kell végezni, azaz minden egyes dinamikus fényforráshoz újra ki kell rajzolni a jelenetet. Ezen lehetne segíteni például azzal, hogy nem az egész jelenetet, csak azokat a részeket árnyaljuk újra, amelyekre az adott fényforrás hatással van. Dinamikus fények megjelenítése szempontjából a legtöbbet azonban a \textit{deferred rendering} (késleltetett árnyalás) technikával lehetne nyerni: ezen módszer lényege, hogy egy speciális, G-Buffernek nevezett pufferben tároljuk a képpontok árnyalásához szükséges összes információt, így a fényforrások számától függetlenül, egy lépésben elvégezhető az árnyalás.
+
+Mind a forward, mind a deferred megjelenítés esetén külön lépésre lenne szükség az átlátszó felületek megjelenítésére, amit a megjelenítő jelenleg nem támogat. Ehhez először az anyagokat átlátszatlan és átlátszó csoportra kellene bontani, majd az átlátszatlanokat forward vagy deferred technikával kirajzolni, végül az átlátszóakat egy utolsó lépésben megfelelően beállított színkeverési móddal rárajzolni a meglévő képre. Tudnunk kell azonban, hogy ez csak alapszintű támogatást jelent: valósidejű grafikában a mai napig nagy kihívást jelentő probléma egymást átfedő átlátszó felületek sorrendfüggetlen megjelenítése (\textit{order-independent transparency}), a létező megoldások még túl nagy számításigényűek ahhoz, hogy komplex jelenetek megjelenítésénél használni tudjuk őket.
 
 \section{Tesztelés}
 
@@ -517,7 +522,15 @@ Egy 3D megjelenítő tesztelésénél némileg el kell térnünk a manapság sz�
 
 Mielőtt rátérnénk a kimenet tesztelésére, fontos leellenőriznünk, hogy a felhasználói interakció során a program helyesen működik, véd az alapvető felhasználói hibák ellen, illetve a különböző bemeneteket jól kezeli.
 
+TODO:
+modell betöltés -> ha nincs material, nagy méretű modell
+skybox betöltés
+UI paraméterek
+
 \subsection{A kimenet ellenőrzése}
+
+TODO:
+összehasonlítás marmosettel
 
 \bibliography{documentation}{}
 \bibliographystyle{plain} 
