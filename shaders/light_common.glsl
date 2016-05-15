@@ -16,3 +16,5 @@ out gl_PerVertex { vec4 gl_Position; };
 out vec2 vs_out_texture;
 out vec3 vs_out_world_normal;
 out vec3 vs_out_view_direction;
+
+out mat3 vs_out_tbn;
