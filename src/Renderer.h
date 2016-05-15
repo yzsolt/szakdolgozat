@@ -22,18 +22,6 @@ class Renderer {
 
 public:
 
-	enum class Visualize : int {
-		NOTHING			= 0,
-		POSITIONS		= 1,
-		NORMALS			= 2,
-		TANGENTS		= 3,
-		AMBIENT			= 4,
-		DIFFUSE			= 5,
-		NORMAL_MAP		= 6,
-		SPECULARITY		= 7,
-		REFLECTIVITY	= 8,
-	};
-
 	enum class ToneMap : int {
 		REINHARD	= 0,
 		UNCHARTED_2	= 1,
@@ -85,8 +73,6 @@ private:
 	float m_mesh_rotation = 0.f;
 
 	bool m_use_ibl = true;
-
-	Visualize m_visualize = Visualize::NOTHING;
 
 	// Programs
 
