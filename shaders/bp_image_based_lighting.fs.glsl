@@ -3,10 +3,8 @@
 
 layout(location = 0) out vec4 out_color;
 
-in vec3 vs_out_position;
 in vec3 vs_out_world_position;
-in vec3 vs_out_normal;
-in vec3 vs_out_tangent;
+in vec3 vs_out_world_normal;
 in vec2 vs_out_texture;
 
 in mat3 vs_out_tbn;
@@ -26,19 +24,16 @@ const vec3 light_position = vec3(60, 20, 0);
 void main() {
 
     vec3 normal;
-    vec3 light_direction = normalize(light_position - vs_out_position);
-    vec3 view_direction = normalize(u_view_position - vs_out_position);
+    vec3 light_direction = normalize(light_position - vs_out_world_position);
+    vec3 view_direction = normalize(u_view_position - vs_out_world_position);
 
     if (u_bpm.normal.use_texture) {
 
         vec3 normal_map_value = normalize(texture(u_bpm.normal.texture, vs_out_texture).rgb * 2 - 1);
         normal = normalize(vs_out_tbn * normal_map_value);
 
-        //light_direction = vs_out_tbn * light_direction;
-        //view_direction = vs_out_tbn * view_direction;
-
     } else {
-        normal = normalize(vs_out_normal);
+        normal = normalize(vs_out_world_normal);
     }
 
     vec3 I = normalize(vs_out_world_position - u_view_position);

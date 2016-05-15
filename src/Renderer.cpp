@@ -428,7 +428,7 @@ Renderer::Renderer(const Settings& settings) :
 
 	m_basic_color_program = std::make_unique<Program>("basic_color.vs.glsl", "basic_color.fs.glsl");
 
-	m_blinn_phong_program = std::make_unique<Program>("blinn_phong.vs.glsl", "blinn_phong.fs.glsl");
+	m_blinn_phong_program = std::make_unique<Program>("bp_image_based_lighting.vs.glsl", "bp_image_based_lighting.fs.glsl");
 
 	m_image_based_lighting_program = std::make_unique<Program>("pb_image_based_lighting.vs.glsl", "pb_image_based_lighting.fs.glsl");
 	m_direct_lighting_program = std::make_unique<Program>("direct_lighting.vs.glsl", "direct_lighting.fs.glsl");
@@ -578,13 +578,11 @@ void Renderer::run() {
 				program.bind();
 
 					program.set_uniform("u_world", m_world);
-					program.set_uniform("u_world_view", m_world_view);
 					program.set_uniform("u_view_position", m_camera.position());
 					program.set_uniform("u_view_projection", view_projection);
+					program.set_uniform("u_world_inverse", world_inverse);
 
 					if (m_mesh->use_pbr()) {
-
-						program.set_uniform("u_world_inverse", world_inverse);
 
 						program.set_texture("u_diffuse_irradiance_map", m_skybox->diffuse_irradiance_map(), 1);
 						program.set_texture("u_specular_irradiance_map", m_skybox->specular_irradiance_map(), 2);
