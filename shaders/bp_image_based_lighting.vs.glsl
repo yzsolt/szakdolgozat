@@ -18,13 +18,14 @@ out vec2 vs_out_texture;
 out mat3 vs_out_tbn;
 
 uniform mat4 u_world;
-//uniform mat4 u_view;
-uniform mat4 u_projection;
+uniform mat4 u_view_projection;
 
 uniform mat4 u_world_view;
 uniform mat4 u_normal_matrix;
 
 void main() {
+
+    vec4 world_position = u_world * vec4(vs_in_position, 1);
 
     // TBN calculation for normal mapping
 
@@ -42,7 +43,7 @@ void main() {
     vs_out_tangent = vs_in_tangent;
     vs_out_texture = vs_in_texture;
 
-    gl_Position = u_projection * u_world_view * vec4(vs_in_position, 1);
+    gl_Position = u_view_projection * world_position;
 
     vec4 vertex_position = u_world_view * vec4(vs_in_position, 1);
     vs_out_position = vec3(vertex_position) / vertex_position.w;

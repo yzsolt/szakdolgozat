@@ -17,9 +17,9 @@ uniform vec3 u_view_position;
 
 uniform BlinnPhongMaterial u_bpm;
 
-uniform int u_visualize;
-
 uniform samplerCube u_environment_map;
+uniform samplerCube u_diffuse_irradiance_map;
+uniform samplerCube u_specular_irradiance_map;
 
 const vec3 light_position = vec3(60, 20, 0);
 
@@ -41,7 +41,10 @@ void main() {
         normal = normalize(vs_out_normal);
     }
 
-    float lambertian = max(dot(light_direction, normal), 0);
+    vec3 I = normalize(vs_out_world_position - u_view_position);
+    vec3 R = reflect(I, normal);
+
+    float lambertian = max(dot(-R, normal), 0);
     float specular = 0;
 
     if (lambertian > 0) {
@@ -59,60 +62,20 @@ void main() {
     vec4 specular_component = specular * specularity * u_bpm.specular.color;
 
     // Environment mapping
-
-    vec3 I = normalize(vs_out_position - u_view_position);
-    vec3 R = reflect(I, normalize(vs_out_normal));
     //R.z *= -1;
+    //R = vec3(1, 0, 0);
     float reflectivity = u_bpm.reflection.use_texture ? texture(u_bpm.reflection.texture, vs_out_texture).r : 0;
     vec4 reflect_color = vec4(0);
     if (reflectivity > 0.05) {
         reflect_color = texture(u_environment_map, R) * reflectivity;
     }
+    reflect_color.a = 1;
 
-    vec4 blinn_phong_color = ambient_color + lambertian * reflect_color +
-                             lambertian * diffuse_color +
-                             specular_component;
+    vec4 diffuse_irradiance = texture(u_diffuse_irradiance_map, normal);
+    //vec4 specular_color = texture(u_specular_irradiance_map, R);
 
-    // Visualization for debugging
+    vec4 blinn_phong_color = ambient_color + /*lambertian */ reflect_color + lambertian * diffuse_color + diffuse_irradiance;// + specular_component;
 
-    switch (u_visualize) {
-
-        case VISUALIZE_NOTHING:
-            out_color = vec4(blinn_phong_color.rgb, 1.0);
-            break;
-
-        case VISUALIZE_POSITIONS:
-            out_color = vec4(normalize(vs_out_position), 1.0);
-            break;
-
-        case VISUALIZE_NORMALS:
-            out_color = vec4(normal / 2.0 + 0.5, 1.0);
-            break;
-
-        case VISUALIZE_TANGENTS:
-            out_color = vec4(normalize(vs_out_tangent) / 2.0 + 0.5, 1.0);
-            break;
-
-        case VISUALIZE_AMBIENT:
-            out_color = vec4(ambient_color.rgb, 1.0);
-            break;
-
-        case VISUALIZE_DIFFUSE:
-            out_color = vec4(diffuse_color.rgb, 1.0);
-            break;
-
-        case VISUALIZE_NORMAL_MAP:
-            out_color = u_bpm.normal.use_texture ? vec4(texture(u_bpm.normal.texture, vs_out_texture).rgb, 1.0) : vec4(0.0, 0.0, 0.0, 1.0);
-            break;
-
-        case VISUALIZE_SPECULARITY:
-            out_color = vec4(vec3(specularity), 1.0);
-            break;
-
-        case VISUALIZE_REFLECTIVITY:
-            out_color = vec4(vec3(reflectivity), 1.0);
-            break;
-
-    }
+    out_color = vec4(blinn_phong_color.rgb, 1);
 
 }
