@@ -254,7 +254,9 @@ void Renderer::_setup_gui() {
 	grid_layout->setColAlignment({ Alignment::Maximum, Alignment::Fill });
 	grid_layout->setSpacing(0, 10);
 
-	new Label(lighting_settings, "Point light");
+	// Point light
+
+	new Label(lighting_settings, "Point light", "sans-bold");
 
 	PointLight* point_light = static_cast<PointLight*>(m_lights[0].get());
 
@@ -266,6 +268,12 @@ void Renderer::_setup_gui() {
 		point_light->set_on(state);
 	});
 	use_point_light->setChecked(point_light->is_on());
+
+	new Label(point_light_grid, "Move:", "sans-bold");
+	auto move_point_light = new CheckBox(point_light_grid, "", [this](bool state) {
+		m_move_point_light = state;
+	});
+	move_point_light->setChecked(m_move_point_light);
 
 	new Label(point_light_grid, "Color:", "sans-bold");
 	auto point_light_color = new ColorPicker(point_light_grid, GUI::vec3_to_eigen4f(point_light->color()));
@@ -283,7 +291,9 @@ void Renderer::_setup_gui() {
 	});
 	point_light_flux->setValue(point_light->luminous_flux() / L);
 
-	new Label(lighting_settings, "Spot light");
+	// Spot light
+
+	new Label(lighting_settings, "Spot light", "sans-bold");
 
 	SpotLight* spot_light = static_cast<SpotLight*>(m_lights[1].get());
 
@@ -646,15 +656,31 @@ void Renderer::run() {
 					if (light_ptr->is_on()) {
 
 						switch (light->type()) {
-						case Light::Type::POINT:
-							static_cast<PointLight*>(light_ptr)->set_uniforms(program);
-							break;
+
+						case Light::Type::POINT: {
+
+							PointLight* point_light = static_cast<PointLight*>(light_ptr);
+
+							if (m_move_point_light) {
+								glm::vec3 point_light_position = point_light->position();
+								// TODO
+								point_light->set_position(point_light_position);
+							}
+
+							point_light->set_uniforms(program);
+
+							} break;
+
 						case Light::Type::SPOT:
+
 							SpotLight* spot_light = static_cast<SpotLight*>(light_ptr);
+
 							spot_light->set_uniforms(program);
 							spot_light->set_direction(m_camera.direction());
 							spot_light->set_position(m_camera.position());
+
 							break;
+
 						}
 
 						m_mesh->draw(&program);

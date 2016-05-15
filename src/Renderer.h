@@ -91,6 +91,7 @@ private:
 	std::unique_ptr<Program> m_pb_direct_lighting_program;
 
 	std::vector<std::unique_ptr<Light>> m_lights;
+	bool m_move_point_light = false;
 
 	void _measure_average_luminance();
 	void _adapt_luminance();
