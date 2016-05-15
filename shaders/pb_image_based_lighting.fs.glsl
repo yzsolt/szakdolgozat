@@ -7,8 +7,6 @@ uniform samplerCube u_diffuse_irradiance_map;
 uniform samplerCube u_specular_irradiance_map;
 uniform sampler2D u_brdf_lut;
 
-uniform vec3 u_view_position;
-
 in vec2 vs_out_texture;
 in vec3 vs_out_world_normal;
 in vec3 vs_out_view_direction;
@@ -88,7 +86,7 @@ void main() {
         n = normalize(vs_out_world_normal);
     }
 
-	vec3 v = normalize(vs_out_view_direction);
+	vec3 v = vs_out_view_direction;
 
     vec4 diffuse_color = u_pbm.diffuse.use_texture ? texture(u_pbm.diffuse.texture, vs_out_texture) : u_pbm.diffuse.color;
     float roughness = u_pbm.roughness.use_texture ? texture(u_pbm.roughness.texture, vs_out_texture).r : u_pbm.roughness.color.r;
