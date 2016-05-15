@@ -230,6 +230,9 @@ void FrameBuffer::blit(const FrameBuffer& to, GLuint bitmask) {
 	GLenum filter = ((bitmask & (GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT)) ? GL_NEAREST : GL_LINEAR);
 	glBlitFramebuffer(0, 0, m_size.x, m_size.y, 0, 0, to.size().x, to.size().y, bitmask, filter);
 
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+
 }
 
 void FrameBuffer::validate() const {
