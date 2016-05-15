@@ -113,13 +113,11 @@ void Program::set_uniform(const std::string &name, const glm::mat4& matrix, GLui
     glProgramUniformMatrix4fv(m_id, this->_get_location(name), count, GL_FALSE, glm::value_ptr(matrix));
 }
 
-void Program::set_texture(const std::string& texture_uniform, Texture& texture) {// , GLuint unit) {
+void Program::set_texture(const std::string& texture_uniform, Texture& texture, GLuint unit) {
 
-    glActiveTexture(GL_TEXTURE0 + m_texture_unit_counter);
+    glActiveTexture(GL_TEXTURE0 + unit);
     texture.bind();
-    set_uniform(texture_uniform, static_cast<GLint>(m_texture_unit_counter));
-
-	m_texture_unit_counter++;
+    set_uniform(texture_uniform, static_cast<GLint>(unit));
 
 }
 
@@ -143,7 +141,6 @@ GLuint Program::_get_location(const std::string &uniform) {
 
 void Program::bind() {
     glUseProgram(m_id);
-	m_texture_unit_counter = 0;
     m_is_bound = true;
 }
 

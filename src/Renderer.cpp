@@ -109,13 +109,13 @@ void Renderer::_measure_average_luminance() {
 
 		// 64x64
 
-		m_average_luminance_program->set_texture("u_luminance_texture", m_main_fb->color_texture(0));
+		m_average_luminance_program->set_texture("u_luminance_texture", m_main_fb->color_texture(0), 0);
 
 		m_average_luminance_program->set_uniform("u_texel_size", texel_size);
 		m_average_luminance_program->set_uniform("u_step", 0);
 		m_fullscreen_quad.draw();
 
-		m_average_luminance_program->set_texture("u_luminance_texture", m_average_luminance_fb->color_texture(0));
+		m_average_luminance_program->set_texture("u_luminance_texture", m_average_luminance_fb->color_texture(0), 0);
 
 		// 16x16
 		
@@ -155,8 +155,8 @@ void Renderer::_adapt_luminance() {
 	m_current_adapted_luminance_fb->bind_for_drawing();
 	m_luminance_adapter_program->bind();
 
-		m_luminance_adapter_program->set_texture("u_previous_adapted_luminance_texture", m_previous_adapted_luminance_fb->color_texture(0));
-		m_luminance_adapter_program->set_texture("u_average_luminance_texture", m_average_luminance_fb->color_texture(0));
+		m_luminance_adapter_program->set_texture("u_previous_adapted_luminance_texture", m_previous_adapted_luminance_fb->color_texture(0), 0);
+		m_luminance_adapter_program->set_texture("u_average_luminance_texture", m_average_luminance_fb->color_texture(0), 1);
 
 		double current_time = glfwGetTime();
 		m_luminance_adapter_program->set_uniform("u_elapsed_time", static_cast<float>(current_time - m_last_frame_time));
@@ -492,7 +492,7 @@ Renderer::Renderer(const Settings& settings) :
 
 	// Load the default mesh
 	
-	m_mesh = std::make_unique<Mesh>("data/meshes/sphere/sphere.obj", m_gui.get());
+	m_mesh = std::make_unique<Mesh>("data/meshes/handgun/Handgun_obj.obj", m_gui.get());
 	m_mesh->upload();
 
 	// Load the default skybox
@@ -578,24 +578,23 @@ void Renderer::run() {
 				program.bind();
 
 					program.set_uniform("u_world", m_world);
-					program.set_uniform("u_projection", m_projection);
 					program.set_uniform("u_world_view", m_world_view);
 					program.set_uniform("u_view_position", m_camera.position());
-					//program.set_uniform("u_visualize", static_cast<int>(m_visualize));
-					program.set_texture("u_environment_map", m_skybox->environment_map());
+					program.set_uniform("u_view_projection", view_projection);
 
 					if (m_mesh->use_pbr()) {
 
 						program.set_uniform("u_world_inverse", world_inverse);
-						program.set_uniform("u_view_projection", view_projection);
 
-						program.set_texture("u_diffuse_irradiance_map", m_skybox->diffuse_irradiance_map());
-						program.set_texture("u_specular_irradiance_map", m_skybox->specular_irradiance_map());
-						program.set_texture("u_brdf_lut", m_skybox->brdf_lut());
+						program.set_texture("u_diffuse_irradiance_map", m_skybox->diffuse_irradiance_map(), 1);
+						program.set_texture("u_specular_irradiance_map", m_skybox->specular_irradiance_map(), 2);
+						program.set_texture("u_brdf_lut", m_skybox->brdf_lut(), 3);
 
 					} else {
 
-						// Lights
+						program.set_texture("u_environment_map", m_skybox->environment_map(), 1);
+						program.set_texture("u_diffuse_irradiance_map", m_skybox->diffuse_irradiance_map(), 2);
+						program.set_texture("u_specular_irradiance_map", m_skybox->specular_irradiance_map(), 3);
 
 					}
 
@@ -604,7 +603,7 @@ void Renderer::run() {
 				program.unbind();
 
 			}
-
+			
 			glDepthMask(GL_FALSE);
 
 			if (m_mesh->use_pbr()) {
@@ -652,7 +651,7 @@ void Renderer::run() {
 				glDisable(GL_BLEND);
 
 			}
-
+			
 			// Draw skybox
 
 			glm::mat4 view_without_translation = glm::mat4(glm::mat3(view));
@@ -687,10 +686,10 @@ void Renderer::run() {
 
 			m_tone_map_program->bind();
 				
-				m_tone_map_program->set_texture("u_hdr_texture", m_main_fb->color_texture(0));
+				m_tone_map_program->set_texture("u_hdr_texture", m_main_fb->color_texture(0), 0);
 				m_tone_map_program->set_uniform("u_exposure", m_exposure);
 				m_tone_map_program->set_uniform("u_tone_map", static_cast<GLint>(m_tone_map));
-				m_tone_map_program->set_texture("u_average_luminance_texture", m_current_adapted_luminance_fb->color_texture(0));
+				m_tone_map_program->set_texture("u_average_luminance_texture", m_current_adapted_luminance_fb->color_texture(0), 1);
 
 				m_fullscreen_quad.draw();
 
@@ -699,7 +698,7 @@ void Renderer::run() {
 		} else {
 
 			m_fullscreen_program->bind();
-				m_fullscreen_program->set_texture("u_texture", m_main_fb->color_texture(0));
+				m_fullscreen_program->set_texture("u_texture", m_main_fb->color_texture(0), 0);
 				m_fullscreen_quad.draw();
 			m_fullscreen_program->unbind();
 

@@ -7,6 +7,7 @@
 void TextureMap::upload(const std::string& material_directory) {
 
 	if (!path.empty()) {
+
 		texture = std::make_unique<Texture2D>();
 
 		try {
@@ -35,14 +36,14 @@ void BlinnPhongMaterial::set_uniforms(Program& program) const {
 
 	program.set_uniform("u_bpm.diffuse.color", diffuse.color);
 	if (diffuse.texture) {
-		program.set_texture("u_bpm.diffuse.texture", *diffuse.texture);
+		program.set_texture("u_bpm.diffuse.texture", *diffuse.texture, 5);
 	}
 	program.set_uniform("u_bpm.diffuse.use_texture", diffuse.use_texture);
 
 	// Normal map
 
 	if (normal.texture) {
-		program.set_texture("u_bpm.normal.texture", *normal.texture);
+		program.set_texture("u_bpm.normal.texture", *normal.texture, 6);
 	}
 	program.set_uniform("u_bpm.normal.use_texture", normal.use_texture);
 
@@ -50,13 +51,13 @@ void BlinnPhongMaterial::set_uniforms(Program& program) const {
 
 	program.set_uniform("u_bpm.specular.color", specular.color);
 	if (specular.texture) {
-		program.set_texture("u_bpm.specular.texture", *specular.texture);
+		program.set_texture("u_bpm.specular.texture", *specular.texture, 7);
 	}
 	program.set_uniform("u_bpm.specular.use_texture", specular.use_texture);
 
 	//program.set_uniform("u_bpm.specular.color", specular.color);
 	if (reflection.texture) {
-		program.set_texture("u_bpm.reflection.texture", *reflection.texture);
+		program.set_texture("u_bpm.reflection.texture", *reflection.texture, 8);
 	}
 	program.set_uniform("u_bpm.reflection.use_texture", reflection.use_texture);
 
@@ -100,6 +101,13 @@ const std::vector<PhysicallyBasedMaterial> PhysicallyBasedMaterial::DEFAULTS = {
 		TextureMap(1)
 	),
 
+	PhysicallyBasedMaterial("Wood",
+		TextureMap("wood_diffuse.png"),
+		TextureMap("wood_normal.png"),
+		TextureMap(0.3),
+		TextureMap(0)
+	),
+
 };
 
 PhysicallyBasedMaterial::PhysicallyBasedMaterial(const std::string& name) : Material(name) {}
@@ -122,14 +130,14 @@ void PhysicallyBasedMaterial::set_uniforms(Program& program) const {
 
 	program.set_uniform("u_pbm.diffuse.color", diffuse.color);
 	if (diffuse.texture) {
-		program.set_texture("u_pbm.diffuse.texture", *diffuse.texture);
+		program.set_texture("u_pbm.diffuse.texture", *diffuse.texture, 9);
 	}
 	program.set_uniform("u_pbm.diffuse.use_texture", diffuse.use_texture);
 
 	// Normal map
 
 	if (normal.texture) {
-		program.set_texture("u_pbm.normal.texture", *normal.texture);
+		program.set_texture("u_pbm.normal.texture", *normal.texture, 10);
 	}
 	program.set_uniform("u_pbm.normal.use_texture", normal.use_texture);
 
@@ -137,7 +145,7 @@ void PhysicallyBasedMaterial::set_uniforms(Program& program) const {
 
 	program.set_uniform("u_pbm.roughness.color", roughness.color);
 	if (roughness.texture) {
-		program.set_texture("u_pbm.roughness.texture", *roughness.texture);
+		program.set_texture("u_pbm.roughness.texture", *roughness.texture, 11);
 	}
 	program.set_uniform("u_pbm.roughness.use_texture", roughness.use_texture);
 
@@ -145,7 +153,7 @@ void PhysicallyBasedMaterial::set_uniforms(Program& program) const {
 
 	program.set_uniform("u_pbm.metalness.color", metalness.color);
 	if (metalness.texture) {
-		program.set_texture("u_pbm.metalness.texture", *metalness.texture);
+		program.set_texture("u_pbm.metalness.texture", *metalness.texture, 12);
 	}
 	program.set_uniform("u_pbm.metalness.use_texture", metalness.use_texture);
 

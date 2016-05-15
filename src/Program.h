@@ -16,8 +16,6 @@ class Program {
 
 	GLuint m_id;
 
-	GLuint m_texture_unit_counter = 0;
-
     bool m_is_linked	= false;
     bool m_is_bound		= false;
 
@@ -51,7 +49,7 @@ public:
 	void set_uniform(const std::string& name, const glm::mat3& matrix, GLuint count = 1);
     void set_uniform(const std::string& name, const glm::mat4& matrix, GLuint count = 1);
 
-	void set_texture(const std::string& texture_uniform, Texture& texture);// , GLuint unit = 0);
+	void set_texture(const std::string& texture_uniform, Texture& texture, GLuint unit);
 
     void bind();
     void unbind();

@@ -156,7 +156,7 @@ void Skybox::_precompute_irradiance(bool specular) {
 
 		program->bind();
 
-			program->set_texture("u_environment_map", m_environment_map);
+			program->set_texture("u_environment_map", m_environment_map, 0);
 
 			for (size_t j = 0; j < 6; j++) {
 
@@ -326,7 +326,7 @@ void Skybox::draw(const glm::mat4& view_projection) {
 
 		m_draw_program.bind();
 
-			m_draw_program.set_texture("u_environment_map", m_environment_map);
+			m_draw_program.set_texture("u_environment_map", m_environment_map, 0);
 			m_draw_program.set_uniform("u_view_projection", view_projection);
 
 			m_vao.draw_arrays(GL_TRIANGLES, m_vbo.vertex_count());
