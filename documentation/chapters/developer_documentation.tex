@@ -520,7 +520,26 @@ Egy 3D megjelenítő tesztelésénél némileg el kell térnünk a manapság sz�
 
 \subsection{Alapvető funkciók helyes működésének ellenőrzése}
 
-Mielőtt rátérnénk a kimenet tesztelésére, fontos leellenőriznünk, hogy a felhasználói interakció során a program helyesen működik, véd az alapvető felhasználói hibák ellen, illetve a különböző bemeneteket jól kezeli.
+Mielőtt rátérnénk a kimenet tesztelésére, fontos leellenőriznünk, hogy a felhasználói interakció során a program helyesen működik, véd az alapvető felhasználói hibák ellen, illetve a különböző bemeneteket jól kezeli. Ennek alapján a programot a következőkben leírt manuális tesztelésnek vetettem alá:
+
+\vspace{10pt}
+
+\begin{center}
+  \begin{tabulary}{\textwidth}{L | C || L}
+    %Teszteset & & Megjegyzés \\
+    %\hline
+    \multicolumn{3}{l}{\textbf{Modell betöltés}} \\
+    \hline
+    Nem megfelelő formátumú modell betöltése & \checkmark & \footnotesize{A megfelelő szűrés be van állítva a tallózó párbeszédablakban. Érvénytelen .obj fájl esetén semmi sem jelenik meg.} \\
+    \hline
+    Nagy méretű modell betöltése & \checkmark & \footnotesize{55 MB-os modellel tesztelve. A betöltési idő értelemszerűen a mérettel arányosan nő.} \\
+    \hline
+    Hivatkozott, de nem létező .mtl fájl & \checkmark & \footnotesize{Egy alapértelmezett anyag jön létre ilyen esetekben.} \\
+    \hline
+    Üres .mtl fájl & \checkmark & \footnotesize{Lásd fentebb.} \\
+    \hline
+  \end{tabulary}
+\end{center}
 
 TODO:
 modell betöltés -> ha nincs material, nagy méretű modell
