@@ -12,7 +12,7 @@ in vec2 vs_out_texture;
 
 void main() {
 
-	const vec3 LUMINANCE_VECTOR = vec3(0.2125, 0.7154, 0.0721);
+	const vec3 LUMINANCE_VECTOR = vec3(0.2126, 0.7152, 0.0722);
 
     if (u_step == 0) {
 
