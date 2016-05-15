@@ -52,8 +52,7 @@ void main() {
     vec4 specular_component = specular * specularity * u_bpm.specular.color;
 
     // Environment mapping
-    //R.z *= -1;
-    //R = vec3(1, 0, 0);
+
     float reflectivity = u_bpm.reflection.use_texture ? texture(u_bpm.reflection.texture, vs_out_texture).r : 0;
     vec4 reflect_color = vec4(0);
     if (reflectivity > 0.05) {
@@ -64,7 +63,10 @@ void main() {
     vec4 diffuse_irradiance = texture(u_diffuse_irradiance_map, normal);
     //vec4 specular_color = texture(u_specular_irradiance_map, R);
 
-    vec4 blinn_phong_color = ambient_color + lambertian * reflect_color + lambertian * diffuse_color * diffuse_irradiance;// + specular_component;
+    vec4 blinn_phong_color = ambient_color +
+                             lambertian * reflect_color +
+                             lambertian * diffuse_color * diffuse_irradiance +
+                             specular_component;
 
     out_color = vec4(blinn_phong_color.rgb, 1);
 
