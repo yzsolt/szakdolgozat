@@ -430,7 +430,7 @@ Renderer::Renderer(const Settings& settings) :
 
 	m_blinn_phong_program = std::make_unique<Program>("blinn_phong.vs.glsl", "blinn_phong.fs.glsl");
 
-	m_image_based_lighting_program = std::make_unique<Program>("pbr_light_probe.vs.glsl", "image_based_lighting.fs.glsl");
+	m_image_based_lighting_program = std::make_unique<Program>("pb_image_based_lighting.vs.glsl", "pb_image_based_lighting.fs.glsl");
 	m_direct_lighting_program = std::make_unique<Program>("direct_lighting.vs.glsl", "direct_lighting.fs.glsl");
 
 	// Create frame buffers
