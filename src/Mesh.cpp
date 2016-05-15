@@ -414,7 +414,7 @@ Mesh::Mesh(const std::string& path, GUI* gui) : m_gui(gui) {
 			glm::vec3 position(p[3 * v + 0], p[3 * v + 1], p[3 * v + 2]);
 			glm::vec3 normal = n.empty() ? glm::vec3(0, 0, 0) : glm::vec3(n[3 * v + 0], n[3 * v + 1], n[3 * v + 2]);
 			glm::vec2 texture = t.empty() ? glm::vec2(0, 0) : glm::vec2(t[2 * v + 0], t[2 * v + 1]);
-			
+
 			m_bounding_box.minimum = glm::min(m_bounding_box.minimum, position);
 			m_bounding_box.maximum = glm::max(m_bounding_box.maximum, position);
 
@@ -441,7 +441,7 @@ Mesh::Mesh(const std::string& path, GUI* gui) : m_gui(gui) {
 	// Parse materials
 
 	for (auto& material : materials) {
-		
+
 		std::string normal_texture = material.bump_texname;
 
 		if (normal_texture.empty()) {
@@ -452,7 +452,7 @@ Mesh::Mesh(const std::string& path, GUI* gui) : m_gui(gui) {
 		std::string reflection_texture = material.unknown_parameter["refl"];
 
 		// Blinn-Phong materials
-		
+
 		m_bp_materials.emplace_back(material.name);
 		BlinnPhongMaterial& bpm = m_bp_materials.back();
 
@@ -507,7 +507,7 @@ Mesh::Mesh(const std::string& path, GUI* gui) : m_gui(gui) {
 		m_pb_materials_window->setVisible(false);
 	}
 
-	if (materials.empty()) {
+	if (materials.empty()/* || (materials.size() == 1 && materials[0].name.empty())*/) {
 		new Label(m_bp_materials_window, "No materials found.");
 		new Label(m_pb_materials_window, "No materials found.");
 	} else {
@@ -515,7 +515,7 @@ Mesh::Mesh(const std::string& path, GUI* gui) : m_gui(gui) {
 		std::vector<std::string> material_names;
 
 		for (const auto& material : materials) {
-			material_names.push_back(material.name);
+			material_names.push_back(material.name.empty() ? "[unnamed]" : material.name);
 		}
 
 		auto* bp_materials = new ComboBox(m_bp_materials_window, material_names);
@@ -673,9 +673,6 @@ void Mesh::draw(Program* program) {
 	m_vao.bind();
 	m_vbo.bind();
 
-	//glDrawArrays(GL_TRIANGLES, 0, m_vertices.size());
-	//glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, (void*)0);
-
 	GLuint index_buffer_size = 0;
 
 	for (size_t i = 0; i < m_shapes.size(); i++) {
@@ -686,24 +683,22 @@ void Mesh::draw(Program* program) {
 
 				int material_id = m_material_map[i];
 
-				if (material_id > -1) {
+				if (material_id < 0) {
+					material_id = 0; // The first is the default
+				}
 
-					if (m_use_pbr) {
+				if (m_use_pbr) {
 
-						auto& material = m_pb_materials[material_id];
+					auto& material = m_pb_materials[material_id];
 
-						if (material.use_default < 0) {
-							material.set_uniforms(*program);
-						} else {
-							m_default_pb_materials[material.use_default].set_uniforms(*program);
-						}
-
+					if (material.use_default < 0) {
+						material.set_uniforms(*program);
 					} else {
-						m_bp_materials[material_id].set_uniforms(*program);
+						m_default_pb_materials[material.use_default].set_uniforms(*program);
 					}
 
 				} else {
-					// TODO: add a default material
+					m_bp_materials[material_id].set_uniforms(*program);
 				}
 
 			}
