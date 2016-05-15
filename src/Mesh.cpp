@@ -132,22 +132,6 @@ void Mesh::_update_bp_material_info(int material_id) {
 		});
 	}
 
-	new Label(material_grid, "Reflection texture:", "sans-bold");
-	split_panel = new Widget(material_grid);
-	split_panel->setLayout(new BoxLayout(Orientation::Horizontal, Alignment::Middle, 0, 10));
-	text_box = new TextBox(split_panel, material.reflection.path);
-	auto use_reflection_texture = new CheckBox(split_panel, "");
-	if (material.reflection.path.empty()) {
-		text_box->setValue("N/A");
-		use_reflection_texture->setChecked(false);
-		use_reflection_texture->setEnabled(false);
-	} else {
-		use_reflection_texture->setChecked(material.reflection.use_texture);
-		use_reflection_texture->setCallback([&material](bool value) {
-			material.reflection.use_texture = value;
-		});
-	}
-
 	new Label(material_grid, "Shininess:", "sans-bold");
 	auto slider = new Slider(material_grid);
 	slider->setValue(material.shininess / 100.f);
@@ -476,7 +460,6 @@ Mesh::Mesh(const std::string& path, GUI* gui) : m_gui(gui) {
 		bpm.diffuse = TextureMap(material.diffuse_texname, _float3_to_vec3(material.diffuse));
 		bpm.normal = TextureMap(normal_texture, glm::vec3(0));
 		bpm.specular = TextureMap(material.specular_texname, _float3_to_vec3(material.specular));
-		bpm.reflection = TextureMap(reflection_texture, glm::vec3(0));
 
 		bpm.shininess = material.shininess;
 

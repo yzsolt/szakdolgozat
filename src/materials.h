@@ -81,9 +81,6 @@ struct BlinnPhongMaterial : public Material {
 	/** The specular map. */
 	TextureMap specular;
 
-	/** The reflection map. */
-	TextureMap reflection;
-
 	/** Shininess determines how smoothly the specular light distributes on the material. */
 	float shininess;
 

@@ -55,12 +55,6 @@ void BlinnPhongMaterial::set_uniforms(Program& program) const {
 	}
 	program.set_uniform("u_bpm.specular.use_texture", specular.use_texture);
 
-	//program.set_uniform("u_bpm.specular.color", specular.color);
-	if (reflection.texture) {
-		program.set_texture("u_bpm.reflection.texture", *reflection.texture, 8);
-	}
-	program.set_uniform("u_bpm.reflection.use_texture", reflection.use_texture);
-
 	program.set_uniform("u_bpm.shininess", shininess);
 
 }
@@ -70,7 +64,6 @@ void BlinnPhongMaterial::upload(const std::string& material_directory) {
 	diffuse.upload(material_directory);
 	specular.upload(material_directory);
 	normal.upload(material_directory);
-	reflection.upload(material_directory);
 
 }
 
