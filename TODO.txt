@@ -1,8 +1,0 @@
-
- - jobb gombbal up vektorra merőleges síkon kamera mozgatás
- - spot, pont fények
- - folyamatban levő húzás GUI-n elengedve nem fejeződik be
- - áttetsző anyagok megjelenítése
- - ssao
-
- google scholar
