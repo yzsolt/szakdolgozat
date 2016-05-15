@@ -5,11 +5,10 @@ layout(location = 0) out vec4 out_color;
 
 in vec3 vs_out_world_position;
 in vec3 vs_out_world_normal;
+in vec3 vs_out_view_direction;
 in vec2 vs_out_texture;
 
 in mat3 vs_out_tbn;
-
-uniform vec3 u_view_position;
 
 #include "bp_pb_common.glsl"
 
@@ -19,13 +18,9 @@ uniform samplerCube u_environment_map;
 uniform samplerCube u_diffuse_irradiance_map;
 uniform samplerCube u_specular_irradiance_map;
 
-const vec3 light_position = vec3(60, 20, 0);
-
 void main() {
 
     vec3 normal;
-    vec3 light_direction = normalize(light_position - vs_out_world_position);
-    vec3 view_direction = normalize(u_view_position - vs_out_world_position);
 
     if (u_bpm.normal.use_texture) {
 
@@ -36,15 +31,15 @@ void main() {
         normal = normalize(vs_out_world_normal);
     }
 
-    vec3 I = normalize(vs_out_world_position - u_view_position);
-    vec3 R = reflect(I, normal);
+    vec3 R = reflect(vs_out_view_direction, normal);
+    vec3 light_direction = R;//normalize(light_position - vs_out_world_position);
 
     float lambertian = max(dot(-R, normal), 0);
     float specular = 0;
 
     if (lambertian > 0) {
 
-        vec3 half_direction = normalize(light_direction + view_direction);
+        vec3 half_direction = normalize(light_direction + vs_out_view_direction);
         float specular_angle = max(dot(half_direction, normal), 0);
         specular = pow(specular_angle, u_bpm.shininess);
 
@@ -69,7 +64,7 @@ void main() {
     vec4 diffuse_irradiance = texture(u_diffuse_irradiance_map, normal);
     //vec4 specular_color = texture(u_specular_irradiance_map, R);
 
-    vec4 blinn_phong_color = ambient_color + /*lambertian */ reflect_color + lambertian * diffuse_color + diffuse_irradiance;// + specular_component;
+    vec4 blinn_phong_color = ambient_color + lambertian * reflect_color + lambertian * diffuse_color * diffuse_irradiance;// + specular_component;
 
     out_color = vec4(blinn_phong_color.rgb, 1);
 
