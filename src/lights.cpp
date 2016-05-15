@@ -134,6 +134,7 @@ float SpotLight::inner_cone_angle() const {
 }
 
 void SpotLight::set_inner_cone_angle(float inner_cone_angle) {
+	assert(inner_cone_angle <= m_outer_cone_angle);
 	m_inner_cone_angle = inner_cone_angle;
 }
 
@@ -142,5 +143,6 @@ float SpotLight::outer_cone_angle() const {
 }
 
 void SpotLight::set_outer_cone_angle(float outer_cone_angle) {
+	assert(outer_cone_angle >= m_inner_cone_angle);
 	m_outer_cone_angle = outer_cone_angle;
 }

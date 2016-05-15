@@ -310,19 +310,37 @@ void Renderer::_setup_gui() {
 	});
 	spot_light_flux->setValue(spot_light->luminous_flux() / L);
 
-	const float D = glm::pi<float>() * 2;
+	const float D = glm::pi<float>() / 2.f;
 
 	new Label(spot_light_grid, "Inner cone angle:", "sans-bold");
 	auto spot_light_inner = new Slider(spot_light_grid);
-	spot_light_inner->setCallback([spot_light, D](float value) {
-		spot_light->set_inner_cone_angle(value * D);
+	spot_light_inner->setCallback([spot_light_inner, spot_light, D](float value) {
+		
+		float outer_cone_angle = spot_light->outer_cone_angle();
+
+		if (value * D < outer_cone_angle) {
+			spot_light->set_inner_cone_angle(value * D);
+		} else {
+			spot_light->set_outer_cone_angle(outer_cone_angle);
+			spot_light_inner->setValue(outer_cone_angle / D);
+		}
+
 	});
 	spot_light_inner->setValue(spot_light->inner_cone_angle() / D);
 
 	new Label(spot_light_grid, "Outer cone angle:", "sans-bold");
 	auto spot_light_outer = new Slider(spot_light_grid);
-	spot_light_outer->setCallback([spot_light, D](float value) {
-		spot_light->set_outer_cone_angle(value * D);
+	spot_light_outer->setCallback([spot_light_outer, spot_light, D](float value) {
+
+		float inner_cone_angle = spot_light->inner_cone_angle();
+
+		if (value * D > inner_cone_angle) {
+			spot_light->set_outer_cone_angle(value * D);
+		} else {
+			spot_light->set_outer_cone_angle(inner_cone_angle);
+			spot_light_outer->setValue(inner_cone_angle / D);
+		}
+
 	});
 	spot_light_outer->setValue(spot_light->outer_cone_angle() / D);
 
@@ -369,9 +387,9 @@ Renderer::Renderer(const Settings& settings) :
 		// Luminous flux
 		100.f,
 		// Inner
-		2.5f,
+		glm::radians(10.f),
 		// Outer
-		3.f
+		glm::radians(20.f)
 	));
 
 	// Setup GUI
@@ -428,10 +446,11 @@ Renderer::Renderer(const Settings& settings) :
 
 	m_basic_color_program = std::make_unique<Program>("basic_color.vs.glsl", "basic_color.fs.glsl");
 
-	m_blinn_phong_program = std::make_unique<Program>("bp_image_based_lighting.vs.glsl", "bp_image_based_lighting.fs.glsl");
+	m_bp_image_based_lighting_program = std::make_unique<Program>("bp_image_based_lighting.vs.glsl", "bp_image_based_lighting.fs.glsl");
+	m_bp_direct_lighting_program = std::make_unique<Program>("bp_direct_lighting.vs.glsl", "bp_direct_lighting.fs.glsl");
 
-	m_image_based_lighting_program = std::make_unique<Program>("pb_image_based_lighting.vs.glsl", "pb_image_based_lighting.fs.glsl");
-	m_direct_lighting_program = std::make_unique<Program>("pb_direct_lighting.vs.glsl", "pb_direct_lighting.fs.glsl");
+	m_pb_image_based_lighting_program = std::make_unique<Program>("pb_image_based_lighting.vs.glsl", "pb_image_based_lighting.fs.glsl");
+	m_pb_direct_lighting_program = std::make_unique<Program>("pb_direct_lighting.vs.glsl", "pb_direct_lighting.fs.glsl");
 
 	// Create frame buffers
 
@@ -573,7 +592,7 @@ void Renderer::run() {
 
 			if (m_use_ibl) {
 
-				Program& program = m_mesh->use_pbr() ? *m_image_based_lighting_program : *m_blinn_phong_program;
+				Program& program = m_mesh->use_pbr() ? *m_pb_image_based_lighting_program : *m_bp_image_based_lighting_program;
 
 				program.bind();
 
@@ -604,51 +623,49 @@ void Renderer::run() {
 			
 			glDepthMask(GL_FALSE);
 
-			if (m_mesh->use_pbr()) {
+			// Draw mesh with direct lights
 
-				// Draw mesh with direct lights
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_ONE, GL_ONE);
 
-				glEnable(GL_BLEND);
-				glBlendFunc(GL_ONE, GL_ONE);
+			Program& program = m_mesh->use_pbr() ? *m_pb_direct_lighting_program : *m_bp_direct_lighting_program;
 
-				m_direct_lighting_program->bind();
+			program.bind();
 
-					m_direct_lighting_program->set_uniform("u_world", m_world);
-					m_direct_lighting_program->set_uniform("u_world_inverse", world_inverse);
-					m_direct_lighting_program->set_uniform("u_projection", m_projection);
-					m_direct_lighting_program->set_uniform("u_view_projection", view_projection);
-					m_direct_lighting_program->set_uniform("u_world_view", m_world_view);
-					m_direct_lighting_program->set_uniform("u_view_position", m_camera.position());
+				program.set_uniform("u_world", m_world);
+				program.set_uniform("u_world_inverse", world_inverse);
+				program.set_uniform("u_projection", m_projection);
+				program.set_uniform("u_view_projection", view_projection);
+				program.set_uniform("u_world_view", m_world_view);
+				program.set_uniform("u_view_position", m_camera.position());
 
-					for (const auto& light : m_lights) {
+				for (const auto& light : m_lights) {
 
-						Light* light_ptr = light.get();
+					Light* light_ptr = light.get();
 
-						if (light_ptr->is_on()) {
+					if (light_ptr->is_on()) {
 
-							switch (light->type()) {
-							case Light::Type::POINT:
-								static_cast<PointLight*>(light_ptr)->set_uniforms(*m_direct_lighting_program);
-								break;
-							case Light::Type::SPOT:
-								SpotLight* spot_light = static_cast<SpotLight*>(light_ptr);
-								spot_light->set_uniforms(*m_direct_lighting_program);
-								spot_light->set_direction(m_camera.direction());
-								spot_light->set_position(m_camera.position());
-								break;
-							}
-
-							m_mesh->draw(m_direct_lighting_program.get());
-
+						switch (light->type()) {
+						case Light::Type::POINT:
+							static_cast<PointLight*>(light_ptr)->set_uniforms(program);
+							break;
+						case Light::Type::SPOT:
+							SpotLight* spot_light = static_cast<SpotLight*>(light_ptr);
+							spot_light->set_uniforms(program);
+							spot_light->set_direction(m_camera.direction());
+							spot_light->set_position(m_camera.position());
+							break;
 						}
+
+						m_mesh->draw(&program);
 
 					}
 
-				m_direct_lighting_program->unbind();
+				}
 
-				glDisable(GL_BLEND);
+			program.unbind();
 
-			}
+			glDisable(GL_BLEND);
 			
 			// Draw skybox
 

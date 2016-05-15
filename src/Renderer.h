@@ -84,10 +84,11 @@ private:
 
 	std::unique_ptr<Program> m_basic_color_program;
 
-	std::unique_ptr<Program> m_blinn_phong_program;
+	std::unique_ptr<Program> m_bp_image_based_lighting_program;
+	std::unique_ptr<Program> m_bp_direct_lighting_program;
 
-	std::unique_ptr<Program> m_image_based_lighting_program;
-	std::unique_ptr<Program> m_direct_lighting_program;
+	std::unique_ptr<Program> m_pb_image_based_lighting_program;
+	std::unique_ptr<Program> m_pb_direct_lighting_program;
 
 	std::vector<std::unique_ptr<Light>> m_lights;
 
