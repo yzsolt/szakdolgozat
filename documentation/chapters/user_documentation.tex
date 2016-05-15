@@ -20,24 +20,25 @@ Az első fordítás előkészítése:
 
 A fordítás menete:
 
+TODO
+
 \section{A felhasználói felület áttekintése}
 
-% ábra
+% screenshot
 
-A felhasználói felület nyelve angol, ezért alapszintű angol nyelvtudás szükséges a program használatához.
+A megjelenítő felhasználói felülete négy ablakból áll, ezeken különféle információkat és beállítási lehetőségeket érhetünk el. A felhasználói felület nyelve angol, ezért alapszintű angol nyelvtudás nem árt a program használatához, de a következő alpontok segítségével nyelvtudás nélkül is képesek leszünk használni a programot.
 
-TODO
+A felhasználói felület hátterében látjuk magát a betöltött modellt, illetve annak panorámaképből összeállított környezetét. Az egérgörgő segítségével változtathatjuk a virtuális kamera távolságát a modelltől, azaz így közelíthetünk vagy távolodhatunk tőle. A bal egérgomb lenyomásával és nyomva tartásával egy képzeletbeli gömbön mozgathatjuk a kamerát, ami mindig a modell közepe felé néz, így a modellt minden irányból megnézhetjük.
 
 \subsection{Megjelenítő beállításai}
 
 \begin{wrapfigure}{l}{0.3\textwidth}
-    \begin{center}
-        \includegraphics[scale=0.6]{images/renderer_settings.png}
-    \end{center}
-    %\caption{A megjelenítő beállításai}
+    \vspace{-23pt}
+    \includegraphics[width=0.28\textwidth]{images/renderer_settings.png}
+    \vspace{-20pt}
 \end{wrapfigure}
 
-A megjelenítő beállításai ablakban elsősorban a modelltől független, globális beállítások találhatóak. A V-Sync a vertikális szinkronizáció be- vagy kikapcsolására szolgál. Alapértelmezésben be van kapcsolva, így a megjelenítő mindig megvárja, amíg az elkészült képkocka megjelenítése befejeződik. Ezzel elkerülhető az ún. \textit{tearing}, ha a képernyő frissítési frekvenciájától (jellemzően 60 Hz) eltérő FPS (\textit{frames per second}, képkocka per másodperc) sebességgel dolgozik a megjelenítő. Kikapcsolásával a program az előző képkocka befejezése után egyből elkezdi a következő rajzolását, így ez a mód teljesítménymérésre is alkalmas lehet. 
+A megjelenítő beállításai ablakban elsősorban a modelltől független, globális beállítások találhatóak. A V-Sync a vertikális szinkronizáció be- vagy kikapcsolására szolgál. Alapértelmezésben be van kapcsolva, így a megjelenítő mindig megvárja, amíg az elkészült képkocka megjelenítése befejeződik. Ezzel elkerülhető az ún. \textit{tearing}, ha a képernyő frissítési frekvenciájától (jellemzően 60 Hz) eltérő FPS (\textit{frames per second}, képkocka per másodperc) sebességgel dolgozik a megjelenítő. Kikapcsolásával a program az előző képkocka befejezése után egyből elkezdi a következő rajzolását, így ez a mód teljesítménymérésre is alkalmas lehet.
 
 A \textit{Load skybox} ill. \textit{Load mesh} gombokkal egy fájlválasztó ablak nyílik meg, amelynek segítségével új skybox-ot vagy modellt tölthetünk be. Skybox esetén Radiance HDR (.hdr), modellek esetén Wavefront OBJ (.obj) a támogatott fájlformátum. Továbbá ügyeljünk arra, hogy a skybox-nak megadott kép vertikális kereszt alakban tartalmazza a kockatérkép oldalait.
 
@@ -49,24 +50,54 @@ Az utolsó beállítás, a \textit{Rotate mesh} jelölőnégyzet segítségével
 
 \subsection{Modell információ}
 
-TODO
+\begin{wrapfigure}{l}{0.3\textwidth}
+    \vspace{-23pt}
+    \includegraphics[width=0.28\textwidth]{images/mesh_info.png}
+    \vspace{-20pt}
+\end{wrapfigure}
+
+A modell információs ablakban a modellel kapcsolatos információk és beállítások kaptak helyet. A \textit{Use PBR} kapcsolóval válthatunk az alapértelmezett fizikai alapú megjelenítés, illetve a hagyományos Blinn-Phong árnyalás között. Az alatta található választógombbal az OBJ fájlban található alakzatok (\textit{shape}-ek) közül választhatunk. A kiválasztott alakzat kirajzolását a \textit{Draw} jelölőnégyzettel kapcsolhatjuk ki vagy be (alapértelmezésben az összes alakzatot kirajzolja a program). Az utolsó két sorban az adott alakzatot alkotó vertexek, illetve ezekhez tartozó indexek száma látható.
+
+\clearpage
 
 \subsection{Anyagtulajdonságok}
 
 \begin{wrapfigure}{l}{0.5\textwidth}
-    \begin{center}
-        \includegraphics[scale=0.5]{images/pbr_materials.png}
-    \end{center}
+    \vspace{-23pt}
+    \includegraphics[width=0.48\textwidth]{images/pbr_materials.png}
+    \vspace{-20pt}
 \end{wrapfigure}
 
 A modellhez tartozó .mtl fájlból olvasott fizikai alapú anyagok a legfelső választógombra kattintva érhetők el, ezek valamelyikére kattintva az ablak tartalma automatikusan frissül.
 
-Amennyiben a modellhez nem volt mellékelve anyagleíró fájl, vagy csak szeretnénk kipróbálni valamilyen valódi anyagot, a \textit{Use predefines material}-t bekapcsolva elérhetővé válik az alatta levő lista, illetve ekkor a modell is a választott előre definiált anyag kinézetével jelenik meg. TODO: anyagok listája ha végleges
+Amennyiben a modellhez nem volt mellékelve anyagleíró fájl, vagy csak szeretnénk kipróbálni valamilyen valódi anyagot, a \textit{Use predefines material}-t bekapcsolva elérhetővé válik az alatta levő lista, illetve ekkor a modell is a választott előre definiált anyag kinézetével jelenik meg. A megjelenítő három beépített anyagot tartalmaz: arany, ezüst és réz.
 
 Az első anyagtulajdonság a diffúz szín, ami megadható egyetlen színként vagy textúrával is. Ez utóbbi csak akkor elérhető, ha az anyagleíróban volt erre vonatkozó bejegyzés. A hozzátartozó kapcsolóval a beállított szín és (ha elérhető,) a betöltött textúra között válthatunk. A következő tulajdonság a normáltextúra. Ezt is az anyagleíróból olvassa a program, a mellett található jelölőnégyzettel pedig a normáltérképezés kapcsolhatjuk be/ki.
 
 Az utolsó két tulajdonság a fizikai alapú megjelenítéshez tartozik. Az első a rücskösség (\textit{roughness}), amely a felület durvaságát szimbolizálja egy 0 és 1 közé eső értékkel. A tökéletesen sima felületeknél ez az érték 0, míg a legdurvább felületek esetén 1. A diffúz színhez hasonlóan ez az érték is olvasható textúrából, ehhez egy egyedi \textit{map\_Roughness} kulcsot kell az anyagleíró fájlhoz hozzáadnunk. Az utolsó tulajdonság a fémesség (\textit{metalness}), amely a rücskösséghez nagyon hasonlóan működik, csak ennél az adható meg, hogy az anyag szigetelő-e vagy sem. Szigorúan fizikai értelemben ennek értéke csak és kizárólag 0 vagy 1 lehetne, mivel nem tudunk részben szigetelő, részben fémes anyagról. Fontos tudni, hogy ezek az anyagtulajdonságok mindig egy adott felület legkülső rétegét írják le: egy festett fémfelületnél tehát ez az érték 0 lesz, hiszen hiába fém az alapja, a fény a festékről verődik vissza, az pedig fizikailag szigetelő. A fémességet meghatározó textúrát szintén egy egyedi, \textit{map\_Metalness} kulccsal tárolhatjuk el.
 
+\clearpage
+
+\begin{wrapfigure}{l}{0.5\textwidth}
+    %\vspace{-23pt}
+    \includegraphics[width=0.48\textwidth]{images/bp_materials.png}
+    \vspace{-20pt}
+\end{wrapfigure}
+
+Ha a modell információs ablakon Blinn-Phong árnyalásra váltunk, akkor az anyagtulajdonságok automatikusan átváltanak Blinn-Phong nézetre. Az \textit{Ambient color} színválasztó segítségével az ambiens, azaz a jelenetben alapból jelen levő sugárzás színét adhatjuk meg. Fizikai alapú megjelenítés esetén erre nincs szükség, hiszen a kép alapú megvilágítás miatt ez jelenettől függetlenül, automatikusan kiszámolódik.
+
+A diffúz és a normál textúrák megegyeznek a fizikai alapú anyagoknál leírtakkal. A spekuláris szín vagy textúra segítségével a spekuláris csillanások helye, intenzitása és színe adható meg. A \textit{Shininess} ("ragyogóság") paraméterrel a felület rücskössége szimulálható: minél nagyobb, annál simább a felület, ezáltal annál kisebb és koncentráltabb lesz a spekuláris csillanás.
+
 \subsection{Megvilágítás beállításai}
 
-TODO
+\begin{wrapfigure}{l}{0.3\textwidth}
+    \vspace{-23pt}
+    \includegraphics[width=0.28\textwidth]{images/lighting_settings.png}
+    \vspace{-20pt}
+\end{wrapfigure}
+
+A megvilágítási beállításoknál lehetőségünk van a megjelenítő által támogatott megvilágítási módok (kép alapú, pont és zseblámpa fény) tulajdonságainak megváltoztatására. A \textit{Use IBL} jelölőnégyzet segítségével be- és kikapcsolhatjuk a kép alapú megvilágítást. Szemléltetés céljából egy pont és egy zseblámpa fényt támogat a program. Mivel a megjelenítő az ún. \textit{forward rendering} technikát használja, ezért több ilyen, dinamikus fényforrás használatára nem alkalmas, mert a fényforrások számával arányosan romlana a kirajzolás sebessége.
+
+A pont fényt a \textit{Use} jelölőnégyzettel kapcsolhatjuk fel vagy le. A \textit{Move} kapcsolóval a pont fény automatikus, képzeletbeli gömbön történő mozgatását tudjuk engedélyezni vagy letiltani. Ezen kívül a kisugárzott fény színét és a fényforrás teljesítményét is változtathatjuk, ez utóbbit 0 és 200 Watt között.
+
+A zseblámpa fény paraméterezése nagyrészt megegyezik a pont fényével. A két új paraméter (\textit{Inner/outer cone angle}) a zseblámpa fénykúpjának belső és külső félszögét határozza meg. A külső félszög adja meg, hogy meddig látható a zseblámpa fénye, a belső félszög pedig arra szolgál, hogy segítségével a valódi zseblámpáknál tapasztalható elhalványodást szimuláljuk a belső és külső félszög között. A zseblámpa pozíciója mindig a nézeti pozíció, iránya pedig a nézeti irány, azaz a zseblámpa fénye mindig a képernyő "közepéből" világít a modellre, és a modell kicsinyítése/nagyítása esetén változik a kivetített fénykör mérete, hiszen ilyenkor tulajdonképpen a kamera modelltől vett távolságát változtatjuk.

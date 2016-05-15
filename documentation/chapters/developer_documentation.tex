@@ -489,7 +489,7 @@ Sugárkövetésen alapuló megjelenítőkhöz már felhasználhatóak ezek a ké
 Az első tagot a rücskösség értékétől függően egy kockatérkép mip szintjeibe számolhatjuk ki. Ezt a textúrát besugárzási kockatérképnek hívjuk. A második tag egy ún. lookup textúrába számolható, azonban jelenleg 3 paramétertől (\(F_0\), rücskösség, \(\mathbf{n} \cdot \mathbf{v}\)) függ, így további egyszerűsítésre van szükség:
 
 \[
-\int_{\Omega} { f_r(\mathbf{l}, \mathbf{v}) cos\theta_l d\mathbf{l} } = 
+\int_{\Omega} { f_r(\mathbf{l}, \mathbf{v}) cos\theta_l d\mathbf{l} } =
 \]
 \[= F_0 \int_{\Omega} { { f_r(\mathbf{l}, \mathbf{v}) \over F(\mathbf{v}, \mathbf{h}) } (1 - (1 - \mathbf{v} \cdot \mathbf{h})^5) cos\theta_l d\mathbf{l} } + \int_{\Omega} { { f_r(\mathbf{l}, \mathbf{v}) \over F(\mathbf{v}, \mathbf{h}) } (1 - \mathbf{v} \cdot \mathbf{h})^5 cos\theta_l d\mathbf{l} }
 \]
@@ -500,11 +500,14 @@ Mindezek segítségével valósidőben, mindössze két textúraolvasással kisz
 
 \subsection{Továbbfejlesztési lehetőségek}
 
-TODO: 
+TODO:
 területi fények,
 spekuláris envmap javítása,
 textúranézet,
 több formátum assimp-pel
+fejlettebb kamerakezelés
+átlátszó anyagok
+deferred rendering
 
 \section{Tesztelés}
 
