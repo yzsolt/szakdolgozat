@@ -52,7 +52,8 @@ class Mesh {
 
 	// Material info window
 
-	nanogui::Window* m_materials_window = nullptr;
+	nanogui::Window* m_bp_materials_window = nullptr;
+	nanogui::Window* m_pb_materials_window = nullptr;
 
 	size_t m_selected_material = 0;
 	nanogui::ComboBox* m_predefined_materials_button = nullptr;

@@ -32,18 +32,18 @@ void Mesh::_update_bp_material_info(int material_id) {
 	if (m_bp_materials.empty()) {
 		return;
 	}
-
-	if (m_materials_window->childCount() > 1) {
-		m_materials_window->removeChild(m_materials_window->children()[1]);
+	
+	if (m_bp_materials_window->childCount() > 1) {
+		m_bp_materials_window->removeChild(m_bp_materials_window->children()[1]);
 	}
 
-	m_materials_window->setTitle("Blinn-Phong materials");
+	m_bp_materials_window->setTitle("Blinn-Phong materials");
 
 	auto grid_layout = new GridLayout(Orientation::Horizontal, 2, Alignment::Middle, 15, 5);
 	grid_layout->setColAlignment({ Alignment::Maximum, Alignment::Fill });
 	grid_layout->setSpacing(0, 10);
 
-	auto material_grid = new Widget(m_materials_window);
+	auto material_grid = new Widget(m_bp_materials_window);
 	material_grid->setLayout(grid_layout);
 
 	TextBox* text_box;
@@ -165,11 +165,11 @@ void Mesh::_update_pb_material_info(int material_id, bool predefined) {
 		return;
 	}
 
-	if (m_materials_window->childCount() > 3) {
-		m_materials_window->removeChild(m_materials_window->children()[3]);
+	if (m_pb_materials_window->childCount() > 3) {
+		m_pb_materials_window->removeChild(m_pb_materials_window->children()[3]);
 	}
 
-	m_materials_window->setTitle("Physically based materials");
+	m_pb_materials_window->setTitle("Physically based materials");
 
 	PhysicallyBasedMaterial* material;
 
@@ -193,7 +193,7 @@ void Mesh::_update_pb_material_info(int material_id, bool predefined) {
 	grid_layout->setColAlignment({ Alignment::Maximum, Alignment::Fill });
 	grid_layout->setSpacing(0, 10);
 
-	auto material_grid = new Widget(m_materials_window);
+	auto material_grid = new Widget(m_pb_materials_window);
 	material_grid->setLayout(grid_layout);
 
 	TextBox* text_box;
@@ -502,14 +502,31 @@ Mesh::Mesh(const std::string& path, GUI* gui) : m_gui(gui) {
 
 	m_default_pb_materials = PhysicallyBasedMaterial::DEFAULTS;
 
-	// Materials window
+	for (auto& default_pb_material : m_default_pb_materials) {
+		default_pb_material.upload("data/meshes/sphere/");
+	}
 
-	m_materials_window = new nanogui::Window(m_gui, "Materials");
-	m_materials_window->setPosition(Eigen::Vector2i(5, 450));
-	m_materials_window->setLayout(new GroupLayout());
+	// Material windows
+
+	m_bp_materials_window = new nanogui::Window(m_gui, "Blinn-Phong materials");
+	m_bp_materials_window->setPosition(Eigen::Vector2i(5, 450));
+	m_bp_materials_window->setLayout(new GroupLayout());
+
+	if (m_use_pbr) {
+		m_bp_materials_window->setVisible(false);
+	}
+
+	m_pb_materials_window = new nanogui::Window(m_gui, "Physically based materials");
+	m_pb_materials_window->setPosition(Eigen::Vector2i(5, 450));
+	m_pb_materials_window->setLayout(new GroupLayout());
+
+	if (!m_use_pbr) {
+		m_pb_materials_window->setVisible(false);
+	}
 
 	if (materials.empty()) {
-		new Label(m_materials_window, "No materials found.");
+		new Label(m_bp_materials_window, "No materials found.");
+		new Label(m_pb_materials_window, "No materials found.");
 	} else {
 
 		std::vector<std::string> material_names;
@@ -518,23 +535,23 @@ Mesh::Mesh(const std::string& path, GUI* gui) : m_gui(gui) {
 			material_names.push_back(material.name);
 		}
 
-		auto* materials = new ComboBox(m_materials_window, material_names);
+		auto* bp_materials = new ComboBox(m_bp_materials_window, material_names);
 
-		materials->setCallback([this](int material_id) {
-
+		bp_materials->setCallback([this](int material_id) {
 			m_selected_material = material_id;
+			_update_bp_material_info(material_id);
+		});
 
-			if (m_use_pbr) {
-				_update_pb_material_info(material_id);
-			} else {
-				_update_bp_material_info(material_id);
-			}
+		auto* pb_materials = new ComboBox(m_pb_materials_window, material_names);
 
+		pb_materials->setCallback([this](int material_id) {
+			m_selected_material = material_id;
+			_update_pb_material_info(material_id);
 		});
 
 		// Predefined materials
 
-		m_use_predefined_material_checkbox = new CheckBox(m_materials_window, "Use predefined material", [this](bool state) {
+		m_use_predefined_material_checkbox = new CheckBox(m_pb_materials_window, "Use predefined material", [this](bool state) {
 
 			m_predefined_materials_button->setEnabled(state);
 
@@ -554,15 +571,11 @@ Mesh::Mesh(const std::string& path, GUI* gui) : m_gui(gui) {
 			default_material_names.push_back(default_material.name);
 		}
 
-		m_predefined_materials_button = new ComboBox(m_materials_window, default_material_names);
+		m_predefined_materials_button = new ComboBox(m_pb_materials_window, default_material_names);
 
 		m_predefined_materials_button->setCallback([this](int default_material_id) {
 
-			if (m_use_pbr) {
-				m_pb_materials[m_selected_material].use_default = default_material_id;
-			} else {
-				// TODO
-			}
+			m_pb_materials[m_selected_material].use_default = default_material_id;
 
 			_update_pb_material_info(default_material_id, true);
 
@@ -587,6 +600,9 @@ Mesh::Mesh(const std::string& path, GUI* gui) : m_gui(gui) {
 		} else {
 			_update_bp_material_info(0);
 		}
+
+		m_pb_materials_window->setVisible(m_use_pbr);
+		m_bp_materials_window->setVisible(!m_use_pbr);
 
 	});
 
@@ -617,7 +633,8 @@ Mesh::Mesh(const std::string& path, GUI* gui) : m_gui(gui) {
 }
 
 Mesh::~Mesh() {
-	m_gui->removeChild(m_materials_window);
+	m_gui->removeChild(m_bp_materials_window);
+	m_gui->removeChild(m_pb_materials_window);
 	m_gui->removeChild(m_mesh_info_window);
 }
 
