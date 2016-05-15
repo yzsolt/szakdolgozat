@@ -9,34 +9,13 @@ in vec3 vs_out_view_direction;
 
 in vec3 vs_out_world_position;
 
-#include "pbr_common.glsl"
+in mat3 vs_out_tbn;
 
-#define POINT_LIGHT 0
-#define SPOT_LIGHT  1
+#include "pbr_common.glsl"
 
 uniform int u_light_type;
 
-struct Light {
-    vec3 position;
-    vec3 color;
-    float luminance;
-    float luminous_intensity;
-    float inverse_radius;
-};
-
-struct PointLight {
-    Light parent;
-};
-
 uniform PointLight u_point_light;
-
-struct SpotLight {
-    Light parent;
-    vec3 direction;
-    float inner_cone_angle;
-    float outer_cone_angle;
-};
-
 uniform SpotLight u_spot_light;
 
 float get_angle_attenuation(vec3 l, SpotLight spot_light) {
