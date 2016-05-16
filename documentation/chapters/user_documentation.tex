@@ -1,9 +1,43 @@
 
-\section{Követelmények}
+\section{A megoldott probléma áttekintése}
+
+A szakdolgozat célja egy olyan program létrehozása volt, amelynek segítségével a valósidejű fizikai alapú megjelenítést, annak előnyeit be lehet mutatni. A fejlesztés eredménye egy C++ programnyelven írt, platformfüggetlen, OpenGL alapú valósidejű megjelenítő lett, amely egyszerű 3D-s modellek megjelenítésére képes, továbbá a modell környezetét ún. skybox-szal szimulálja és a modell anyagtulajdonságainak interaktív módosítására is lehetőséget ad.
+
+\section{A felhasznált módszerek rövid leírása}
+
+A program C++ programnyelven íródott és az OpenGL grafikus API-t használja. A megjelenítés során az alapértelmezett fizikai alapú mellett választható a korábban használt Blinn-Phong árnyalás~\cite{blinn1977models}. A fizikai alapú megjelenítés az árnyalási egyenlet~\cite{immel1986radiosity} megoldására épül, ehhez valósidőben több közelítés alkalmazása is szükséges: Cook-Torrance modell~\cite{cook1981reflectance} a spekuláris BRDF (kétirányú visszaverődési eloszlásfüggvény), Schlick közelítés~\cite{schlick1994inexpensive} a Fresnel-tényező kiszámolásához. 
+
+A nagy dinamikatartományú megjelenítéssel és az ehhez tartozó színleképezéssel lehetőség van a valóságban tapasztalható fényviszonyok, kontrasztarányok szimulálására az egyébként kis dinamikatartományú kijelzőkön. A fényviszonyokhoz történő adaptáció Erik Reinhard\cite{reinhard2002photographic} módszerét használja az átlagos fénysűrűség megállapításához, majd ebből a DICE prezentációja~\cite{dice_moving_frostbite_to_pbr} alapján számol expozíciós értéket.
+
+A kép alapú megvilágításhoz használt részekre bontott integrál-közelítés és a hozzá tartozó árnyalóprogramok implementációja az Unreal 4 játékmotorban használt módszeren~\cite{karis2013real} alapul.
+
+\section{Hardveres követelmények}
+
+Minimális konfiguráció:
+
+\begin{itemize}
+  \item 64 bites, x86 architektúrájú processzor
+  \item 128 MB memória
+  \item legalább 50 MB szabad tárhely a háttértárolón
+  \item OpenGL 3.3-at támogató videokártya
+\end{itemize}
+
+\vspace{15pt}
+
+Ajánlott konfiguráció:
+
+\begin{itemize}
+  \item legalább 2 GHz-es, 64 bites, x86 architektúrájú processzor
+  \item 512 MB memória
+  \item 300 MB szabad tárhely a háttértárolón
+  \item OpenGL 3.3-at támogató, minimum középkategóriás videokártya
+\end{itemize}
+
+\section{Szoftveres követelmények}
 
 A mellékelt bináris 64 bites Windows operációs rendszerhez készült, azonban a forráskód a három legnagyobb asztali operációs rendszer (Windows, Linux, OS X) bármelyikére lefordítható, 32 és 64 bites változatban is, ennek menetéről bővebben a következő fejezet ad felvilágosítást.
 
-Mivel a megjelenítő OpenGL alapú, ezért a futtató számítógépen elérhetőnek kell lennie az OpenGL 3.3-as verziójának. Ezt a verziót mind az integrált, mind a dedikált videokártyák évekre visszamenőleg támogatják. Ha nem vagyunk biztosak a támogatott verzióban, akkor a grafikus meghajtóprogram vezérlőpultján valószínűleg megtaláljuk ez az információt.
+Mivel a megjelenítő OpenGL alapú, ezért a futtató számítógépen elérhetőnek kell lennie az OpenGL 3.3-as verziójának. Ezt a verziót mind az integrált, mind a dedikált videokártyák évekre visszamenőleg támogatják. Ha nem vagyunk biztosak a támogatott verzióban, akkor a melléklet \textit{bin} mappájában található glewinfo.exe binárist futtatva egy glewinfo.txt szöveges állomány jön létre, amelynek 8. sorában szerepel a grafikus kártya által támogatott OpenGL verzió (pl. ,,OpenGL version 4.3.0 - Build 20.19.15.4424 is supported'': a 4.3-as verzió támogatott).
 
 \section{A program üzembe helyezése}
 
@@ -28,7 +62,7 @@ A fordítás menete innentől már egyszerű: lépjünk az előzőleg létrehozo
     \caption{A megjelenítő felhasználói felülete.}
 \end{figure}
 
-A megjelenítő felhasználói felülete négy ablakból áll, ezeken különféle információkat és beállítási lehetőségeket érhetünk el. A felhasználói felület nyelve angol, ezért alapszintű angol nyelvtudás nem árt a program használatához, de a következő alpontok segítségével nyelvtudás nélkül is képesek leszünk használni a programot.
+A megjelenítő felhasználói felülete négy ablakból áll, ezeken különféle információkat és beállítási lehetőségeket érhetünk el. A felhasználói felület nyelve angol, ezért alapszintű angol nyelvtudás szükséges a program használatához, de a következő alpontokban leírtak segítségével nyelvtudás nélkül is képesek leszünk legalább alapszinten használni a programot.
 
 A felhasználói felület hátterében látjuk magát a betöltött modellt, illetve annak panorámaképből összeállított környezetét. Az egérgörgő segítségével változtathatjuk a virtuális kamera távolságát a modelltől, azaz így közelíthetünk vagy távolodhatunk tőle. A bal egérgomb lenyomásával és nyomva tartásával egy képzeletbeli gömbön mozgathatjuk a kamerát, ami mindig a modell közepe felé néz, így a modellt minden irányból megnézhetjük. A megjelenítő ablaka futás közben technikai okok miatt nem méretezhető át. Az alapértelmezett felbontás \(1280 \times 720\), de a következő, egymástól szóközzel elválasztott parancssori paraméterek segítségével elindítható a kívánt felbontáson:
 
@@ -88,7 +122,7 @@ A modell információs ablakban a modellel kapcsolatos információk és beáll�
 
 A modellhez tartozó .mtl fájlból olvasott fizikai alapú anyagok a legfelső választógombra kattintva érhetők el, ezek valamelyikére kattintva az ablak tartalma automatikusan frissül.
 
-Amennyiben a modellhez nem volt mellékelve anyagleíró fájl, vagy csak szeretnénk kipróbálni valamilyen valódi anyagot, a \textit{Use predefines material}-t bekapcsolva elérhetővé válik az alatta levő lista, illetve ekkor a modell is a választott előre definiált anyag kinézetével jelenik meg. A megjelenítő három beépített anyagot tartalmaz: arany, ezüst és réz.
+Amennyiben a modellhez nem volt mellékelve anyagleíró fájl, vagy csak szeretnénk kipróbálni valamilyen valódi anyagot, a \textit{Use predefined material}-t bekapcsolva elérhetővé válik az alatta levő lista, illetve ekkor a modell is a választott előre definiált anyag kinézetével jelenik meg. A megjelenítő három beépített anyagot tartalmaz: arany, ezüst és réz.
 
 Az első anyagtulajdonság a diffúz szín, ami megadható egyetlen színként vagy textúrával is. Ez utóbbi csak akkor elérhető, ha az anyagleíróban volt erre vonatkozó bejegyzés. A hozzátartozó kapcsolóval a beállított szín és (ha elérhető,) a betöltött textúra között válthatunk. A következő tulajdonság a normáltextúra. Ezt is az anyagleíróból olvassa a program, a mellett található jelölőnégyzettel pedig a normáltérképezés kapcsolhatjuk be/ki.
 
