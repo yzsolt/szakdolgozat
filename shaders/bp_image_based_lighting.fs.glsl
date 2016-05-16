@@ -35,25 +35,28 @@ void main() {
     vec3 light_direction = R;//normalize(light_position - vs_out_world_position);
 
     float lambertian = max(dot(-R, normal), 0);
-    float specular = 0;
+    float specular_intensity = 0;
 
     if (lambertian > 0) {
 
         vec3 half_direction = normalize(light_direction + vs_out_view_direction);
         float specular_angle = max(dot(half_direction, normal), 0);
-        specular = pow(specular_angle, u_bpm.shininess);
+        specular_intensity = pow(specular_angle, u_bpm.shininess);
 
     }
 
     vec4 ambient_color = u_bpm.ambient.use_texture ? texture(u_bpm.ambient.texture, vs_out_texture) : u_bpm.ambient.color;
     vec4 diffuse_color = u_bpm.diffuse.use_texture ? texture(u_bpm.diffuse.texture, vs_out_texture) : u_bpm.diffuse.color;
+    vec4 specular_color = u_bpm.specular.use_texture ? texture(u_bpm.specular.texture, vs_out_texture) : u_bpm.specular.color;
 
-    float specularity = u_bpm.specular.use_texture ? texture(u_bpm.specular.texture, vs_out_texture).r : 1;
-    vec4 specular_component = specular * specularity * u_bpm.specular.color;
+    float specularity = (specular_color.r + specular_color.g + specular_color.b) / 3;
+    vec4 specular_component = specular_intensity * specularity * specular_color;
 
 
     float reflectivity = specularity;
     vec4 reflect_color = vec4(0);
+
+    R.y *= -1;
 
     if (reflectivity > 0.05) {
         reflect_color = texture(u_environment_map, R) * reflectivity;
