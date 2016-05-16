@@ -52,6 +52,11 @@ std::unique_ptr<float[]> Texture::load_hdr_image(const std::string& path, int& c
 
 	float* data = stbi_loadf_from_file(file, &width, &height, &component_count, 0);
 
+	if (!data) {
+		fclose(file);
+		throw std::runtime_error("Couldn't load HDR image, its content is probably invalid.");
+	}
+
 	fclose(file);
 
 	out_size = glm::uvec2(width, height);

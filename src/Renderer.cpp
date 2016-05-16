@@ -188,10 +188,16 @@ void Renderer::_setup_gui() {
 	auto load_skybox = new Button(renderer_settings, "Load skybox");
 	load_skybox->setCallback([&] {
 
-		std::string skybox_path = file_dialog({ { "hdr", "Radiance HDR" } }, false);
+		try {
 
-		if (!skybox_path.empty()) {
-			m_skybox->reset_panorama(skybox_path);
+			std::string skybox_path = file_dialog({ { "hdr", "Radiance HDR" } }, false);
+
+			if (!skybox_path.empty()) {
+				m_skybox->reset_panorama(skybox_path);
+			}
+
+		} catch (const std::runtime_error& e) {
+			new nanogui::MessageDialog(m_gui.get(), MessageDialog::Type::Warning, "Load error", std::string("An error happened when trying to load the skybox: ") + e.what());
 		}
 
 	});

@@ -8,9 +8,12 @@ std::array<std::unique_ptr<float[]>, 6> TextureCubeMap::_load_hdr_vertical_cross
 
 	std::unique_ptr<float[]> data = Texture::load_hdr_image(file_path, m_component_count, m_size);
 
-	assert(m_size.x % 3 == 0 && m_size.y % 4 == 0);
+	if (!(m_size.x % 3 == 0 && m_size.y % 4 == 0 && m_size.x / 3 == m_size.y / 4)) {
+		throw std::runtime_error("Wrong size for vertical cross skybox: width must be 3/4 of height.");
+	}
+
 	unsigned int section_width = m_size.x / 3;
-	assert(m_size.y == section_width * 4);
+	//assert(m_size.y == section_width * 4);
 
 	std::vector<glm::uvec2> sections;
 
