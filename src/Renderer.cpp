@@ -559,26 +559,26 @@ void Renderer::run() {
 
 		FrameBuffer* render_target = m_msaa_fb ? m_msaa_fb.get() : m_main_fb.get();
 
+		if (m_rotate_mesh) {
+			m_mesh_rotation += static_cast<float>(glfwGetTime() - m_last_frame_time) / 2.f;
+		}
+
+		// Matrix calculations
+
+		m_world = glm::mat4(1);
+		m_world = glm::scale(m_world, glm::vec3(m_mesh->scale()));
+		m_world = glm::rotate(m_world, m_mesh_rotation, glm::vec3(0, 1, 0));
+		m_world = glm::translate(m_world, -m_mesh->center());
+
+		glm::mat4 view = m_camera.view_matrix();
+
+		m_world_view = view * m_world;
+		m_normal_matrix = glm::transpose(glm::inverse(m_world_view));
+
+		glm::mat4 world_inverse = glm::inverse(m_world);
+		glm::mat4 view_projection = m_projection * view;
+
 		render_target->bind_for_drawing();
-
-			if (m_rotate_mesh) {
-				m_mesh_rotation += static_cast<float>(glfwGetTime() - m_last_frame_time) / 2.f;
-			}
-
-			// Matrix calculations
-
-			m_world = glm::mat4(1);
-			m_world = glm::scale(m_world, glm::vec3(m_mesh->scale()));
-			m_world = glm::rotate(m_world, m_mesh_rotation, glm::vec3(0, 1, 0));
-			m_world = glm::translate(m_world, -m_mesh->center());
-
-			glm::mat4 view = m_camera.view_matrix();
-
-			m_world_view = view * m_world;
-			m_normal_matrix = glm::transpose(glm::inverse(m_world_view));
-
-			glm::mat4 world_inverse = glm::inverse(m_world);
-			glm::mat4 view_projection = m_projection * view;
 
 			// Depth-only prepass
 
