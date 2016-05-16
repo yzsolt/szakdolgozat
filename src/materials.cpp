@@ -94,13 +94,6 @@ const std::vector<PhysicallyBasedMaterial> PhysicallyBasedMaterial::DEFAULTS = {
 		TextureMap(1)
 	),
 
-	PhysicallyBasedMaterial("Wood",
-		TextureMap("wood_diffuse.png"),
-		TextureMap("wood_normal.png"),
-		TextureMap(0.3),
-		TextureMap(0)
-	),
-
 };
 
 PhysicallyBasedMaterial::PhysicallyBasedMaterial(const std::string& name) : Material(name) {}
