@@ -119,7 +119,7 @@ A Blinn-Phong tükröződési modell~\cite{blinn1977models} a Phong modell James
 H = \frac{ L + V }{ \| L + V \| }
 \]
 
-Ennek előnye megjelenésének idején elsősorban az volt, hogy a \(H\) vektort gyorsabban ki lehetett számolni, mint az \(R\)-t. Végül ez a modell vált a de-facto sztenderd árnyalási modellé, mind az OpenGL, mind a DirectX fix-funkciós (?) csővezetéke ezt a modellt használja. További előnye az eredeti Phong modellel szemben, hogy sík felületen történő tükröződéskor kis szögű vézeti vektor esetén a csillanás "megnyúlik", elliptikus alakot vesz fel, így jobban közelítve a valóságban tapasztalható jelenséget (szemben a Phong modellel, amely mindig kör alakú csillanást eredményez), továbbá a \(H\) vektorral történő számolás a később tárgyalt, fizikai alapú megjelenítést megalapozó mikrofelületi modellhez hasonlatos.
+Ennek előnye megjelenésének idején elsősorban az volt, hogy a \(H\) vektort gyorsabban ki lehetett számolni, mint az \(R\)-t. Végül ez a modell vált a de-facto sztenderd árnyalási modellé, mind az OpenGL, mind a DirectX fix-funkciós csővezetéke ezt a modellt használja. További előnye az eredeti Phong modellel szemben, hogy sík felületen történő tükröződéskor kis szögű vézeti vektor esetén a csillanás "megnyúlik", elliptikus alakot vesz fel, így jobban közelítve a valóságban tapasztalható jelenséget (szemben a Phong modellel, amely mindig kör alakú csillanást eredményez), továbbá a \(H\) vektorral történő számolás a később tárgyalt, fizikai alapú megjelenítést megalapozó mikrofelületi modellhez hasonlatos.
 
 \begin{figure}[!ht]
     \centering
@@ -127,7 +127,7 @@ Ennek előnye megjelenésének idején elsősorban az volt, hogy a \(H\) vektort
     \caption{A Phong és a Blinn-Phong visszaverődési modell vektorai.}
 \end{figure}
 
-A gyakorlatban a \(k\) anyagparaméterekre színvektorokat használunk, így lényegében egyszerre számoljuk a vörös, zöld és kék fények tükröződését. A modell definíciójából látható, hogy az anyagparaméterek mindegyike tapasztalaki alapon kitalált, nincs egzakt fizikai mértékegységük, hiszen nem konkrét fizikai modellen alapulnak. Az anyag által meghatározott ambiens tükröződési érték is furcsának hat, hiszen logikusan gondolkozva ezt a megvilágítást a jelenet alapján kellene kiszámítani, itt mégis az anyagtulajdonságok között szerepel. A Blinn-Phong modell egyik nagy hátránya is ebből fakad: egy adott megvilágítás mellett elkészített, szemmel jónak ítélt anyagmodellt más megvilágítás alá helyezve "elromlik" a megjelenítés, a fix és fizikai alapot nélkülöző paraméterek miatt.
+A gyakorlatban a \(k\) anyagparaméterekre színvektorokat használunk, így lényegében egyszerre számoljuk a vörös, zöld és kék fények tükröződését. A modell definíciójából látható, hogy az anyagparaméterek mindegyike tapasztalati alapon kitalált, nincs egzakt fizikai mértékegységük, hiszen nem konkrét fizikai modellen alapulnak. Az anyag által meghatározott ambiens tükröződési érték is furcsának hat, hiszen logikusan gondolkozva ezt a megvilágítást a jelenet alapján kellene kiszámítani, itt mégis az anyagtulajdonságok között szerepel. A Blinn-Phong modell egyik nagy hátránya is ebből fakad: egy adott megvilágítás mellett elkészített, szemmel jónak ítélt anyagmodellt más megvilágítás alá helyezve "elromlik" a megjelenítés, a fix és fizikai alapot nélkülöző paraméterek miatt.
 
 \subsection{Matematikai és fizikai alapfogalmak}
 \label{subsec:matbase}
@@ -138,12 +138,12 @@ A radiometria az elektromágneses sugárzás (esetünkben a látható fény) mé
 
 \begin{itemize}[noitemsep]
 \item \(\phi\): sugárzási teljesítmény (\textit{radiant flux}),
-\item \(E\): besugárzott teljesítmény (\textit{irradiance}),
-\item \(I\): sugárzási intenzitás (\textit{radiant intensity}),
-\item \(L\): sugárzás (\textit{radiance}).
+\item \(E\): besugárzás (\textit{irradiance}),
+\item \(I\): sugárerősség (\textit{radiant intensity}),
+\item \(L\): sugársűrűség (\textit{radiance}).
 \end{itemize}
 
-A sugárzási teljesítmény egy tartományon egységnyi idő alatt átáramló sugárzási energiát jelöli és Wattban (W) mérjük. A besugárzott teljesítmény az egységnyi területre beérkező sugárzási teljesítmény adja meg. Mértékegysége \(W \over m^2\), és a következőképpen számolható:
+A sugárzási teljesítmény egy tartományon egységnyi idő alatt átáramló sugárzási energiát jelöli és Wattban (W) mérjük. A besugárzás az egységnyi területre beérkező sugárzási teljesítmény adja meg. Mértékegysége \(W \over m^2\), és a következőképpen számolható:
 
 \[
 E = { { d\phi } \over { dA } }
@@ -151,15 +151,15 @@ E = { { d\phi } \over { dA } }
 
 ahol \(d\) a parciális derivált szimbóluma, \(\phi\) a sugárzási teljesítmény és \(A\) a terület.
 
-A sugárzási intenzitás az egységnyi térszögben terjedő sugárzási teljesítményt adja meg, mértékegysége \(W \over {sr}\), definíciója pedig:
+A sugárerősség az egységnyi térszögben terjedő sugárzási teljesítményt adja meg, mértékegysége \(W \over {sr}\), definíciója pedig:
 
 \[
 I = { { d\phi } \over { d\omega } }
 \]
 
-ahol \(\omega\) ?.
+ahol \(\omega\) infinitezimális térszög.
 
-A sugárzás az egységnyi vetített területre egységnyi térszögben beérkező sugárzási teljesítményt határozza meg. Ez a legfontosabb fogalom a felsoroltak közül, ugyanis a megjelenítés során ezt az értéket, azaz a megjelenítendő felület egy adott pontját adott irányban elhagyó sugárzást kell kiszámoljuk. Mértékegysége \(W \over {m^2sr}\), és a következőképpen definiáljuk:
+A radiancia az egységnyi vetített területre egységnyi térszögben beérkező, visszavert, vagy emittált sugárzási teljesítményt határozza meg. Ez a legfontosabb fogalom a felsoroltak közül, ugyanis a megjelenítés során ezt az értéket, azaz a megjelenítendő felület egy adott pontját adott irányban elhagyó sugárzást kell kiszámoljuk. Mértékegysége \(W \over {m^2sr}\), és a következőképpen definiáljuk:
 
 \[
 L(\mathbf{v}) = { { d^2\phi } \over { dA cos\theta d\mathbf{v} } }
@@ -175,7 +175,7 @@ dE(\mathbf{l}) = d { {d\phi} \over {dA} } (\mathbf{l}) = L_{in}(\mathbf{l}) cos\
 
 \subsection{A kétirányú visszaverődési eloszlásfüggvény}
 
-A kétirányú visszaverődési eloszlásfüggvényt, azaz BRDF-et Fred Nicodemus definiálta először~\cite{nicodemus1965directional}, és arra a feltevésre épül, hogy a nézeti irányba visszavert fény arányos a fényforrás által besugárzott fényhez. Ezek alapján definíciója a következő:
+A kétirányú visszaverődési eloszlásfüggvényt, azaz BRDF-et Fred Nicodemus definiálta először~\cite{nicodemus1965directional}, és arra a feltevésre épül, hogy a nézeti irányba visszavert fény arányos a fényforrás által besugárzott fénnyel. Ezek alapján definíciója a következő:
 
 \[
 f_r(\mathbf{l}, \mathbf{v}) = { { dL_{out}(\mathbf{v}) } \over {dE(\mathbf{l})} }
@@ -193,7 +193,7 @@ Tulajdonságai:
 
 A Blinn-Phong modellhez hasonlóan a fizikai alapú megjelenítés során is külön számoljuk a diffúz és a spekuláris megvilágítást, emiatt minden megvilágítási típushoz két megfelelő, diffúz és spekuláris BRDF-et kell találjunk.
 
-A valósidejű grafikában minimáis számításigénye miatt leggyakrabban használt diffúz BRDF a Lambert-féle tükröződésen alapuló "Lambert BRDF", amely a következőképpen definiált:
+A valósidejű grafikában minimális számításigénye miatt leggyakrabban használt diffúz BRDF a Lambert-féle tükröződésen alapuló "Lambert BRDF", amely a következőképpen definiált:
 
 \[
 f_{Lambert}(\mathbf{l}, \mathbf{v}) = { c_{diff} \over \pi }
@@ -207,7 +207,7 @@ ahol \(c_{diff}\) az anyag diffúz visszaverődési aránya, gyakorlati megvaló
 
 tehát \(\pi\) kiesik, \(c_{diff}\) állandó integrálja pedig értelemszerűen már teljesíti az energiamegmaradás törvényét.
 
-A Lambert-féle tükröződés Johann Heinrich Lambert nevéhez fűződik, aki 1760-ban írta le ezt a jelenséget Photometria c. könyvében~\cite{klett1760ih}. A Lambert-féle tükröződés szerint egy ideális diffúzan tükröző, azaz matt felület (Lambert felület) a nézeti pozíciótól függetlenül ugyanolyan fényesnek látszik, vagyis teljesíti Lambert koszinusz törvényét, ami szerint az ilyen felületek megfigyelhető fényessége közvetlenül arányos az \(\mathbf{l}\) és \(\mathbf{n}\) vektorok által bezárt szög koszinuszával.
+A Lambert-féle tükröződés Johann Heinrich Lambert nevéhez fűződik, aki 1760-ban írta le ezt a jelenséget Photometria c. könyvében~\cite{klett1760ih}. A Lambert-féle tükröződés szerint egy ideális diffúzan tükröző, azaz matt felület (Lambert felület) a nézeti pozíciótól függetlenül ugyanolyan fényesnek látszik, vagyis teljesíti Lambert koszinusz törvényét, ami szerint az ilyen felületek megfigyelhető fényessége közvetlenül arányos a fényforrásba mutató vektor \(\mathbf{l}\) és a felületi normálvektor \(\mathbf{n}\) által bezárt szög koszinuszával.
 
 A Lambert BRDF jól használható diffúz felületek megvilágításának közelítésére, azonban tudnunk kell, hogy nagyon kevés tökéletes Lambert felület létezik, így nem-valósidejű megjelenítésnél, ahol nem ennyire hangsúlyos tényező a futásidő, érdemes más, a valóságban gyakran előforduló rücskös felületek megjelenését jobban közelítő BRDF-et választani. Két lehetséges alternatíva a Disney által kifejlesztett Burley~\cite{burley2012physically} illetve az Oren-Nayar visszaverődési modell~\cite{oren1994generalization}, amely a felület rücskösségét is figyelembe veszi.
 
@@ -327,9 +327,9 @@ Számtalan a normáltérképhez (\textit{normal map}) hasonló "trükkös" text�
 
 \subsection{Nagy dinamikatartományú megjelenítés}
 
-A jelenleg elterjedt kijelzők túlnyomó többsége 24 bites RGB bemenet alapján dolgozik. Ez azt jelenti, hogy a képernyőn látható színek vörös, zöld és kék komponensekből állnak, ahol minden komponensre \(2^8\) bit jut, azaz 256 különböző értéket vehetnek fel. Elméletben tehát \(3 \cdot 2^8\), azaz körülbelül 16,7 millió különböző színt tudunk megjeleníteni. A valóságban ténylegesen megjelenített színmennyiség a kijelzők különböző fizikai paramétereitől függően változik, de az emberi szem csupán körülbelül 10 millió színt képes megkülönböztetni egymástól~\cite{judd1975color}, így ebben a tekintetben a technológia az emberi érzékelés előtt áll.
+A jelenleg elterjedt kijelzők túlnyomó többsége 24 bites RGB bemenet alapján dolgozik. Ez azt jelenti, hogy a képernyőn látható színek vörös, zöld és kék komponensekből állnak, ahol minden komponensre \(2^8\) bit jut, azaz 256 különböző értéket vehetnek fel. Elméletben tehát \((2^8)^3\), azaz körülbelül 16,7 millió különböző színt tudunk megjeleníteni. A valóságban ténylegesen megjelenített színmennyiség a kijelzők különböző fizikai paramétereitől függően változik, de az emberi szem csupán körülbelül 10 millió színt képes megkülönböztetni egymástól~\cite{judd1975color}, így ebben a tekintetben a technológia az emberi érzékelés előtt áll.
 
-Van azonban egy másik nagyon fontos, megjelenítőt és érzékelőt egyaránt jellemző tulajdonság, a kontrasztarány, amit a legvilágosabb (fehér) és a legsötétebb (fekete) megjeleníteni/érzékelni képes szín közötti arányként definiálunk. Míg egy modern LCD kijelző a 24 bites színtér által meghatározott 256:1 bemenő kontrasztarányból kb. 1000:1 kimenő arányt tud megjeleníteni, addig az emberi szem különböző fényviszonyokhoz való rendkívül jó alkalmazkodóképességének köszönhetően ennél jóval nagyobb, kb. 1000:1 - 15000:1 kontrasztarány érzékelésére is képes. (hivatkozás?)
+Van azonban egy másik nagyon fontos, megjelenítőt és érzékelőt egyaránt jellemző tulajdonság, a kontrasztarány, amit a legvilágosabb (fehér) és a legsötétebb (fekete) megjeleníteni/érzékelni képes szín közötti arányként definiálunk. Míg egy modern LCD kijelző a 24 bites színtér által meghatározott 256:1 bemenő kontrasztarányból kb. 1000:1 kimenő arányt tud megjeleníteni, addig az emberi szem különböző fényviszonyokhoz való rendkívül jó alkalmazkodóképességének köszönhetően ennél jóval nagyobb, kb. 1000:1 - 15000:1 kontrasztarány érzékelésére is képes.~\cite{human_eye_dynamic_range}
 
 A nagy dinamikatartomány (\textit{high-dynamic-range, HDR}) fogalma először a fényképészet területén jelent meg. A probléma az volt - illetve mind a mai napig az, hogy a fényképezőgépek felépítéséből adódóan egyetlen expozícióval nem lehet olyan képet készíteni, amely a teljes emberi szem által érzékelhető dinamikatartományt visszaadja. A fényképészek ezt úgy oldották meg, hogy az expozíciós időt - és ezzel a bejövő fénymennyiséget - változtatva több képet készítettek ugyanarról a jelenetről, majd egy végső lépésben (amelyet színleképezésnek [\textit{tone mapping}] hívnak) ezeket egy meghatározott metodika alapján egy képpé kombinálták. A fényképészet a dinamikatartományt ún. expozíciós értékkel (\textit{exposure value, EV}) méri, ahol EV eggyel való növekedése a beérkező fénymennyiség megkétszereződését jelenti.
 
@@ -342,7 +342,7 @@ A nagy dinamikatartomány (\textit{high-dynamic-range, HDR}) fogalma először a
 Ahhoz tehát, hogy az általunk a valóságban érzékelhető fényerősség különbségeket érzékeltetni tudjuk, először is el kell szakadjunk az ebben minket korlátozó 24 bites színtértől. A modern grafikus kártyák már hardveresen támogatják a lebegőpontos (komponensenként 16 vagy 32 bites) puffereket, így ezeket használhatjuk HDR megjelenítésre. A fényképészettel ellentétben továbbra is csak egy leképezési lépésre van szükségünk, amely során egy ilyen lebegőpontos pufferbe számolunk, amelyben a korábbi maximális 255-nél fényerősségtől függően jóval nagyobb értékek is szerepelhetnek. A kijelzők azonban továbbra is a 24 bites, alacsony dinamikatartományú RGB színtérben várják a bemenetet, ezért HDR megjelenítésnél is szükség van egy színleképezési lépésre, amely során egy ún. színleképezési operátor segítségével a pufferben szereplő értékeket ismét "beszorítjuk" a \([0; 1]\) intervallumba. Színleképezés során az alapvető cél az eredeti HDR kép lokális kontrasztarányainak minél jobb megtartása. Több ilyen operátor létezik, az egyik legegyszerűbb ezek közül a Reinhard operátor~\cite{reinhard2002photographic}:
 
 \[
-L_{ldr} = { L_{hdr}(x, y) \over 1 + L_{hdr}(x, y) }
+L_{ldr}(x, y) = { L_{hdr}(x, y) \over 1 + L_{hdr}(x, y) }
 \]
 
 ahol \(L_{hdr}(x, y)\) a (kétdimenziós) HDR puffer \((x, y)\) koordinátájában található érték.
@@ -410,16 +410,16 @@ ahol
 \item \(L_{prev}\) az előző képkocka kirajzolása során mért átlagos fénysűrűség,
 \item \(L_{avg}\) az aktuális képkoca átlagos fénysűrűsége,
 \item \(S_a\) állandó, amellyel az adaptáció sebessége szabályozható,
-\item \(t_{\delta}\) az előző képkocka kirajzolása eltelt idő.
+\item \(t_{\delta}\) az előző képkocka kirajzolása óta eltelt idő.
 \end{itemize}
 
 Az \(S_a\) állandónak az implementációban 60-as értéket adtam, ezzel a szemünkhöz hasonló gyorsasággal történik az adaptáció. Az eltelt idővel való szorzás azért szükséges, hogy ezzel függetlenítsük az algoritmust (az adaptáció sebességét) a kirajzolás sebességétől.
 
 \subsection{Pont és zseblámpa fények}
 
-A valóságban szinte mindig érkezik valamilyen fény a szemünkbe, még a legsötétebb éjszakákon is. Az aggteleki Baradla-barlangot végigjáró turistacsoportoknak a túravezetők előszeretettel mutatják meg, milyen az abszolút sötétség: a túra egy pontján a fényképezők, telefonok kikapcsolása után a barlangi világítást is lekapcsolják. A számítógépes megjelenítésben ez a kiindulópont. Ahhoz, hogy egy jelenetből lássunk is valamit, szükségünk van legalább egy fényforrásra.
+A valóságban szinte mindig érkezik valamilyen fény a szemünkbe, még a legsötétebb éjszakákon is. Az aggteleki Baradla-barlangot végigjáró turistacsoportoknak a túravezetők előszeretettel mutatják meg, milyen az abszolút sötétség: a túra egy pontján a fényképezők, telefonok kikapcsolása után a mesterséges barlangi világítást is lekapcsolják. A számítógépes megjelenítésben ez a kiindulópont. Ahhoz, hogy egy jelenetből lássunk is valamit, szükségünk van legalább egy fényforrásra.
 
-A legegyszerűbb fényforrások a pont fények, amelyek egy pozícióval és intenzitással adottak. Mivel nincs területük, a sugárzást nem tudjuk értelmezni rajtuk. A sugárzási teljesítményt viszont fel tudjuk írni a sugárzási intenzitás segítségével, ha a pont fény körüli egységgömbön integrált számítunk:
+Valósidejű grafikában az igaziakat jól közelítő, de a valóságban nem létező, absztrakt fényforrásokat használunk, mert ezekkel könnyen és gyorsan tudunk számolni. A legegyszerűbb ilyen fényforrások a pont fények, amelyek egy pozícióval és intenzitással adottak. Mivel nincs területük, a sugárzást nem tudjuk értelmezni rajtuk. A sugárzási teljesítményt viszont fel tudjuk írni a sugárzási intenzitás segítségével, ha a pont fény körüli egységgömbön integrált számítunk:
 
 \[
 \phi = \int_S { I d\omega } = I \int_0^{2\pi} { \int_0^\pi { sin\theta d\theta d\Phi } } = I 4\pi
@@ -486,7 +486,7 @@ Sugárkövetésen alapuló megjelenítőkhöz már felhasználhatóak ezek a ké
 \approx { { 1 \over \sum_{k=1}^{N} cos{\theta_l}_k } \sum_{k=1}^{N} L_{in}(\mathbf{l}_k)cos{\theta_l}_k } + { 1 \over N \sum_{k=1}^{N} { { f_r(\mathbf{v}, \mathbf{l}_k) cos{\theta_l}_k} \over { p_r(\mathbf{v}, \mathbf{l}_k) } } }
 \]
 
-Az első tagot a rücskösség értékétől függően egy kockatérkép mip szintjeibe számolhatjuk ki. Ezt a textúrát besugárzási kockatérképnek hívjuk. A második tag egy ún. lookup textúrába számolható, azonban jelenleg 3 paramétertől (\(F_0\), rücskösség, \(\mathbf{n} \cdot \mathbf{v}\)) függ, így további egyszerűsítésre van szükség:
+Az első tagot a rücskösség értékétől függően egy kockatérkép mip-map szintjeibe számolhatjuk ki. Ezt a textúrát besugárzási kockatérképnek hívjuk. A második tag egy ún. lookup textúrába számolható, azonban jelenleg 3 paramétertől (\(F_0\), rücskösség, \(\mathbf{n} \cdot \mathbf{v}\)) függ, így további egyszerűsítésre van szükség:
 
 \[
 \int_{\Omega} { f_r(\mathbf{l}, \mathbf{v}) cos\theta_l d\mathbf{l} } =
@@ -499,6 +499,7 @@ Ezzel az \(F_0\)-tól való függést megszüntettük, és a két integrál ért
 Mindezek segítségével valósidőben, mindössze két textúraolvasással kiszámolható a kép alapú megvilágításból származó sugárzás. Sőt, a két besugárzási kockatérképet (diffúz és spekuláris) és a BRDF lookup textúrát nem muszáj előre kiszámolni, dinamikus tükröződés megvalósításához kevesebb mintával menet közben is generálhatók. Az \(\mathbf{n} = \mathbf{v} = \mathbf{l}\) feltételezés azonban szemmel látható hibákat okoz: elsősorban sík felületeknél észrevehető, hogy a valóságban "megnyúlt" tükröződések emiatt itt nem jelennek meg.
 
 \section{Továbbfejlesztési lehetőségek}
+\label{sec:further_dev}
 
 Az elkészült megjelenítő ugyan alkalmas a fizikai alapú megjelenítés bemutatására, de számtalan lehetőség van a továbbfejlesztésre mind a felhasználói felület, mind a fizikai alapú megvilágítás szempontjából.
 
@@ -508,7 +509,7 @@ A megjelenítő jelenleg egyetlen modellformátumot képes betölteni. Ezen pél
 
 A fizikai alapú megjelenítés nem merül ki a kép alapú megvilágításban illetve a pont és zseblámpa fényeknél: a fejlett PBR-alapú megjelenítők gömb, kapszula (a két végén félgömbbel lezárt henger) és területi (síkbeli poligon) típusú fényforrások kezelésére is képesek. Ezek fizikai alapú, valósidőben történő megjelenítése aktív kutatási terület, a jelenleg használt közelítések nem teljesen korrektek, bizonyos tulajdonságokat (pl. energiamegmaradás) nem mindig teljesítenek. Az emberi szem meggyőzésére azonban már most is alkalmasak, ezért ezen fényforrások az aktuálisan használt közelítésekkel történő implementálása látványos eredményt hozna.
 
-\textit{Megjegyzés: az aktív kutatási terület aktualitását mi sem bizonyítja jobban, hogy a szakdolgozat írása alatt jelent meg egy új, viszonylag kis számításigényű módszer a területi fények közelítésére. }
+\textit{Megjegyzés: az aktív kutatási terület aktualitását mi sem bizonyítja jobban, hogy a szakdolgozat írása alatt jelent meg egy új, viszonylag kis számításigényű módszer a területi fények közelítésére~\cite{real_time_area_light}. }
 
 Az elkészült megjelenítő az ún. \textit{forward rendering} technikát használja, aminek nagy hátránya, hogy egy képpont árnyalását minden egyes dinamikus fényre külön el kell végezni, azaz minden egyes dinamikus fényforráshoz újra ki kell rajzolni a jelenetet. Ezen lehetne segíteni például azzal, hogy nem az egész jelenetet, csak azokat a részeket árnyaljuk újra, amelyekre az adott fényforrás hatással van. Dinamikus fények megjelenítése szempontjából a legtöbbet azonban a \textit{deferred rendering} (késleltetett árnyalás) technikával lehetne nyerni: ezen módszer lényege, hogy egy speciális, G-Buffernek nevezett pufferben tároljuk a képpontok árnyalásához szükséges összes információt, így a fényforrások számától függetlenül, egy lépésben elvégezhető az árnyalás.
 
@@ -525,10 +526,9 @@ Mielőtt rátérnénk a kimenet tesztelésére, fontos leellenőriznünk, hogy a
 \vspace{10pt}
 
 \begin{center}
+
   \begin{tabulary}{\textwidth}{L | C || L}
-    %Teszteset & & Megjegyzés \\
-    %\hline
-    \multicolumn{3}{l}{\textbf{Modell betöltés}} \\
+    \multicolumn{3}{l}{\textbf{Modell betöltés tesztelése}} \\
     \hline
     Nem megfelelő formátumú modell betöltése & \checkmark & \footnotesize{A megfelelő szűrés be van állítva a tallózó párbeszédablakban. Érvénytelen .obj fájl esetén semmi sem jelenik meg.} \\
     \hline
@@ -538,15 +538,117 @@ Mielőtt rátérnénk a kimenet tesztelésére, fontos leellenőriznünk, hogy a
     \hline
     Üres .mtl fájl & \checkmark & \footnotesize{Lásd fentebb.} \\
     \hline
+    Üres .obj fájl & \checkmark & \footnotesize{} \\
+    \hline
   \end{tabulary}
+
+  \vspace{15pt}
+
+  \begin{tabulary}{\textwidth}{L | C || L}
+    \multicolumn{3}{l}{\textbf{Skybox betöltés tesztelése}} \\
+    \hline
+    Nem megfelelő formátumú skybox betöltése & \checkmark & \footnotesize{Nincs rá lehetőség, hiszen a megfelelő szűrés be van állítva a tallózó párbeszédablakban.} \\
+    \hline
+    Nem megfelelő méretű skybox betöltése & \checkmark & \footnotesize{A program hibaüzenetet ad.} \\
+    \hline
+    Érvénytelen HDR fájl betöltése & \checkmark & \footnotesize{A program hibaüzenetet ad.} \\
+    \hline
+    Nem megfelelő elrendezésű skybox betöltése & \checkmark & \footnotesize{Hibás méretű kép esetén hibaüzenet jelenik meg.} \\
+    \hline
+    Besugárzási és BRDF textúrák előállítása & \checkmark & \footnotesize{A program külön ellenőrzi a BRDF, diffúz és spekuláris besugárzási textúrák meglétét, ha bármelyikből hiányzik, azt újragenerálja.} \\
+    \hline
+    Nagy értékeket tartalmazó skyboxból történő előgenerálás & \xmark & \footnotesize{Lásd továbbfejlesztési lehetőségek (~\ref{sec:further_dec} fejezet).} \\
+    \hline
+  \end{tabulary}
+  
+  \vspace{15pt}
+
+  \begin{tabulary}{\textwidth}{L | C || L}
+    \multicolumn{3}{l}{\textbf{Megjelenítő beállításainak tesztelése}} \\
+    \hline
+    Vertikális szinkronizáció & \checkmark & \footnotesize{Bekapcsolva a megszokott 60 FPS-sel történik a megjelenítés, kikapcsolva ennél többel, ha képes rá a grafikus kártya.} \\
+    \hline
+    Színleképezés működése & \checkmark & \footnotesize{Mindegyik színleképezési operátor kiválasztható és megfelelően működik.} \\
+    \hline
+    Automatikus expozíció & \checkmark & \footnotesize{Működik, a fényerősség észrevehetően adaptálódik a fényviszonyokhoz.} \\
+    \hline
+    Expozíciós érték & \checkmark & \footnotesize{A csúszkát állítgatva változik a fényerősség.} \\
+    \hline
+    Modell forgatása & \checkmark & \footnotesize{A jelölőnégyzet segítségével a modell forgatása be/kikapcsolható.} \\
+    \hline
+  \end{tabulary}
+  
+  \vspace{15pt}
+  
+  \begin{tabulary}{\textwidth}{L | C || L}
+    \multicolumn{3}{l}{\textbf{Modellinformációs ablak tesztelése}} \\
+    \hline
+    PBR ki/bekapcsolása & \checkmark & \footnotesize{A kapcsoló működik. Kikapcsolt állapotban Blinn-Phong árnyalással jelenik meg a modell.} \\
+    \hline
+    Alakzat választás & \checkmark & \footnotesize{A választógombbal lehet az alakzatok között váltani, az ablak tartalma megfelelően frissül.} \\
+    \hline
+    Alakzat kirajzolásának ki/bekapcsolása & \checkmark & \footnotesize{} \\
+    \hline
+  \end{tabulary}
+  
+  \vspace{15pt}
+  
+  \begin{tabulary}{\textwidth}{L | C || L}
+    \multicolumn{3}{l}{\textbf{Megvilágítási beállítások tesztelése}} \\
+    \hline
+    Kép alapú megvilágítás ki/bekapcsolása & \checkmark & \footnotesize{A kapcsoló működik. Kikapcsolt állapotban a modellre csak a pont/zseblámpa fény hat.} \\
+    \hline
+    Pont/zseblámpa fény kapcsolása & \checkmark & \footnotesize{Mindkét fényforrást a megfelelő jelölőnégyzettel ki/be lehet kapcsolni.} \\
+    \hline
+    Pont/zseblámpa fény színének és teljesítményének beállítása & \checkmark & \footnotesize{Mindkét fényforrás esetén a szín és a teljesítmény szemmel láthatóan változik.} \\
+    \hline
+    Zseblámpa fény nyitási szögének beállítása & \checkmark & \footnotesize{A két félszög módosítására a program megfelelően reagál. A belső nyitási szög nem lehet nagyobb a külsőnél, a külső nyitási szög nem lehet kisebb a belsőnél.} \\
+    \hline
+  \end{tabulary}
+  
+  \vspace{15pt}
+  
+  \begin{tabulary}{\textwidth}{L | C || L}
+    \multicolumn{3}{l}{\textbf{Blinn-Phong anyagbeállítások tesztelése}} \\
+    \hline
+    Anyag kiválasztása & \checkmark & \footnotesize{Az ablak tartalma megfelelően frissül.} \\
+    \hline
+    Diffúz szín/textúra beállítása & \checkmark & \footnotesize{Szemmel láthatóan jól működik.} \\
+    \hline
+    Normáltérképezés be/kikapcsolása & \xmark & \footnotesize{Nem tökéletes. Egyes normáltérképek elrontják a megvilágítást, míg mások jól működnek.} \\
+    \hline
+    Ambiens szín/textúra beállítása & \checkmark & \footnotesize{Az ambiens szín láthatóan hozzáadódik a visszavert színhez.} \\
+    \hline
+    Spekuláris szín/textúra beállítása & \checkmark & \footnotesize{A spekuláris szín erőssége határozza meg a visszaverődés koncentráltságát.} \\
+    \hline
+    Ragyogás beállítása & \checkmark & \footnotesize{A ragyogást növelve egyre kisebb és koncentráltabbá válik a spekuláris csillanás.} \\
+    \hline
+  \end{tabulary}
+  
+  \vspace{15pt}
+  
+  \begin{tabulary}{\textwidth}{L | C || L}
+    \multicolumn{3}{l}{\textbf{Fizikai alapú anyagbeállítások tesztelése}} \\
+    \hline
+    Anyag kiválasztása & \checkmark & \footnotesize{Az ablak tartalma megfelelően frissül.} \\
+    \hline
+    Előre beállított anyag kiválasztása & \checkmark & \footnotesize{Előre beállított anyagot kiválasztva az anyagtulajdonságok frissülnek és tetszőlegesen módosíthatóak.} \\
+    \hline
+    Diffúz szín/textúra beállítása & \checkmark & \footnotesize{Szemmel láthatóan jól működik.} \\
+    \hline
+    Normáltérképezés be/kikapcsolása & \xmark & \footnotesize{Lásd a Blinn-Phong anyagbeállítások tesztelésénél.} \\
+    \hline
+    Rücskösség beállítása & \checkmark & \footnotesize{A csúszkával a rücskösséget állítva jól láthatóan, élethűen változik a modellen a fények tükröződésének elmosódottsága.} \\
+    \hline
+    Fémesség beállítása & \checkmark & \footnotesize{Szigetelőknél a diffúz szín sokkal jobban közrejátszik a spekuláris tükröződésben az eltérő törési mutató miatt.} \\
+    \hline
+  \end{tabulary}
+  
 \end{center}
 
-TODO:
-modell betöltés -> ha nincs material, nagy méretű modell
-skybox betöltés
-UI paraméterek
-
 \subsection{A kimenet ellenőrzése}
+
+
 
 TODO:
 összehasonlítás marmosettel
