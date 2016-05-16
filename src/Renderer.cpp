@@ -236,11 +236,17 @@ void Renderer::_setup_gui() {
 	auto load_mesh = new Button(renderer_settings, "Load mesh");
 	load_mesh->setCallback([&] {
 
-		std::string mesh_path = file_dialog({ { "obj", "Wavefront OBJ" } }, false);
+		try {
 
-		if (!mesh_path.empty()) {
-			m_mesh.reset(new Mesh(mesh_path, m_gui.get()));
-			m_mesh->upload();
+			std::string mesh_path = file_dialog({ { "obj", "Wavefront OBJ" } }, false);
+
+			if (!mesh_path.empty()) {
+				m_mesh.reset(new Mesh(mesh_path, m_gui.get()));
+				m_mesh->upload();
+			}
+
+		} catch (const std::runtime_error& e) {
+			new nanogui::MessageDialog(m_gui.get(), MessageDialog::Type::Warning, "Load error", std::string("An error happened when trying to load the model: ") + e.what());
 		}
 
 	});
