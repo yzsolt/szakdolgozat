@@ -132,7 +132,13 @@ A gyakorlatban a \(k\) anyagparaméterekre színvektorokat használunk, így lé
 \subsection{Matematikai és fizikai alapfogalmak}
 \label{subsec:matbase}
 
-TODO: térszög leírása
+A térszög (\textit{solid angle}, jelölése: \(\Omega\)) egy objektum egy ponttal bezárt kétdimenziós szöge háromdimenziós térben. Mértékegységét \textit{szteradiánnak} nevezzük és \(sr\)-rel jelöljük.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.3\textwidth]{images/steradian.eps}
+    \caption{Bármely terület egy gömb felszínén, ami megegyezik sugarának négyzetével, a gömb középpontjából nézve pontosan egy szteradiánt zár be.}
+\end{figure}
 
 A radiometria az elektromágneses sugárzás (esetünkben a látható fény) mérésével foglalkozik. A következő definíciókban a könnyebb érthetőséget és a későbbi gyakorlati megvalósítást szem előtt tartva nem mindig az eredeti, fizikai definíciókban szereplő jelöléseket, hanem a korábban bevezetett vektortípusokat használtam.
 
@@ -322,7 +328,7 @@ A Renderer run() metódusa tartalmazza a program főciklusát, ami a program fol
   \item a kettős pufferelés során használt elő- és háttérpufferek megcserélése, az elkészült képkocka megjelenítése
 \end{enumerate}
 
-TODO: bef
+A főciklust megszakítani, és ezzel a program futását leállítani a megjelenítő ablakának bezárásával lehet.
 
 \subsection{Anyagok és modellek leírása}
 
@@ -494,11 +500,8 @@ Kép alapú megvilágítás esetén ebből a kockatérképből szeretnénk a meg
 L_{out}(\mathbf{v}) = \int_{\Omega} { f_r(\mathbf{l}, \mathbf{v}) L_{in}(\mathbf{l})(-\mathbf{l} \cdot \mathbf{n}) d\mathbf{l} } \approx { 1 \over N } \sum_{k=1}^{N} { { f_r(\mathbf{l}, \mathbf{v}) L_{in}(\mathbf{l})(-\mathbf{l} \cdot \mathbf{n}) d\mathbf{l} } \over { p_r(\mathbf{v}, \mathbf{l}_k) } }
 \]
 
-Itt \(p_r\) az \(\mathbf{l}_k\) sűrűségfüggvénye. Egyenletes eloszlás esetén \(p_r = \frac{1}{2\pi}\), hiszen félgömbön integrálunk.
 
-TODO: importance sampling
-
-Sugárkövetésen alapuló megjelenítőkhöz már felhasználhatóak ezek a képletek, valósidejű megjelenítéshez azonban a fontossági mintavételezés ellenére is túl nagy számításigényűek: a rücskösség növelésével egyre több mintát kellene vennünk. Ezért a kép alapú megvilágítást az Unreal Engine 4-ben használt technikával~\cite{karis2013real} valósítottam meg, aminek segítségével a besugárzás és a BRDF speciális textúrákba előre kiszámolható, és az \(\mathbf{n} = \mathbf{v} = \mathbf{l}\) feltételezésen alapszik:
+Sugárkövetésen alapuló megjelenítőkhöz már felhasználhatóak ezek a képletek, valósidejű megjelenítéshez azonban a fontosság szerinti mintavételezés ellenére is túl nagy számításigényűek: a rücskösség növelésével egyre több mintát kellene vennünk. Ezért a kép alapú megvilágítást az Unreal Engine 4-ben használt technikával~\cite{karis2013real} valósítottam meg, aminek segítségével a besugárzás és a BRDF speciális textúrákba előre kiszámolható, és az \(\mathbf{n} = \mathbf{v} = \mathbf{l}\) feltételezésen alapszik:
 
 \[
 { 1 \over N } \sum_{k=1}^{N} { { f_r(\mathbf{l}, \mathbf{v}) L_{in}(\mathbf{l})(-\mathbf{l} \cdot \mathbf{n}) d\mathbf{l} } \over { p_r(\mathbf{v}, \mathbf{l}_k) } } \approx
@@ -535,6 +538,8 @@ A fizikai alapú megjelenítés nem merül ki a kép alapú megvilágításban i
 Az elkészült megjelenítő az ún. \textit{forward rendering} technikát használja, aminek nagy hátránya, hogy egy képpont árnyalását minden egyes dinamikus fényre külön el kell végezni, azaz minden egyes dinamikus fényforráshoz újra ki kell rajzolni a jelenetet. Ezen lehetne segíteni például azzal, hogy nem az egész jelenetet, csak azokat a részeket árnyaljuk újra, amelyekre az adott fényforrás hatással van. Dinamikus fények megjelenítése szempontjából a legtöbbet azonban a \textit{deferred rendering} (késleltetett árnyalás) technikával lehetne nyerni: ezen módszer lényege, hogy egy speciális, G-Buffernek nevezett pufferben tároljuk a képpontok árnyalásához szükséges összes információt, így a fényforrások számától függetlenül, egy lépésben elvégezhető az árnyalás.
 
 Mind a forward, mind a deferred megjelenítés esetén külön lépésre lenne szükség az átlátszó felületek megjelenítéséhez, amit a megjelenítő jelenleg nem támogat. Ehhez először az anyagokat átlátszatlan és átlátszó csoportra kellene bontani, majd az átlátszatlanokat forward vagy deferred technikával kirajzolni, végül az átlátszóakat egy utolsó lépésben megfelelően beállított színkeverési móddal rárajzolni a meglévő képre. Tudnunk kell azonban, hogy ez csak alapszintű támogatást jelent: valósidejű grafikában a mai napig nagy kihívást jelentő probléma egymást átfedő átlátszó felületek sorrendfüggetlen megjelenítése (\textit{order-independent transparency}), a létező megoldások még túl nagy számításigényűek ahhoz, hogy komplex jelenetek megjelenítésénél használni tudjuk őket.
+
+A tesztelés során felszínre került egy hiba a besugárzási textúrák előre generálása során: a nagy értékeket tartalmazó HDR kockatérképek esetén a generált spekuláris besugárzási textúra zajos lesz. Ennek oka, hogy nagy értékek mellett a fontosság szerinti mintavételezés során a képpontonkénti 2048 mintavétel már nem elegendő az integrál kis hibájú közelítéséhez. Triviális megoldásnak tűnik a mintavétel-szám növelése, azonban tudnunk kell, hogy az árnyalóprogramok viszonylag rövid futásidőre vannak kitalálva, és egy bizonyos időkeretet túllépve (jellemzően alig pár másodperc) a grafikus kártya meghajtóprogramja egyszerűen leállítja programunkat. Ennek kiküszöbölésére a kockatérképet fel lehetne bontani kisebb (ideális esetben az intenzitástól függő nagyságú) részekre, majd ezeken lefuttatni az árnyalóprogramot és végül ezekből összerakni az eredeti méretű textúrát. Ezzel kicselezhető a meghajtóprogram, de a generálás továbbra is sokáig fog tartani a mintavételezés magas száma miatt, ezért az egész előgenerálási folyamatot külön alkalmazásban lenne érdemes megvalósítani.
 
 \section{Tesztelés}
 
@@ -578,7 +583,7 @@ Mielőtt rátérnénk a kimenet tesztelésére, fontos leellenőriznünk, hogy a
     \hline
     Besugárzási és BRDF textúrák előállítása & \checkmark & \footnotesize{A program külön ellenőrzi a BRDF, diffúz és spekuláris besugárzási textúrák meglétét, ha bármelyikből hiányzik, azt újragenerálja.} \\
     \hline
-    Nagy értékeket tartalmazó skyboxból történő előgenerálás & \xmark & \footnotesize{Lásd továbbfejlesztési lehetőségek (~\ref{sec:further_dec} fejezet).} \\
+    Nagy értékeket tartalmazó skyboxból történő előgenerálás & \xmark & \footnotesize{Lásd továbbfejlesztési lehetőségek (~\ref{sec:further_dec} fejezet, utolsó bekezdés).} \\
     \hline
   \end{tabulary}
 
@@ -668,8 +673,6 @@ Mielőtt rátérnénk a kimenet tesztelésére, fontos leellenőriznünk, hogy a
 \end{center}
 
 \subsection{A kimenet ellenőrzése}
-
-
 
 TODO:
 összehasonlítás marmosettel

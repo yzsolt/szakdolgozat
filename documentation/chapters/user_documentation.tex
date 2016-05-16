@@ -13,14 +13,12 @@ Az első fordítás előkészítése:
 
 \begin{enumerate}[noitemsep]
 \item nyissunk meg egy parancssort (terminált) a program gyökérkönyvtárában
-\item adjuk ki a git submodule init, majd a git submodule update parancsokat
-\item a cd parancs segítségével lépjünk a dependencies/nanogui könyvtárba, majd ismételjük meg az előző lépést
-\item a cd .. paranccsal lépjünk vissza a főkönyvtárba, és adjuk ki a cmake parancsot
+\item adjuk ki a \textit{git submodule init}, majd a \textit{git submodule update} parancsokat
+\item a \textit{cd} parancs segítségével lépjünk a dependencies/nanogui könyvtárba, majd ismételjük meg az előző lépést
+\item a \textit{cd ../../} paranccsal lépjünk vissza a főkönyvtárba, és hozzunk létre egy könyvtárat a fordítás során keletkező fájlok számára: \textit{mkdir build}
 \end{enumerate}
 
-A fordítás menete:
-
-TODO
+A fordítás menete innentől már egyszerű: lépjünk az előzőleg létrehozott ,,build'' könyvtárba, majd adjuk ki a \textit{cmake ../} parancsot a megfelelő paraméterekkel, amelyekről a CMake program súgója (\textit{cmake -\-help}) ad bővebb felvilágosítást. Amennyiben grafikus fejlesztőkörnyezetet szeretnénk használni, úgy a CMake számára a \textit{-G} kapcsolóval megadhatjuk, hogy milyen projektfájlt generáljon. Ezután a generált projektfájlt használhatjuk a program fordításához, azonban a projekt módosulása esetén (pl. forrásfájlok hozzáadása vagy törlése) a változtatásokat a CMakeLists.txt-ben meg kell adni, és a projektfájlt újra kell generáltatni.
 
 \section{A felhasználói felület áttekintése}
 
