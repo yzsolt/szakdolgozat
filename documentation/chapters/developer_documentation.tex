@@ -96,6 +96,7 @@ A Phong tükröződési (vagy megvilágítási) modell egy tapasztalati modell e
 L_{p} = k_a i_a + \sum_{m \in \textrm{lights}} {\left( k_d (L_m \cdot N) i_{m,d} + k_s(R_m \cdot V)^\alpha i_{m,s} \right)}
 \]
 
+\noindent
 ahol a jelenetben szereplő összes anyagmodellre definiálva van
 
 \begin{itemize}[noitemsep]
@@ -107,6 +108,8 @@ ahol a jelenetben szereplő összes anyagmodellre definiálva van
 
 A tükröződési állandók a beérkező fénynek az anyag felszínéről történő tükröződésének mértékét adják meg. Az ambiens, vagy ,,elérhető'' fény a jelenet leképezése során implicit létező (napfény, holdfény, villámlás) megvilágítást jelenti.
 
+\vspace{12pt}
+\noindent
 Ezen kívül
 
 \begin{itemize}[noitemsep]
@@ -117,9 +120,12 @@ Ezen kívül
 \item \(V\) a nézeti vektor.
 \end{itemize}
 
+\noindent
 \textit{Megjegyzés: az \(L_m\), \(N\), \(R_m\) és \(V\) vektorok egység hosszúságúak.}
 
-A Blinn-Phong tükröződési modell~\cite{blinn1977models} a Phong modell James F. Blinn által módosított változata: az \(R_m \cdot V\) skalárszorzat helyett \(N \cdot H\)-t használ, ahol a \(H\) egy ún. félszög vektor (\textit{half-angle vector}) a nézeti és a fényforrás irányába mutató vektorok között.
+\vspace{12pt}
+
+A Blinn-Phong tükröződési modell~\cite{blinn1977models} a Phong modell James F. Blinn által módosított változata: az \(R_m \cdot V\) skalárszorzat helyett \(N \cdot H\)-t használ, ahol a \(H\) egy ún. félszög vektor (\textit{half-angle vector}) a nézeti és a fényforrás irányába mutató vektorok között:
 
 \[
 H = \frac{ L + V }{ \| L + V \| }
@@ -161,7 +167,10 @@ A sugárzási teljesítmény egy tartományon egységnyi idő alatt átáramló 
 E = { { d\phi } \over { dA } }
 \]
 
+\noindent
 ahol \(d\) a parciális derivált szimbóluma, \(\phi\) a sugárzási teljesítmény és \(A\) a terület.
+
+\vspace{12pt}
 
 A sugárerősség az egységnyi térszögben terjedő sugárzási teljesítményt adja meg, mértékegysége \(W \over {sr}\), definíciója pedig:
 
@@ -169,7 +178,10 @@ A sugárerősség az egységnyi térszögben terjedő sugárzási teljesítmény
 I = { { d\phi } \over { d\omega } }
 \]
 
+\noindent
 ahol \(\omega\) infinitezimális térszög.
+
+\vspace{12pt}
 
 A radiancia az egységnyi vetített területre egységnyi térszögben beérkező, visszavert, vagy emittált sugárzási teljesítményt határozza meg. Ez a legfontosabb fogalom a felsoroltak közül, ugyanis a megjelenítés során ezt az értéket, azaz a megjelenítendő felület egy adott pontját adott irányban elhagyó sugárzást kell kiszámoljuk. Mértékegysége \(W \over {m^2sr}\), és a következőképpen definiáljuk:
 
@@ -177,9 +189,13 @@ A radiancia az egységnyi vetített területre egységnyi térszögben beérkez�
 L(\mathbf{v}) = { { d^2\phi } \over { dA cos\theta d\mathbf{v} } }
 \]
 
+\noindent
 ahol \(\theta\) a felületi normálvektor és a nézeti vektor által bezárt szög.
 
-A besugárzás kiszámítására a következő képlet ad lehetőséget:
+\vspace{12pt}
+
+\noindent
+A besugárzás kiszámítására a későbbiekben pedig a következő képlet ad lehetőséget:
 
 \[
 dE(\mathbf{l}) = d { {d\phi} \over {dA} } (\mathbf{l}) = L_{in}(\mathbf{l}) cos\theta_l d\mathbf{l}
@@ -195,6 +211,9 @@ f_r(\mathbf{l}, \mathbf{v}) = { { dL_{out}(\mathbf{v}) } \over {dE(\mathbf{l})} 
 
 A BRDF egyik előnye, hogy fizikailag mérhető: az interneten található MERL adatbázis~\cite{merl_database} 100 különböző anyag visszaverődési függvényét tartalmazza.
 
+\vspace{12pt}
+
+\noindent
 Tulajdonságai:
 
 \begin{itemize}[noitemsep]
@@ -217,7 +236,7 @@ ahol \(c_{diff}\) az anyag diffúz visszaverődési aránya, gyakorlati megvaló
 \int_\Omega { (-\mathbf{l} \cdot \mathbf{n}) \mathrm{d}\mathbf{l} } = \int_\Omega { cos(\omega_l) \mathrm{d}\mathbf{l} } = \pi
 \]
 
-tehát \(\pi\) kiesik, \(c_{diff}\) állandó integrálja pedig értelemszerűen már teljesíti az energiamegmaradás törvényét.
+Tehát \(\pi\) kiesik, \(c_{diff}\) állandó integrálja pedig értelemszerűen már teljesíti az energiamegmaradás törvényét.
 
 A Lambert-féle tükröződés Johann Heinrich Lambert nevéhez fűződik, aki 1760-ban írta le ezt a jelenséget Photometria c. könyvében~\cite{klett1760ih}. A Lambert-féle tükröződés szerint egy ideális diffúzan tükröző, azaz matt felület (Lambert felület) a nézeti pozíciótól függetlenül ugyanolyan fényesnek látszik, vagyis teljesíti Lambert koszinusz törvényét, ami szerint az ilyen felületek megfigyelhető fényessége közvetlenül arányos a fényforrásba mutató vektor \(\mathbf{l}\) és a felületi normálvektor \(\mathbf{n}\) által bezárt szög koszinuszával.
 
@@ -252,6 +271,9 @@ A spekuláris BRDF-re, azaz a visszaverődő fény által létrehozott csillaná
 f_{CookTorrance}(\mathbf{l}, \mathbf{v}) = { {D(\mathbf{h}) F(\mathbf{l}, \mathbf{h}) G(\mathbf{l}, \mathbf{v}, \mathbf{h})} \over {4(\mathbf{n} \cdot \mathbf{l})(\mathbf{n} \cdot \mathbf{v})} }
 \]
 
+\vspace{12pt}
+
+\noindent
 ahol
 
 \begin{itemize}[noitemsep]
@@ -280,6 +302,7 @@ Az eredeti Cook-Torrance modell \(D\)-re a Beckmann eloszlást~\cite{beckmann198
 D_{Beckmann}(\mathbf{n}, \mathbf{h}) = { { e^{ -tan(\alpha)^2 \over m^2 } } \over { \pi m^2 cos(\alpha)^4 } }
 \]
 
+\noindent
 ahol
 
 \begin{itemize}[noitemsep]
@@ -293,6 +316,7 @@ Ugyan a képlet még egyszerűsíthető, ezzel együtt is szemmel láthatóan na
 D_{GGX}(\mathbf{n}, \mathbf{h}) = { \alpha \over { \pi ((\mathbf{n} \cdot \mathbf{h})^2 (\alpha^2 - 1) + 1)^2 } }
 \]
 
+\noindent
 ahol \(\alpha = {roughness}^2\) (roughness = rücskösség).
 
 \section{Gyakorlati megvalósítás}
@@ -325,9 +349,15 @@ A program belépési pontja, a main() függvény először létrehoz egy Setting
 
 A Renderer konstruktora a kapott beállítások alapján létrehoz egy OpenGL ablakot a Window osztály segítségével, ami tulajdonképpen egy GLFW ablakot kezel objektum-orientált módon. Ezután létrehozza a két beépített fényt, majd a felhasználói felület inicializálása következik. Ekkor már van OpenGL kontextusunk, ezért a modell és vetítési mátrixok beállítása után létrehozza a szükséges árnyalóprogramokat és képpont puffereket. Végül pedig létrehozza az alapértelmezett Mesh illetve Skybox objektumokat.
 
-A Renderer run() metódusa tartalmazza a program főciklusát, ami a program folyamatosnak tűnő futását okozza. Ebben a ciklusban a következő lépések történnek:
+A Renderer run() metódusa tartalmazza a program főciklusát, ami a program folyamatos futását okozza. Ebben a ciklusban a következő lépések történnek:
 
-\begin{enumerate}
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.45\textwidth]{images/main_loop.png}
+    \caption{A főciklus szekvenciadiagramja}
+\end{figure}
+
+\begin{enumerate}[noitemsep]
   \item operációs rendszer által küldött események feldolgozása (a GLFW segítségével)
   \item a megjelenítés során használt mátrixok (modell, nézeti, vetítési) illetve ezek különféle kombinációinak kiszámolása
   \item egy előlépésben a modell kirajzolása, de csak a mélységi pufferbe
@@ -396,6 +426,7 @@ A megvalósításhoz szükségünk van a jelenet átlagos fénysűrűségére, a
 L_{avg} = exp\left( { 1 \over N } \displaystyle\sum_{x, y} log(\delta + L_{rel}(x, y)) \right)
 \]
 
+\noindent
 ahol
 
 \begin{itemize}[noitemsep]
@@ -416,6 +447,7 @@ Mivel a színleképezés expozíció alapján működik, ezért az átlagos fén
 EV = log_2\left({ L_{avg} \cdot S } \over K\right)
 \]
 
+\noindent
 ahol
 
 \begin{itemize}[noitemsep]
@@ -429,6 +461,7 @@ Ebből látható, hogy az expozíciós érték definíciója függ az ISO érté
 EV_{100} = log_2\left({ L_{avg} \cdot 100 } \over 12,5\right)
 \]
 
+\noindent
 Az expozíció ebből a DICE prezentációja alapján a következőképpen számolható:
 
 \[
@@ -443,6 +476,7 @@ A valóban élethű fényerősség adaptációhoz még egy dolog szükséges: a 
 L_{cur} = L_{prev} + (L_{avg} - L_{prev}) \cdot (1 - 0,98^{S_a \cdot t_{\delta}})
 \]
 
+\noindent
 ahol
 
 \begin{itemize}[noitemsep]
@@ -466,12 +500,15 @@ Valósidejű grafikában az igaziakat jól közelítő, de a valóságban nem l�
 
 ahol S a pont fény körüli egységgömb.
 
+\vspace{12pt}
+\noindent
 A ~\ref{subsec:matbase} fejezetben megadott képletek alapján:
 
 \[
 E = { { d\phi } \over { dA } } = I { { d\omega } \over { dA } } = I { { cos\theta } \over { dist }^2 }
 \]
 
+\noindent
 Ebből pedig már
 
 \[
@@ -528,6 +565,8 @@ Az első tagot a rücskösség értékétől függően egy kockatérkép mip-map
 \]
 \[= F_0 \int_{\Omega} { { f_r(\mathbf{l}, \mathbf{v}) \over F(\mathbf{v}, \mathbf{h}) } (1 - (1 - \mathbf{v} \cdot \mathbf{h})^5) cos\theta_l d\mathbf{l} } + \int_{\Omega} { { f_r(\mathbf{l}, \mathbf{v}) \over F(\mathbf{v}, \mathbf{h}) } (1 - \mathbf{v} \cdot \mathbf{h})^5 cos\theta_l d\mathbf{l} }
 \]
+
+\vspace{5pt}
 
 Ezzel az \(F_0\)-tól való függést megszüntettük, és a két integrál értéke a kétdimenziós lookup textúra vörös és zöld csatornájában tárolható.
 
@@ -594,7 +633,7 @@ Mielőtt rátérnénk a kimenet tesztelésére, fontos leellenőriznünk, hogy a
     \hline
     Besugárzási és BRDF textúrák előállítása & \checkmark & \footnotesize{A program külön ellenőrzi a BRDF, diffúz és spekuláris besugárzási textúrák meglétét, ha bármelyikből hiányzik, azt újragenerálja.} \\
     \hline
-    Nagy értékeket tartalmazó skyboxból történő előgenerálás & \xmark & \footnotesize{Lásd továbbfejlesztési lehetőségek (~\ref{sec:further_dec} fejezet, utolsó bekezdés).} \\
+    Nagy értékeket tartalmazó skyboxból történő előgenerálás & \xmark & \footnotesize{Lásd továbbfejlesztési lehetőségek (~\ref{sec:further_dev} fejezet, utolsó bekezdés).} \\
     \hline
   \end{tabulary}
 
@@ -684,7 +723,7 @@ Mielőtt rátérnénk a kimenet tesztelésére, fontos leellenőriznünk, hogy a
     Fémesség beállítása & \checkmark & \footnotesize{Szigetelőknél a diffúz szín sokkal jobban közrejátszik a spekuláris tükröződésben az eltérő törési mutató miatt.} \\
     \hline
   \end{tabulary}
-  
+
 \end{center}
 
 \subsection{A kimenet ellenőrzése}
@@ -693,6 +732,7 @@ A kimenet tesztelését a bevezetésben leírtak alapján egy másik fizikai ala
 
 \vspace{15pt}
 
+\noindent
 \textbf{Összetett modell tesztelése}
 
 Ennél a tesztesetnél a mellékelt fegyver modell megjelenítését teszteltem, amely rendelkezik diffúz, rücskösségi és fémességi textúrával is, így jó alapot ad az összehasonlításra.
@@ -718,25 +758,26 @@ A képeken jól látható, hogy minimálisan eltérések vannak kamera pozíció
 
 \vspace{15pt}
 
+\noindent
 \textbf{Felületi rücskösség tesztelése}
 
 Ennél a tesztesetnél a mellékelt gömb modell segítségével ellenőriztem, hogy a megjelenítő a különböző rücskösségi értékek alapján milyen kimenetet állít elő. Ehhez előbb 1-re (legsimább), majd 0,5-re, végül 0-ra (legdurvább) állítottam a rücskösség értékét. A gömb diffúz színét pirosra állítottam be, az anyagot szigetelőnek (0-s fémesség) definiáltam.
 
 \begin{figure}[!ht]
     \centering
-    \begin{subfigure}[b]{0.27\textwidth}
+    \begin{subfigure}[b]{0.28\textwidth}
         \centering
         \includegraphics[width=\textwidth]{images/scr_r1.png}
         %\caption{Eredmény}
     \end{subfigure}
     \hfill
-    \begin{subfigure}[b]{0.27\textwidth}
+    \begin{subfigure}[b]{0.28\textwidth}
         \centering
         \includegraphics[width=\textwidth]{images/scr_r05.png}
         %\caption{Referencia}
     \end{subfigure}
     \hfill
-    \begin{subfigure}[b]{0.27\textwidth}
+    \begin{subfigure}[b]{0.28\textwidth}
         \centering
         \includegraphics[width=\textwidth]{images/scr_r0.png}
         %\caption{Referencia}
@@ -746,19 +787,19 @@ Ennél a tesztesetnél a mellékelt gömb modell segítségével ellenőriztem, 
 
 \begin{figure}[!ht]
     \centering
-    \begin{subfigure}[b]{0.27\textwidth}
+    \begin{subfigure}[b]{0.28\textwidth}
         \centering
         \includegraphics[width=\textwidth]{images/marmoset_r1.png}
         %\caption{Eredmény}
     \end{subfigure}
     \hfill
-    \begin{subfigure}[b]{0.27\textwidth}
+    \begin{subfigure}[b]{0.28\textwidth}
         \centering
         \includegraphics[width=\textwidth]{images/marmoset_r05.png}
         %\caption{Referencia}
     \end{subfigure}
     \hfill
-    \begin{subfigure}[b]{0.27\textwidth}
+    \begin{subfigure}[b]{0.28\textwidth}
         \centering
         \includegraphics[width=\textwidth]{images/marmoset_r0.png}
         %\caption{Referencia}
@@ -770,13 +811,14 @@ Ennél a tesztesetnél a mellékelt gömb modell segítségével ellenőriztem, 
 
 \vspace{15pt}
 
+\noindent
 \textbf{Fémesség tesztelése}
 
 Szintén a mellékelt gömb modell segítségével teszteltem, hogy a megjelenítő milyen kimenetet ad fémes illetve szigetelő anyagok esetén. Ehhez előbb 1-re (fémes), majd 0-ra (nem fémes) állítottam a fémesség értékét. A felületi durvaságot 0,5-re állítottam, és a diffúz színt fehérnek választottam.
 
 \begin{figure}[!ht]
     \centering
-    \begin{subfigure}[b]{\textwidth}
+    \begin{subfigure}[b]{0.8\textwidth}
         \centering
         \includegraphics[width=\textwidth]{images/scr_metalness.png}
         %\caption{Eredmény}
@@ -786,7 +828,7 @@ Szintén a mellékelt gömb modell segítségével teszteltem, hogy a megjelení
 
 \begin{figure}[!ht]
     \centering
-    \begin{subfigure}[b]{\textwidth}
+    \begin{subfigure}[b]{0.8\textwidth}
         \centering
         \includegraphics[width=\textwidth]{images/marmoset_metalness.png}
         %\caption{Eredmény}
