@@ -183,7 +183,7 @@ ahol \(\omega\) infinitezimális térszög.
 
 \vspace{12pt}
 
-A radiancia az egységnyi vetített területre egységnyi térszögben beérkező, visszavert, vagy emittált sugárzási teljesítményt határozza meg. Ez a legfontosabb fogalom a felsoroltak közül, ugyanis a megjelenítés során ezt az értéket, azaz a megjelenítendő felület egy adott pontját adott irányban elhagyó sugárzást kell kiszámoljuk. Mértékegysége \(W \over {m^2sr}\), és a következőképpen definiáljuk:
+A radiancia az egységnyi vetített területre egységnyi térszögben beérkező, visszavert vagy emittált sugárzási teljesítményt határozza meg. Ez a legfontosabb fogalom a felsoroltak közül, ugyanis a megjelenítés során ezt az értéket, azaz a megjelenítendő felület egy adott pontját adott irányban elhagyó sugárzást kell kiszámoljuk. Mértékegysége \(W \over {m^2sr}\), és a következőképpen definiáljuk:
 
 \[
 L(\mathbf{v}) = { { d^2\phi } \over { dA cos\theta d\mathbf{v} } }
@@ -329,7 +329,7 @@ A C++ projekt definiálására és lefordításának megkönnyítése érdekébe
 
 Az asztali számítógépeken a két legelterjedtebb grafikus API a DirectX és az OpenGL. Okostelefonokon az OpenGL speciális, kisebb tudású, áramvonalasított változata, az OpenGL ES az egyeduralkodó API. A konzolokon jellemzően erősen a célhardverre specializált alacsonyszintű programozási felületek állnak rendelkezésre, amelyek elérése külön feltételekhez kötött, így ezekről kevés információnk áll rendelkezésre. A két rivális asztali API közül azért az OpenGL-re esett a választásom, mert volt már vele tapasztalatom, és mert keresztplatformos, míg a DirectX csak Microsoft Windows rendszereken érhető el.
 
-Habár az OpenGL a 3-as főverzióval komoly ráncfelvarrást kapott, felépítésében továbbra is egy erősen egy szálon futó állapotgép maradt. A modern GPU-k azonban architekturálisan már tovább fejlődtek ennél: az új, alacsonyszintű API-k már hatékonyan kezelik a több szálról érkező parancsokat, ami az OpenGL-ben csak költséges módon (\textit{context switch}) megoldható. Ezzel elsősorban a kirajzolási hívásszám-limitált jelenetekben (pl. részecskerendszerek kirajzolása) érhető el az OpenGL-nél jóval magasabb teljesítmény.
+Habár az OpenGL a 3-as főverzióval komoly ráncfelvarrást kapott, felépítésében továbbra is egy erősen egy szálon futó állapotgép maradt. A modern GPU-k azonban architekturálisan már tovább fejlődtek ennél: az új, alacsonyszintű API-k már hatékonyan kezelik a több szálról érkező parancsokat, ami az OpenGL-ben csak költséges módon (\textit{context switch} segítségével) megoldható. Ezzel elsősorban a kirajzolási hívásszám-limitált jelenetekben (pl. részecskerendszerek kirajzolása) érhető el az OpenGL-nél jóval magasabb teljesítmény.
 
 További lassító tényező az OpenGL magasszintűsége, ami a fejlesztőknek ugyan valamekkora kényelmet és időbeli nyereséget jelenthet, azonban egyrészt emiatt a grafikus kártya meghajtóprogramjának kell sok olyan dolgot általános módon implementálnia (pl. biztonságos videomemória-kezelés), amit sok esetben a fejlesztők a saját igényeiket és céljaikat ismerve optimálisabban is meg tudnának írni, másrészt a meghajtóprogram sok ellenőrzést is végrehajt a kapott inputokon, ami processzor oldalon felesleges többletterhelést jelenthet.
 
@@ -351,13 +351,17 @@ A megjelenítő alapvetően az alábbi felhasználói esetek kiszolgálására l
     \caption{Felhasználói esetek}
 \end{figure}
 
-Ezekből adódik, hogy szükség volt modell, skybox, anyag illetve fény osztályokra. A forráskódban ezen osztályok elnevezése rendre Mesh, Skybox, Material illetve Light. A megjelenítő főosztálya a Renderer lett, ami egy Settings objektumban tárolt beállítások alapján hozza létre a Window objektumba burkolt ablakát, továbbá a GUI osztállyal hozza létre és jeleníti meg a felhasználói felületet. A kódismétlés elkerülése és az átláthatóság könnyítése érdekében több egyszerű burkoló (\textit{wrapper}) objektumot is létrehoztam a leggyakrabban használt OpenGL objektumok köré. Ezek a Shader, Program, VertexArray, VertexBuffer, FrameBuffer és Texture (Texture2D, TextureArray és TextureCubeMap) osztályok.
+Ezekből adódik, hogy szükség volt modell, skybox, anyag illetve fény osztályokra. A forráskódban ezen osztályok elnevezése rendre Mesh, Skybox, Material illetve Light. A megjelenítő főosztálya a Renderer lett, ami egy Settings objektumban tárolt beállítások alapján hozza létre a Window objektumba burkolt ablakát, továbbá a GUI osztállyal hozza létre és jeleníti meg a felhasználói felületet. A kódismétlés elkerülése és az átláthatóság könnyítése érdekében több egyszerű burkoló (\textit{wrapper}) objektumot is létrehoztam a leggyakrabban használt OpenGL objektumok köré. Ezek a Shader, Program, VertexArray, VertexBuffer, FrameBuffer és Texture (Texture2D és TextureCubeMap) osztályok.
 
 Ezeken kívül néhány segédosztályra is szükség volt. Az AABB ún. tengely-igazított burkoló dobozt (\textit{axis-aligned bounding box}) testesít meg, és a modell középre igazításánál ill. megfelelő méretezésénél van szerepe. A Vertex ill. VertexFormatDescriptor osztályok a vertexek formátumának leírását és OpenGL-el történő feltöltését hivatottak megkönnyíteni. A FullScreenQuad osztály pedig egy egyszerű textúrázott négyzetet határoz meg, ami a különféle képpont pufferekbe történő rajzolás esetén jelent segítséget.
 
-TODO: osztálydiagram
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=1.0\textwidth]{images/components.png}
+    \caption{Komponensdiagram}
+\end{figure}
 
-A program belépési pontja, a main() függvény először létrehoz egy Settings objektumot a kapott parancssori argumentumok alapján, majd ennek segítségével létrehoz egy Renderer objektumot, amin meghívja a Renderer osztály egyetlen metódusát, a run()-t. Mivel a megjelenítő a végzetes hibák jelzésére kivételkezelést használ, ezért az egész program egy try/catch blokkban fut, így a korábban el nem kapott kivételek legkésőbb a main()-ben elfogásra kerülnek, a bennük tárolt hibaüzenet kiíródik és a program kilép. Ilyen végzetes hiba például az, ha egy árnyalóprogram lefordítása valamiért nem sikerül.
+A program belépési pontja, a main() függvény először létrehoz egy Settings objektumot a kapott parancssori argumentumok alapján, majd ennek segítségével egy Renderer objektumot, amin meghívja a Renderer osztály egyetlen metódusát, a run()-t. Mivel a megjelenítő a végzetes hibák jelzésére kivételkezelést használ, ezért az egész program egy try/catch blokkban fut, így a korábban el nem kapott kivételek legkésőbb a main()-ben elfogásra kerülnek, a bennük tárolt hibaüzenet kiíródik és a program kilép. Ilyen végzetes hiba például az, ha egy árnyalóprogram lefordítása valamiért nem sikerül.
 
 A Renderer konstruktora a kapott beállítások alapján létrehoz egy OpenGL ablakot a Window osztály segítségével, ami tulajdonképpen egy GLFW ablakot kezel objektum-orientált módon. Ezután létrehozza a két beépített fényt, majd a felhasználói felület inicializálása következik. Ekkor már van OpenGL kontextusunk, ezért a modell és vetítési mátrixok beállítása után létrehozza a szükséges árnyalóprogramokat és képpont puffereket. Végül pedig létrehozza az alapértelmezett Mesh illetve Skybox objektumokat.
 
@@ -529,7 +533,7 @@ L_{out}(\mathbf{v}) = f_r(\mathbf{l}, \mathbf{v}) E = f_r(\mathbf{l}, \mathbf{v}
 
 következik.
 
-Ez lényegében az ún. inverz négyzet törvény, azaz a besugárzott teljesítmény a fényforrástól való távolság négyzetével csökken. Gyakorlati megvalósítás szempontjából problémát jelent, hogy ez alapján \(L_{out}\) sosem éri el a 0-t, azaz elesünk egy fontos optimalizációs lehetőségtől, a nem látható fények kivágásától. Ezért egy halványítási tényezőt is bevezetünk az árnyalóban:
+Ez lényegében az ún. inverz négyzet törvény, azaz a besugárzott teljesítmény a fényforrástól való távolság négyzetével csökken. Gyakorlati megvalósítás szempontjából problémát jelent, hogy ez alapján \(L_{out}\) sosem éri el a 0-t, azaz elesünk egy fontos optimalizációs lehetőségtől, a nem látható fények kivágásától. Ezért egy halványítási tényezőt is bevezetünk a pb\_direct\_lighting.fs.glsl árnyalóban:
 
 \[
 attenuation = { I \over {dist}^2 } max(0, 1 - { dist \over r })
@@ -580,7 +584,7 @@ Az első tagot a rücskösség értékétől függően egy kockatérkép mip-map
 
 \vspace{5pt}
 
-Ezzel az \(F_0\)-tól való függést megszüntettük, és a két integrál értéke a kétdimenziós lookup textúra vörös és zöld csatornájában tárolható.
+Ezzel az \(F_0\)-tól való függést megszüntettük, és a két integrál értéke a kétdimenziós lookup textúra vörös és zöld csatornájában tárolható. Ennek implementációja a precompute\_brdf.fs.glsl árnyalóban, míg a diffúz és spekuláris besugárzási kockatérkép kiszámításának kódja a precompute\_diffuse- ill. precompute\_specular\_irradiance.fs.glsl-ben található.
 
 Mindezek segítségével valósidőben, mindössze két textúraolvasással kiszámolható a kép alapú megvilágításból származó sugárzás. Sőt, a két besugárzási kockatérképet (diffúz és spekuláris) és a BRDF lookup textúrát nem muszáj előre kiszámolni, dinamikus tükröződés megvalósításához kevesebb mintával menet közben is generálhatók. Az \(\mathbf{n} = \mathbf{v} = \mathbf{l}\) feltételezés azonban szemmel látható hibákat okoz: elsősorban sík felületeknél észrevehető, hogy a valóságban ,,megnyúlt'' tükröződések emiatt itt nem jelennek meg.
 
@@ -740,7 +744,7 @@ Mielőtt rátérnénk a kimenet tesztelésére, fontos leellenőriznünk, hogy a
 
 \subsection{A kimenet ellenőrzése}
 
-A kimenet tesztelését a bevezetésben leírtak alapján egy másik fizikai alapú megjelenítő segítségével végeztem. A Marmoset Toolbag 2 egy 3D művészek által közkedvelt eszköz, ami lényegében hasonló a szakdolgozat keretében elkészült megjelenítőhöz, csak jóval nagyobb tudású. Mivel ennek a tesztelésnek a szemmel történő összehasonlítás adja az alapját, így az mindegyik tesztesethez mellékeltem a két megjelenítő kimenetét.
+A kimenet tesztelését a bevezetésben leírtak alapján egy másik fizikai alapú megjelenítő segítségével végeztem. A Marmoset Toolbag 2 egy 3D művészek által közkedvelt, professzionális eszköz, ami lényegében hasonló a szakdolgozat keretében elkészült megjelenítőhöz, csak jóval nagyobb tudású. Mivel ennek a tesztelésnek a szemmel történő összehasonlítás adja az alapját, így mindegyik tesztesethez mellékeltem a két megjelenítő kimenetét.
 
 \vspace{15pt}
 
