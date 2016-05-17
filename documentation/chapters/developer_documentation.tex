@@ -17,7 +17,7 @@ Valósidejű grafikában a geometriák leírásához háromszöghálókat haszn�
     \label{fig:tomb_raider_evolution}
     \centering
     \includegraphics[width=1.0\textwidth]{images/tomb_raider_evolution.png}
-    \caption{A Tomb Raider játéksorozat főszereplőjének evolúciója 1996 és 2008 között. Figyeljük meg, az évek alatt mennyivel részletesebb, a valóságos alakot egyre jobban visszaadó lett a karakter geometriája. }
+    \caption{A Tomb Raider játéksorozat főszereplőjének evolúciója 1996 és 2008 között. Figyeljük meg, az évek alatt mennyivel részletesebb, a valóságos alakot egyre jobban visszaadó lett a karakter geometriája}
 \end{figure}
 
 Önmagukban a háromszögeket meghatározó térbeli pozíciók még nem elégségesek. Ismernünk kell a felület tetszőleges pontjának irányultságát, amelyet egy, a felületből ,,kifelé'' álló, egység hosszúságú vektorral írunk le és felületi normálvektornak hívunk. Jelölése: \(\mathbf{n}\). Ezeket legegyszerűbben a háromszögeket alkotó pontokkal együtt tárolhatjuk, majd menet közben interpolálva őket kaphatjuk meg a háromszög által meghatározott felület tetszőleges pontján vett normálvektort.
@@ -71,7 +71,7 @@ Mielőtt a mikrofelületekkel tovább haladnánk, tisztáznunk kell, mit jelent 
         \caption{Diffúz visszaverődés}
     \end{subfigure}
 
-    \caption{A fénysugarak visszaverődése spekuláris és diffúz esetben.}
+    \caption{A fénysugarak visszaverődése spekuláris és diffúz esetben}
 \end{figure}
 
 Spekuláris tükröződésről akkor beszélünk, amikor egy sima felületre érkező fénysugarak mindegyike ugyanabba az irányba halad tovább a visszaverődés után. Diffúz tükröződés akkor történik, amikor egy durva felület különböző irányokba veri vissza, szórja szét a beérkező fénysugarakat. A mikrofelület elmélet segítségével ezt úgy képzelhetjük el, hogy a fénysugarak különböző irányultságú lapkákról verődnek vissza, így értelemszerűen különböző irányokba szóródnak szét.
@@ -87,7 +87,7 @@ Bui Tuong Phong 1973-ban publikálta a később róla elnevezett tükröződési
 \begin{figure}[!ht]
     \centering
     \includegraphics[width=0.7\textwidth]{images/flat_gouraud_phong.png}
-    \caption{Sík, Gouraud és Phong árnyalás összehasonlítása. }
+    \caption{Sík, Gouraud és Phong árnyalás összehasonlítása}
 \end{figure}
 
 A Phong tükröződési (vagy megvilágítási) modell egy tapasztalati modell egy felület pontjainak lokális megvilágításának kiszámítására. A felület \(p\) pontjából visszavert fény a Phong modell szerint a következőképpen számolható:
@@ -136,7 +136,7 @@ Ennek előnye megjelenésének idején elsősorban az volt, hogy a \(H\) vektort
 \begin{figure}[!ht]
     \centering
     \includegraphics[width=0.4\textwidth]{images/blinn_vectors.eps}
-    \caption{A Phong és a Blinn-Phong visszaverődési modell vektorai.}
+    \caption{A Phong és a Blinn-Phong visszaverődési modell vektorai}
 \end{figure}
 
 A gyakorlatban a \(k\) anyagparaméterekre színvektorokat használunk, így lényegében egyszerre számoljuk a vörös, zöld és kék fények tükröződését. A modell definíciójából látható, hogy az anyagparaméterek mindegyike tapasztalati alapon kitalált, nincs egzakt fizikai mértékegységük, hiszen nem konkrét fizikai modellen alapulnak. Az anyag által meghatározott ambiens tükröződési érték is furcsának hat, hiszen logikusan gondolkozva ezt a megvilágítást a jelenet alapján kellene kiszámítani, itt mégis az anyagtulajdonságok között szerepel. A Blinn-Phong modell egyik nagy hátránya is ebből fakad: egy adott megvilágítás mellett elkészített, szemmel jónak ítélt anyagmodellt más megvilágítás alá helyezve ,,elromlik'' a megjelenítés, a fix és fizikai alapot nélkülöző paraméterek miatt.
@@ -149,7 +149,7 @@ A térszög (\textit{solid angle}, jelölése: \(\Omega\)) egy objektum egy pont
 \begin{figure}[!ht]
     \centering
     \includegraphics[width=0.3\textwidth]{images/steradian.eps}
-    \caption{Bármely terület egy gömb felszínén, ami megegyezik sugarának négyzetével, a gömb középpontjából nézve pontosan egy szteradiánt zár be.}
+    \caption{Bármely terület egy gömb felszínén, ami megegyezik sugarának négyzetével, a gömb középpontjából nézve pontosan egy szteradiánt zár be}
 \end{figure}
 
 A radiometria az elektromágneses sugárzás (esetünkben a látható fény) mérésével foglalkozik. A következő definíciókban a könnyebb érthetőséget és a későbbi gyakorlati megvalósítást szem előtt tartva nem mindig az eredeti, fizikai definíciókban szereplő jelöléseket, hanem a korábban bevezetett vektortípusokat használtam.
@@ -262,7 +262,7 @@ A Lambert BRDF jól használható diffúz felületek megvilágításának közel
         \caption{Oren-Nayar}
     \end{subfigure}
 
-    \caption{Egy valódi váza és annak számítógéppel megjelenített változatai különböző diffúz modellekkel.}
+    \caption{Egy valódi váza és annak számítógéppel megjelenített változatai különböző diffúz modellekkel}
 \end{figure}
 
 A spekuláris BRDF-re, azaz a visszaverődő fény által létrehozott csillanás kiszámolására rengeteg modell létezik. Ebből egyet már ismerünk, ami a Blinn-Phong visszaverődési modellben található spekuláris komponens kiszámítására vonatkozó részlet. A valós idejű fizikai alapú megjelenítők túlnyomó többsége azonban az ún. Cook-Torrance modellt használja, amit R. Cook és K. Torrance dolgozott ki 1981-ben~\cite{cook1981reflectance}.
@@ -339,11 +339,23 @@ A szakdolgozat írásának idején megjelent új API-k --- DirectX 12, Vulkan (l
 
 Munkám során a fejlesztést megkönnyítendő, és a programozás egyik alapvető tételét, az újrafelhasználást figyelembe véve a fizikai megjelenítéshez szorosan nem kapcsolódó részeket nyílt forráskódú könyvtárak segítségével valósítottam meg. A megjelenítő ablakának ill. az OpenGL környezet létrehozását, továbbá az ehhez kapcsolódó eseménykezelést (egérmozgás, billentyűzet kezelés, ablakesemények) a C-ben írt, keresztplatformos GLFW könyvtár végzi. Ahhoz, hogy az OpenGL bővítményeit használni tudjam, a Python alapú GLAD OpenGL függvénymutató-betöltővel generáltam C forrásfájlt, amelyben a legújabb, 4.5-ös OpenGL verzióig az összes függvénymutató, ill. az ezeket inicializáló mechanizmus megtalálható. Grafikus alkalmazásoknál, kiváltképp három dimenzióban elkerülhetetlen a lineáris algebra használata. Ehhez a népszerű GLM fejléc alapú C++ sablonkönyvtárat választottam, amely az OpenGL árnyalónyelve, a GLSL mintájára készült, és a legfontosabb lineáris algebrai konstrukciók (egész és lebegőpontos vektorok, mátrixok, kvaterniók) mellett többek közt az ezek között definiált műveletek megvalósítását és sok hasznos segédfüggvényt (pl. vetítési, nézeti mátrix létrehozása) is tartalmaz. A megjelenítő elsődleges bemenetét képező 3D-s Wavefront OBJ formátumú modellek betöltését a tinyobjloader C++ könyvtár végzi, amely a hozzájuk csatolt anyagtulajdonság-leíró fájlokat (.mtl kiterjesztéssel) is feldolgozza. A felhasználói felület megjelenítéséért és kezeléséért az OpenGL alapú NanoGUI könyvtár felel, amely a NanoVG (szintén OpenGL-alapú) közvetlen módú vektorgrafikus rajzoló könyvtárra épül. Ezen könyvtárak mindegyike nyílt forráskódú és folyamatos fejlesztés alatt áll, így probléma esetén a szükséges módosításokat végre tudtam hajtani rajtuk, ami --- mindamellett, hogy segítségükkel a fizikai megjelenítés konkrét implementációjára koncentrálhattam --- nagy segítséget jelentett a fejlesztés során.
 
+\clearpage
+
 \subsection{A megjelenítő felépítése}
 
-TODO: ábra a felépítésről
+A megjelenítő alapvetően az alábbi felhasználói esetek kiszolgálására lett felépítve:
 
-Ugyan az OpenGL egy meglehetősen magas szintű grafikus programozási felület, a kódismétlés elkerülése és az átláthatóság könnyítése érdekében több egyszerű burkoló (\textit{wrapper}) objektumot is létrehoztam a leggyakrabban használt OpenGL objektumok köré. Ezek a Shader, Program, VertexArray, VertexBuffer, FrameBuffer és Texture (Texture2D, TextureArray és TextureCubeMap) osztályok.
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/use_cases.png}
+    \caption{Felhasználói esetek}
+\end{figure}
+
+Ezekből adódik, hogy szükség volt modell, skybox, anyag illetve fény osztályokra. A forráskódban ezen osztályok elnevezése rendre Mesh, Skybox, Material illetve Light. A megjelenítő főosztálya a Renderer lett, ami egy Settings objektumban tárolt beállítások alapján hozza létre a Window objektumba burkolt ablakát, továbbá a GUI osztállyal hozza létre és jeleníti meg a felhasználói felületet. A kódismétlés elkerülése és az átláthatóság könnyítése érdekében több egyszerű burkoló (\textit{wrapper}) objektumot is létrehoztam a leggyakrabban használt OpenGL objektumok köré. Ezek a Shader, Program, VertexArray, VertexBuffer, FrameBuffer és Texture (Texture2D, TextureArray és TextureCubeMap) osztályok.
+
+Ezeken kívül néhány segédosztályra is szükség volt. Az AABB ún. tengely-igazított burkoló dobozt (\textit{axis-aligned bounding box}) testesít meg, és a modell középre igazításánál ill. megfelelő méretezésénél van szerepe. A Vertex ill. VertexFormatDescriptor osztályok a vertexek formátumának leírását és OpenGL-el történő feltöltését hivatottak megkönnyíteni. A FullScreenQuad osztály pedig egy egyszerű textúrázott négyzetet határoz meg, ami a különféle képpont pufferekbe történő rajzolás esetén jelent segítséget.
+
+TODO: osztálydiagram
 
 A program belépési pontja, a main() függvény először létrehoz egy Settings objektumot a kapott parancssori argumentumok alapján, majd ennek segítségével létrehoz egy Renderer objektumot, amin meghívja a Renderer osztály egyetlen metódusát, a run()-t. Mivel a megjelenítő a végzetes hibák jelzésére kivételkezelést használ, ezért az egész program egy try/catch blokkban fut, így a korábban el nem kapott kivételek legkésőbb a main()-ben elfogásra kerülnek, a bennük tárolt hibaüzenet kiíródik és a program kilép. Ilyen végzetes hiba például az, ha egy árnyalóprogram lefordítása valamiért nem sikerül.
 
@@ -389,7 +401,7 @@ A textúrázás alapvető lényege tehát egy valódi felület élethű megjelen
 \begin{figure}[!ht]
     \centering
     \includegraphics[width=0.8\textwidth]{images/brick_texture_maps.png}
-    \caption{Diffúz, normál és spekuláris textúratérképek.}
+    \caption{Diffúz, normál és spekuláris textúratérképek}
 \end{figure}
 
 Számtalan, a normáltérképhez (\textit{normal map}) hasonló ,,trükkös'' textúrázás létezik még. Az elkészített megjelenítő a felület alapszínét jelentő diffúz értékeken kívül kívül Blinn-Phong árnyalás esetén az ambiens színt és a spekuláris tükröződési állandót, fizikai alapú árnyalás esetén pedig a rücskösség és fémesség értékeket képes textúrából olvasni. PBR esetén különösen látványos a textúrázás hatása: a mellékelt fegyver modellen jól megfigyelhető a változó rücskösség által okozott tükröződés-elmosódás, illetve a fém és szigetelő részeken eltérő spekuláris csillanás.
@@ -405,7 +417,7 @@ A nagy dinamikatartomány (\textit{high-dynamic-range, HDR}) fogalma először a
 \begin{figure}[!ht]
     \centering
     \includegraphics[width=1.0\textwidth]{images/hdr_process.png}
-    \caption{HDR kép előállítása túl-, semlegesen és alulexponált fotókból.}
+    \caption{HDR kép előállítása túl-, semlegesen és alulexponált fotókból}
 \end{figure}
 
 Ahhoz tehát, hogy az általunk a valóságban érzékelhető fényerősség különbségeket érzékeltetni tudjuk, először is el kell szakadjunk az ebben minket korlátozó 24 bites színtértől. A modern grafikus kártyák már hardveresen támogatják a lebegőpontos (komponensenként 16 vagy 32 bites) puffereket, így ezeket használhatjuk HDR megjelenítésre. A fényképészettel ellentétben továbbra is csak egy leképezési lépésre van szükségünk, amely során egy ilyen lebegőpontos pufferbe számolunk, amelyben a korábbi maximális 255-nél fényerősségtől függően jóval nagyobb értékek is szerepelhetnek. A kijelzők azonban továbbra is a 24 bites, alacsony dinamikatartományú RGB színtérben várják a bemenetet, ezért HDR megjelenítésnél is szükség van egy színleképezési lépésre, amely során egy ún. színleképezési operátor segítségével a pufferben szereplő értékeket ismét ,,beszorítjuk'' a \([0; 1]\) intervallumba. Színleképezés során az alapvető cél az eredeti HDR kép lokális kontrasztarányainak minél jobb megtartása. Több ilyen operátor létezik, az egyik legegyszerűbb ezek közül a Reinhard operátor~\cite{reinhard2002photographic}:
