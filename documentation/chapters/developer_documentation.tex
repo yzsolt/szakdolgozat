@@ -43,11 +43,11 @@ ahol a paraméterek:
 \noindent
 \textit{Megjegyzés: az eredeti egyenlet figyelembe veszi még az időt és a fény hullámhosszát is. Az egyenlet paraméterei az idő előrehaladtával ritkán változnak, és ebben az esetben is előre kiszámolhatóak, ezért gyakorlati alkalmazás esetén az időt állandónak tekinthetjük, amely így kiesik az egyenletből. Mivel számítógépes grafikánál RGB színtérben dolgozunk, és ennek 3 összetevőjét külön-külön számolhatjuk, így a hullámhossz paraméter is elhagyható. A továbbiakban ezért fény alatt a fény színét és erősségét értjük.}
 
-A könnyebb érthetőség kedvéért bontsuk részekre az egyenletet. A bal oldalon szereplő \(L_{out}\) az eredmény: a felület egy pontjából érkező fényt határozza meg a nézeti vektor függvényében, később ez lesz a ténylegesen megjelenített színérték. A jobb oldal első tagja, \(L_{emit}\) a felület egy pontjából kisugárzott fényt adja meg. Ez az érték a gyakorlatban jellemzően 0, mert kevés emisszív anyag létezik, de pl. a fényforrások megjelenítéséhez szükség van rá. 
+A könnyebb érthetőség kedvéért bontsuk részekre az egyenletet. A bal oldalon szereplő \(L_{out}\) az eredmény: a felület egy pontjából érkező fényt határozza meg a nézeti vektor függvényében, később ez lesz a ténylegesen megjelenített színérték. A jobb oldal első tagja, \(L_{emit}\) a felület egy pontjából kisugárzott fényt adja meg. Ez az érték a gyakorlatban jellemzően 0, mert kevés emisszív anyag létezik, de pl. a fényforrások megjelenítéséhez szükség van rá.
 
-A következő tag az integrál, amelyben az \(\Omega\) a felületi normálvektor körül vett félgömböt jelenti, ami az összes lehetséges \(\mathbf{l}\) vektort tartalmazza, amelyen integrálni kell a tartalmazott függvényeket. Mint később látni fogjuk, az integrálás lesz az egyik sarkalatos pontja az egyenlet gyakorlati alkalmazásának, ugyanis az integrálnak nem minden fényforrás esetén van analitikus megoldása --- ilyenkor közelítést fogunk alkalmazni. \(f_r\) az ún. kétirányú visszaverődési eloszlásfüggvény (bi-directional reflection distribution function, röviden BRDF), amelyről a következő alfejezetben lesz részletesen szó. \(L_{in}\) a felület adott pontjára \(-\mathbf{l}\) irányból beérkező fényt adja meg. 
+A következő tag az integrál, amelyben az \(\Omega\) a felületi normálvektor körül vett félgömböt jelenti, ami az összes lehetséges \(\mathbf{l}\) vektort tartalmazza, amelyen integrálni kell a tartalmazott függvényeket. Mint később látni fogjuk, az integrálás lesz az egyik sarkalatos pontja az egyenlet gyakorlati alkalmazásának, ugyanis az integrálnak nem minden fényforrás esetén van analitikus megoldása --- ilyenkor közelítést fogunk alkalmazni. \(f_r\) az ún. kétirányú visszaverődési eloszlásfüggvény (bi-directional reflection distribution function, röviden BRDF), amelyről a következő alfejezetben lesz részletesen szó. \(L_{in}\) a felület adott pontjára \(-\mathbf{l}\) irányból beérkező fényt adja meg.
 
-Fontos megjegyezni, hogy ez a fény nem csak direkt, hanem indirekt forrásból is érkezhet (pl. már valahol tükröződött fény, ld. globális/kép alapú megvilágítás). 
+Fontos megjegyezni, hogy ez a fény nem csak direkt, hanem indirekt forrásból is érkezhet (pl. már valahol tükröződött fény, ld. globális/kép alapú megvilágítás).
 
 Az utolsó tag, \(-\mathbf{l} \cdot \mathbf{n}\) a beérkező fény iránya és a felületi normálvektor által bezárt szög koszinusza alapján csökkenti a kisugárzott fény erősségét.
 
@@ -297,7 +297,7 @@ ahol \(\alpha = {roughness}^2\) (roughness = rücskösség).
 
 \section{Gyakorlati megvalósítás}
 
-Egy háromdimenziós megjelenítő fejlesztésekor mind programozási nyelv, mind megjelenítő API szempontjából több választási lehetőség áll előttünk. Valósidejű megjelenítőről lévén szó azonban nagyon fontos, hogy a választott programozási környezet járulékos lassító tényezői (pl. menedzselt nyelvek --- Java, C\# stb. --- esetén a futtatókörnyezet, ill. szemétgyűjtő futási sebességre és felhasznált memóriára vonatkozó negatív hatása) minél kevésbé befolyásolja a program futását. Ezért --- követve az iparág nagy szereplőit --- választásom a C++ programozási nyelvre esett. A C++ fordított nyelv, azaz forráskódunkból a processzor által közvetlenül végrehajtható, a fordító által erősen optimalizált gépi kód készül. Ennek egyik hátránya, hogy processzor architektúrához és operációs rendszerhez kötődő futtatható állományt kapunk, azaz minden kívánt platformra külön le kell fordítsuk forráskódunkat --- ellentétben pl. a Java-val, amely platformfüggetlen bájtkódot állít elő, és azt a gépre előre telepített, platformspecifikus futtatókörnyezet hajtja végre. Előnye viszont, hogy minden platformra külön optimalizált futtathatót készíthetünk, ami valósidejű megjelenítésnél a futási sebesség szempontjából fontos lehet. A C++ eléggé alacsonyszintű ahhoz, hogy minden teljesítmény szempontjából számító befolyásoló tényezőt (pl. memóriafoglalás, annak pontos ideje és mérete) a kezünkben tarthassunk, de közben eléggé magasszintű ahhoz, hogy az objektum-orientált programozást lehetővé tevő nyelvi eszközei és standard könyvtára (\textit{standard template library, STL}) segítségével hatékonyan írhassunk benne összetett programokat. 
+Egy háromdimenziós megjelenítő fejlesztésekor mind programozási nyelv, mind megjelenítő API szempontjából több választási lehetőség áll előttünk. Valósidejű megjelenítőről lévén szó azonban nagyon fontos, hogy a választott programozási környezet járulékos lassító tényezői (pl. menedzselt nyelvek --- Java, C\# stb. --- esetén a futtatókörnyezet, ill. szemétgyűjtő futási sebességre és felhasznált memóriára vonatkozó negatív hatása) minél kevésbé befolyásolja a program futását. Ezért --- követve az iparág nagy szereplőit --- választásom a C++ programozási nyelvre esett. A C++ fordított nyelv, azaz forráskódunkból a processzor által közvetlenül végrehajtható, a fordító által erősen optimalizált gépi kód készül. Ennek egyik hátránya, hogy processzor architektúrához és operációs rendszerhez kötődő futtatható állományt kapunk, azaz minden kívánt platformra külön le kell fordítsuk forráskódunkat --- ellentétben pl. a Java-val, amely platformfüggetlen bájtkódot állít elő, és azt a gépre előre telepített, platformspecifikus futtatókörnyezet hajtja végre. Előnye viszont, hogy minden platformra külön optimalizált futtathatót készíthetünk, ami valósidejű megjelenítésnél a futási sebesség szempontjából fontos lehet. A C++ eléggé alacsonyszintű ahhoz, hogy minden teljesítmény szempontjából számító befolyásoló tényezőt (pl. memóriafoglalás, annak pontos ideje és mérete) a kezünkben tarthassunk, de közben eléggé magasszintű ahhoz, hogy az objektum-orientált programozást lehetővé tevő nyelvi eszközei és standard könyvtára (\textit{standard template library, STL}) segítségével hatékonyan írhassunk benne összetett programokat.
 
 A megjelenítő fejlesztése során igyekeztem minél jobban igénybe venni az új C++ szabványok (C++11, C++14) által bevezetett szintaktikai és STL-t érintő újdonságokat (okos mutatók, új tömb tároló, automatikus típuslevezetés, stb.), illetve a ,,modern C++'' meghatározó eszközeit (kivételkezelés, RAII), amelyek segítségével egy átlátható, könnyedén bővíthető, robosztus kódbázis született.
 
@@ -307,7 +307,7 @@ Az asztali számítógépeken a két legelterjedtebb grafikus API a DirectX és 
 
 Habár az OpenGL a 3-as főverzióval komoly ráncfelvarrást kapott, felépítésében továbbra is egy erősen egy szálon futó állapotgép maradt. A modern GPU-k azonban architekturálisan már tovább fejlődtek ennél: az új, alacsonyszintű API-k már hatékonyan kezelik a több szálról érkező parancsokat, ami az OpenGL-ben csak költséges módon (\textit{context switch}) megoldható. Ezzel elsősorban a kirajzolási hívásszám-limitált jelenetekben (pl. részecskerendszerek kirajzolása) érhető el az OpenGL-nél jóval magasabb teljesítmény.
 
-További lassító tényező az OpenGL magasszintűsége, ami a fejlesztőknek ugyan valamekkora kényelmet és időbeli nyereséget jelenthet, azonban egyrészt emiatt a grafikus kártya meghajtóprogramjának kell sok olyan dolgot általános módon implementálnia (pl. biztonságos videomemória-kezelés), amit sok esetben a fejlesztők a saját igényeiket és céljaikat ismerve optimálisabban is meg tudnának írni, másrészt a meghajtóprogram sok ellenőrzést is végrehajt a kapott inputokon, ami processzor oldalon felesleges többletterhelést jelenthet. 
+További lassító tényező az OpenGL magasszintűsége, ami a fejlesztőknek ugyan valamekkora kényelmet és időbeli nyereséget jelenthet, azonban egyrészt emiatt a grafikus kártya meghajtóprogramjának kell sok olyan dolgot általános módon implementálnia (pl. biztonságos videomemória-kezelés), amit sok esetben a fejlesztők a saját igényeiket és céljaikat ismerve optimálisabban is meg tudnának írni, másrészt a meghajtóprogram sok ellenőrzést is végrehajt a kapott inputokon, ami processzor oldalon felesleges többletterhelést jelenthet.
 
 A szakdolgozat írásának idején megjelent új API-k --- DirectX 12, Vulkan (lényegében az OpenGL revolúciós folytatása), Metal (Apple rendszereken) --- ezeket a problémákat küszöbölik ki: alacsony szintűek, explicitek és erősen támogatják a többszálúságot.
 
@@ -504,8 +504,6 @@ A kép alapú megvilágítás egy gyakran használt módszer a globális megvil�
 
 Az elkészült program a megjelenített modell környezetét környezeti térképezéssel (\textit{environment mapping}), egy ún. skybox (,,égdoboz'') segítségével szimulálja. Ezt úgy kell elképzelni, mintha egy végtelen nagyságú kocka közepére állnánk, és ezen kocka belső oldallapjaira felfestenénk, amit az adott oldal középpontjára merőlegesen nézve látunk a köryezetünkből. A program a skybox.vs.glsl árnyaló segítségével transzformálja úgy a kocka csúcspontjait, hogy azok a nézeti pozíciótól függetlenek legyenek. A skybox.fs.glsl-ben pedig egy egyszerű textúraolvasással rajzoljuk ki a kocka oldalait. Ez a textúra viszont speciális, kockatérkép (\textit{cube map} típusú, amit a program Radiance HDR típusú nagy dinamikatartományú képekből olvas, amelyben függőleges kereszt elrendezésben találhatóak a kocka oldallapjainak textúrái.
 
-TODO: elrendezések ábra
-
 Kép alapú megvilágítás esetén ebből a kockatérképből szeretnénk a megvilágítást kiszámolni. Pont és zseblámpa fények esetén könnyű dolgunk volt, hiszen a kimenő sugárzás kiszámolására használt integrálnak volt analitikus megoldása. Kép alapú megvilágításnál viszont a felület rücskössége miatt nem tudunk analitikus megoldást adni, az integrál értékét ezért valamilyen numerikus módszerrel kell közelítenünk. Az egyik legelterjedtebb ilyen módszer a Monte-Carlo integrálás. Ennek során az integrálandó függvényből \(N\) mintát veszünk, ezeket a mintákat elosztjuk egy valószínűségi sűrűségfüggvénnyel (\textit{probability density function, PDF}), majd összeadjuk őket:
 
 \[
@@ -691,8 +689,114 @@ Mielőtt rátérnénk a kimenet tesztelésére, fontos leellenőriznünk, hogy a
 
 \subsection{A kimenet ellenőrzése}
 
-TODO:
-összehasonlítás marmosettel
+A kimenet tesztelését a bevezetésben leírtak alapján egy másik fizikai alapú megjelenítő segítségével végeztem. A Marmoset Toolbag 2 egy 3D művészek által közkedvelt eszköz, ami lényegében hasonló a szakdolgozat keretében elkészült megjelenítőhöz, csak jóval nagyobb tudású. Mivel ennek a tesztelésnek a szemmel történő összehasonlítás adja az alapját, így az mindegyik tesztesethez mellékeltem a két megjelenítő kimenetét.
+
+\vspace{15pt}
+
+\textbf{Összetett modell tesztelése}
+
+Ennél a tesztesetnél a mellékelt fegyver modell megjelenítését teszteltem, amely rendelkezik diffúz, rücskösségi és fémességi textúrával is, így jó alapot ad az összehasonlításra.
+
+\begin{figure}[!ht]
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/scr_ennis.png}
+        \caption{Eredmény}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/marmoset_ennis.png}
+        \caption{Referencia}
+    \end{subfigure}
+\end{figure}
+
+A képeken jól látható, hogy minimálisan eltérések vannak kamera pozícióban, modell elforgatásban és skybox fényerőben. Ennek oka az, hogy a két megjelenítőnek nem ugyanaz a bemenete: a Marmoset rendelkezik saját jelenetleíró fájllal, viszont az enyém nem, emiatt mindkét esetben kézzel kellett minden paramétert beállítani, ez pedig nyilvánvalóan kisebb eltéréseket okoz.
+
+\textit{Eredmény:} a megjelenítő által előállított kép meggyőzően hasonlít a Marmoset által előállítottra. Az apró visszaverődési eltéréseket az előbb említett beállításbeli pontatlanságok okozzák.
+
+\vspace{15pt}
+
+\textbf{Felületi rücskösség tesztelése}
+
+Ennél a tesztesetnél a mellékelt gömb modell segítségével ellenőriztem, hogy a megjelenítő a különböző rücskösségi értékek alapján milyen kimenetet állít elő. Ehhez előbb 1-re (legsimább), majd 0,5-re, végül 0-ra (legdurvább) állítottam a rücskösség értékét. A gömb diffúz színét pirosra állítottam be, az anyagot szigetelőnek (0-s fémesség) definiáltam.
+
+\begin{figure}[!ht]
+    \centering
+    \begin{subfigure}[b]{0.27\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/scr_r1.png}
+        %\caption{Eredmény}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.27\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/scr_r05.png}
+        %\caption{Referencia}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.27\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/scr_r0.png}
+        %\caption{Referencia}
+    \end{subfigure}
+    \caption{Eredmény}
+\end{figure}
+
+\begin{figure}[!ht]
+    \centering
+    \begin{subfigure}[b]{0.27\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/marmoset_r1.png}
+        %\caption{Eredmény}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.27\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/marmoset_r05.png}
+        %\caption{Referencia}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.27\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/marmoset_r0.png}
+        %\caption{Referencia}
+    \end{subfigure}
+    \caption{Referencia}
+\end{figure}
+
+\textit{Eredmény:} a két megjelenítő által előállított kép nagyon hasonlít egymásra. Apró különbségek csak a Fresnel-effektus mértékében mutatkoznak.
+
+\vspace{15pt}
+
+\textbf{Fémesség tesztelése}
+
+Szintén a mellékelt gömb modell segítségével teszteltem, hogy a megjelenítő milyen kimenetet ad fémes illetve szigetelő anyagok esetén. Ehhez előbb 1-re (fémes), majd 0-ra (nem fémes) állítottam a fémesség értékét. A felületi durvaságot 0,5-re állítottam, és a diffúz színt fehérnek választottam.
+
+\begin{figure}[!ht]
+    \centering
+    \begin{subfigure}[b]{\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/scr_metalness.png}
+        %\caption{Eredmény}
+    \end{subfigure}
+    \caption{Eredmény}
+\end{figure}
+
+\begin{figure}[!ht]
+    \centering
+    \begin{subfigure}[b]{\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/marmoset_metalness.png}
+        %\caption{Eredmény}
+    \end{subfigure}
+    \caption{Referencia}
+\end{figure}
+
+\textit{Eredmény:} a két megjelenítő által előállított kép nagyon hasonlít egymásra. Apró különbségek csak a Fresnel-effektus mértékében mutatkoznak.
+
+A kimenet tesztelése tehát összességében sikerrel zárult: az elkészült megjelenítő apróbb, elsősorban beállítási különbségekből fakadó eltérésekkel ugyan, de szemmel láthatóan szinte teljesen hasonló kimenetet ad, mint a szintén fizikai alapú, professzionális Marmoset Toolbag 2.
 
 \bibliography{documentation}{}
 \bibliographystyle{plain} 

@@ -5,7 +5,7 @@ A szakdolgozat célja egy olyan program létrehozása volt, amelynek segítség�
 
 \section{A felhasznált módszerek rövid leírása}
 
-A program C++ programnyelven íródott és az OpenGL grafikus API-t használja. A megjelenítés során az alapértelmezett fizikai alapú mellett választható a korábban használt Blinn-Phong árnyalás~\cite{blinn1977models}. A fizikai alapú megjelenítés az árnyalási egyenlet~\cite{immel1986radiosity} megoldására épül, ehhez valósidőben több közelítés alkalmazása is szükséges: Cook-Torrance modell~\cite{cook1981reflectance} a spekuláris BRDF (kétirányú visszaverődési eloszlásfüggvény), Schlick közelítés~\cite{schlick1994inexpensive} a Fresnel-tényező kiszámolásához. 
+A program C++ programnyelven íródott és az OpenGL grafikus API-t használja. A megjelenítés során az alapértelmezett fizikai alapú mellett választható a korábban használt Blinn-Phong árnyalás~\cite{blinn1977models}. A fizikai alapú megjelenítés az árnyalási egyenlet~\cite{immel1986radiosity} megoldására épül, ehhez valósidőben több közelítés alkalmazása is szükséges: Cook-Torrance modell~\cite{cook1981reflectance} a spekuláris BRDF (kétirányú visszaverődési eloszlásfüggvény), Schlick közelítés~\cite{schlick1994inexpensive} a Fresnel-tényező kiszámolásához.
 
 A nagy dinamikatartományú megjelenítéssel és az ehhez tartozó színleképezéssel lehetőség van a valóságban tapasztalható fényviszonyok, kontrasztarányok szimulálására az egyébként kis dinamikatartományú kijelzőkön. A fényviszonyokhoz történő adaptáció Erik Reinhard\cite{reinhard2002photographic} módszerét használja az átlagos fénysűrűség megállapításához, majd ebből a DICE prezentációja~\cite{dice_moving_frostbite_to_pbr} alapján számol expozíciós értéket.
 
@@ -22,8 +22,7 @@ Minimális konfiguráció:
   \item OpenGL 3.3-at támogató videokártya
 \end{itemize}
 
-\vspace{15pt}
-
+\noindent
 Ajánlott konfiguráció:
 
 \begin{itemize}
@@ -43,6 +42,7 @@ Mivel a megjelenítő OpenGL alapú, ezért a futtató számítógépen elérhet
 
 Ha 64 bites Windows rendszert használunk, akkor a mellékelt, előre lefordított bináris használható. Ha viszont más operációs rendszeren dolgozunk, vagy tovább szeretnénk fejleszteni a programot, akkor azt az adott platformra nekünk kell lefordítanunk. Ennek minimális feltétele a Git verziókövető rendszer és a CMake keresztplatformos buildrendszer megléte a számítógépen.
 
+\noindent
 Az első fordítás előkészítése:
 
 \begin{enumerate}[noitemsep]
@@ -71,6 +71,7 @@ A felhasználói felület hátterében látjuk magát a betöltött modellt, ill
 \item \textbf{height}=magasság (képpontban)
 \end{itemize}
 
+\noindent
 További indítási paraméterek még:
 
 \begin{itemize}[noitemsep]
