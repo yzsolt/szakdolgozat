@@ -40,20 +40,13 @@ Mivel a megjelenítő OpenGL alapú, ezért a futtató számítógépen elérhet
 
 \section{A program üzembe helyezése}
 
-Ha 64 bites Windows rendszert használunk, akkor a mellékelt, előre lefordított bináris használható. Ha viszont más operációs rendszeren dolgozunk, vagy tovább szeretnénk fejleszteni a programot, akkor azt az adott platformra nekünk kell lefordítanunk. Ennek minimális feltétele a Git verziókövető rendszer és a CMake keresztplatformos buildrendszer megléte a számítógépen.
+Ha 64 bites Windows rendszert használunk, akkor a mellékelt, előre lefordított bináris használható. Ha viszont más operációs rendszeren dolgozunk, vagy tovább szeretnénk fejleszteni a programot, akkor azt az adott platformra nekünk kell lefordítanunk. Ennek minimális feltétele a CMake keresztplatformos buildrendszer és valamilyen C/C++ fordító megléte a számítógépen.
 
-\vspace{12pt}
-\noindent
-Az első fordítás előkészítése:
+A mellékelt forráskód könyvtár a végleges bináris elkészítésekor fennálló állapotot őrzi, azaz tartalmazza a függőségek Git tárolóit, forráskódjait és --- ahol szükséges --- a 64 bites Windows-ra lefordított Debug és Release bináris könyvtárfájlokat is az elkészítésükhöz használt Microsoft Visual Studio 2015 projektfájlokkal együtt, így egyező fejlesztői környezet esetén a továbbfejlesztés minden további teendő nélkül, azonnal elkezdhető.
 
-\begin{enumerate}[noitemsep]
-\item nyissunk meg egy parancssort (terminált) a program gyökérkönyvtárában
-\item adjuk ki a \textit{git submodule init}, majd a \textit{git submodule update} parancsokat
-\item a \textit{cd} parancs segítségével lépjünk a dependencies/nanogui könyvtárba, majd ismételjük meg az előző lépést
-\item a \textit{cd ../../} paranccsal lépjünk vissza a főkönyvtárba, és hozzunk létre egy könyvtárat a fordítás során keletkező fájlok számára: \textit{mkdir build}
-\end{enumerate}
+A főprogram fordítása egyszerű: lépjünk az előzőleg létrehozott \textit{build} könyvtárba, majd adjuk ki a \textit{cmake ../} parancsot a megfelelő paraméterekkel, amelyekről a CMake program súgója (\textit{cmake -{}-help}) ad bővebb felvilágosítást. Amennyiben grafikus fejlesztőkörnyezetet szeretnénk használni, úgy a CMake számára a \textit{-G} kapcsolóval megadhatjuk, hogy milyen projektfájlt generáljon. Ezután a generált projektfájlt használhatjuk a program fordításához, azonban a projekt módosulása esetén (pl. forrásfájlok hozzáadása vagy törlése) a változtatásokat a CMakeLists.txt-ben meg kell adni, és a projektfájlt újra kell generáltatni.
 
-A fordítás menete innentől már egyszerű: lépjünk az előzőleg létrehozott ,,build'' könyvtárba, majd adjuk ki a \textit{cmake ../} parancsot a megfelelő paraméterekkel, amelyekről a CMake program súgója (\textit{cmake -\-help}) ad bővebb felvilágosítást. Amennyiben grafikus fejlesztőkörnyezetet szeretnénk használni, úgy a CMake számára a \textit{-G} kapcsolóval megadhatjuk, hogy milyen projektfájlt generáljon. Ezután a generált projektfájlt használhatjuk a program fordításához, azonban a projekt módosulása esetén (pl. forrásfájlok hozzáadása vagy törlése) a változtatásokat a CMakeLists.txt-ben meg kell adni, és a projektfájlt újra kell generáltatni.
+Más operációs rendszer/processzor architektúra esetén a függőségek közül legalább a GLFW és NanoGUI könyvtárat újra le kell fordítanunk. Mindkettő a CMake build rendszert használja, így fordításuk hasonlóan történik a főprograméhoz. Kérdés esetén a projektek saját weboldalán találunk segítséget. Ügyeljünk rá, hogy a megfelelő \textit{glfw-build} és \textit{nanogui-build} mappából indítsuk a fordítást, mert a főprogram később ezekben fogja keresni az előre lefordított könyvtárfájlokat.
 
 \section{A felhasználói felület áttekintése}
 

@@ -370,7 +370,7 @@ A Renderer run() metódusa tartalmazza a program főciklusát, ami a program fol
 \begin{figure}[!ht]
     \centering
     \includegraphics[width=0.45\textwidth]{images/main_loop.png}
-    \caption{A főciklus szekvenciadiagramja}
+    \caption{A főciklus folyamatábrája}
 \end{figure}
 
 \begin{enumerate}[noitemsep]
@@ -586,7 +586,13 @@ Az első tagot a rücskösség értékétől függően egy kockatérkép mip-map
 
 Ezzel az \(F_0\)-tól való függést megszüntettük, és a két integrál értéke a kétdimenziós lookup textúra vörös és zöld csatornájában tárolható. Ennek implementációja a precompute\_brdf.fs.glsl árnyalóban, míg a diffúz és spekuláris besugárzási kockatérkép kiszámításának kódja a precompute\_diffuse- ill. precompute\_specular\_irradiance.fs.glsl-ben található.
 
-Mindezek segítségével valósidőben, mindössze két textúraolvasással kiszámolható a kép alapú megvilágításból származó sugárzás. Sőt, a két besugárzási kockatérképet (diffúz és spekuláris) és a BRDF lookup textúrát nem muszáj előre kiszámolni, dinamikus tükröződés megvalósításához kevesebb mintával menet közben is generálhatók. Az \(\mathbf{n} = \mathbf{v} = \mathbf{l}\) feltételezés azonban szemmel látható hibákat okoz: elsősorban sík felületeknél észrevehető, hogy a valóságban ,,megnyúlt'' tükröződések emiatt itt nem jelennek meg.
+Mindezek segítségével valósidőben, mindössze két textúraolvasással kiszámolható a kép alapú megvilágításból származó sugárzás. Sőt, a két besugárzási kockatérképet (diffúz és spekuláris) és a BRDF lookup textúrát nem muszáj előre kiszámolni, dinamikus tükröződés megvalósításához kevesebb mintával menet közben is generálhatók. Az \(\mathbf{n} = \mathbf{v} = \mathbf{l}\) feltételezés azonban szemmel látható hibákat okoz: például sík felületeknél észrevehető, hogy a valóságban ,,megnyúlt'' tükröződések emiatt itt nem jelennek meg.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=1.0\textwidth]{images/nvl_error.png}
+    \caption{Felül a sugárkövetéses referencia, alul az eredmény az \(\mathbf{n} = \mathbf{v} = \mathbf{l}\) miatt megjelenő hibával~\cite{karis2013real}}
+\end{figure}
 
 \section{Továbbfejlesztési lehetőségek}
 \label{sec:further_dev}
@@ -630,7 +636,7 @@ Mielőtt rátérnénk a kimenet tesztelésére, fontos leellenőriznünk, hogy a
     \hline
     Üres .mtl fájl & \checkmark & \footnotesize{Lásd fentebb.} \\
     \hline
-    Üres .obj fájl & \checkmark & \footnotesize{} \\
+    Üres .obj fájl & \checkmark & \footnotesize{A tinyobjloader ilyenkor nem jelez hibát, egyszerűen nem jelenik meg semmi.} \\
     \hline
   \end{tabulary}
 
@@ -683,7 +689,7 @@ Mielőtt rátérnénk a kimenet tesztelésére, fontos leellenőriznünk, hogy a
     \hline
     Alakzat választás & \checkmark & \footnotesize{A választógombbal lehet az alakzatok között váltani, az ablak tartalma megfelelően frissül.} \\
     \hline
-    Alakzat kirajzolásának ki/bekapcsolása & \checkmark & \footnotesize{} \\
+    Alakzat kirajzolásának ki/bekapcsolása & \checkmark & \footnotesize{A kapcsoló megfelelően működik.} \\
     \hline
   \end{tabulary}
 
@@ -852,7 +858,7 @@ Szintén a mellékelt gömb modell segítségével teszteltem, hogy a megjelení
     \caption{Referencia}
 \end{figure}
 
-\textit{Eredmény:} a két megjelenítő által előállított kép nagyon hasonlít egymásra. Apró különbségek csak a Fresnel-effektus mértékében mutatkoznak.
+\textit{Eredmény:} a megjelenítő által előállított kép szinte tökéletesen megegyezik a referenciával.
 
 A kimenet tesztelése tehát összességében sikerrel zárult: az elkészült megjelenítő apróbb, elsősorban beállítási különbségekből fakadó eltérésekkel ugyan, de szemmel láthatóan szinte teljesen hasonló kimenetet ad, mint a szintén fizikai alapú, professzionális Marmoset Toolbag 2.
 
