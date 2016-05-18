@@ -17,8 +17,7 @@ Light::Light(Type type, const glm::vec3& position, const glm::vec3& color, float
 	m_type(type),
 	m_position(position),
 	m_color(color),
-	m_radius(radius),
-	m_is_on(true)
+	m_radius(radius)
 {
 }
 

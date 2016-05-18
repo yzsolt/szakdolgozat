@@ -29,7 +29,7 @@ protected:
 
 	float m_radius = 1;
 
-	bool m_is_on = true;
+	bool m_is_on = false;
 
 	void _set_uniforms(Program& program, const std::string& prefix) const;
 
