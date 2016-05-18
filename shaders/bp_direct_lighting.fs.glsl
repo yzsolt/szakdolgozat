@@ -82,7 +82,7 @@ void main() {
 
         vec3 half_direction = normalize(-light_direction + vs_out_view_direction);
         float specular_angle = max(dot(half_direction, normal), 0);
-        specular = pow(specular_angle, max(0.1, u_bpm.shininess)) * 9;
+        specular = pow(specular_angle, max(0.1, u_bpm.shininess)) * 13;
 
     }
 

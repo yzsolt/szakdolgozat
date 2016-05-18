@@ -169,6 +169,146 @@ void Renderer::_adapt_luminance() {
 
 }
 
+void Renderer::_draw_with_ibl() {
+
+	Program& program = m_mesh->use_pbr() ? *m_pb_image_based_lighting_program : *m_bp_image_based_lighting_program;
+
+	program.bind();
+
+	program.set_uniform("u_world", m_world);
+	program.set_uniform("u_view_position", m_camera.position());
+	program.set_uniform("u_view_projection", m_view_projection);
+	program.set_uniform("u_world_inverse", m_world_inverse);
+
+	if (m_mesh->use_pbr()) {
+
+		program.set_texture("u_diffuse_irradiance_map", m_skybox->diffuse_irradiance_map(), 1);
+		program.set_texture("u_specular_irradiance_map", m_skybox->specular_irradiance_map(), 2);
+		program.set_texture("u_brdf_lut", m_skybox->brdf_lut(), 3);
+
+	} else {
+
+		program.set_texture("u_environment_map", m_skybox->environment_map(), 1);
+		program.set_texture("u_diffuse_irradiance_map", m_skybox->diffuse_irradiance_map(), 2);
+		program.set_texture("u_specular_irradiance_map", m_skybox->specular_irradiance_map(), 3);
+
+	}
+
+	m_mesh->draw(&program);
+
+	program.unbind();
+
+}
+
+void Renderer::_draw_with_direct_lights() {
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE, GL_ONE);
+
+	Program& program = m_mesh->use_pbr() ? *m_pb_direct_lighting_program : *m_bp_direct_lighting_program;
+
+	program.bind();
+
+	program.set_uniform("u_world", m_world);
+	program.set_uniform("u_world_inverse", m_world_inverse);
+	program.set_uniform("u_projection", m_projection);
+	program.set_uniform("u_view_projection", m_view_projection);
+	program.set_uniform("u_world_view", m_world_view);
+	program.set_uniform("u_view_position", m_camera.position());
+
+	for (const auto& light : m_lights) {
+
+		Light* light_ptr = light.get();
+
+		if (light_ptr->is_on()) {
+
+			switch (light->type()) {
+
+			case Light::Type::POINT: {
+
+				PointLight* point_light = static_cast<PointLight*>(light_ptr);
+
+				if (m_move_point_light) {
+
+					glm::vec3 point_light_position = point_light->position();
+					float z = point_light_position.z;
+
+					double time_delta = glfwGetTime() - m_last_frame_time;
+
+					float angle = std::atan2(point_light_position.y, point_light_position.x);
+					angle += time_delta * 0.5;
+
+					point_light_position.x = std::cos(angle);
+					point_light_position.y = std::sin(angle);
+
+					float length = point_light_position.length();
+					point_light_position *= length;
+					point_light_position.z = z;
+
+					point_light->set_position(point_light_position);
+
+				}
+
+				point_light->set_uniforms(program);
+
+			} break;
+
+			case Light::Type::SPOT:
+
+				SpotLight* spot_light = static_cast<SpotLight*>(light_ptr);
+
+				spot_light->set_uniforms(program);
+				spot_light->set_direction(m_camera.direction());
+				spot_light->set_position(m_camera.position());
+
+				break;
+
+			}
+
+			m_mesh->draw(&program);
+
+		}
+
+	}
+
+	program.unbind();
+
+	glDisable(GL_BLEND);
+
+}
+
+void Renderer::_tone_map() {
+
+	glm::uvec2 screen_size = m_window.size();
+	glViewport(0, 0, screen_size.x, screen_size.y);
+
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+	if (m_tone_map != ToneMap::OFF) {
+
+		m_tone_map_program->bind();
+
+		m_tone_map_program->set_texture("u_hdr_texture", m_main_fb->color_texture(0), 0);
+		m_tone_map_program->set_uniform("u_exposure", m_exposure);
+		m_tone_map_program->set_uniform("u_tone_map", static_cast<GLint>(m_tone_map));
+		m_tone_map_program->set_texture("u_average_luminance_texture", m_current_adapted_luminance_fb->color_texture(0), 1);
+
+		m_fullscreen_quad.draw();
+
+		m_tone_map_program->unbind();
+
+	} else {
+
+		m_fullscreen_program->bind();
+		m_fullscreen_program->set_texture("u_texture", m_main_fb->color_texture(0), 0);
+		m_fullscreen_quad.draw();
+		m_fullscreen_program->unbind();
+
+	}
+
+}
+
 void Renderer::_setup_gui() {
 
 	m_gui = std::make_unique<GUI>(&m_window);
@@ -542,7 +682,7 @@ Renderer::Renderer(const Settings& settings) :
 
 	// Load the default skybox
 
-	m_skybox = std::make_unique<Skybox>(Skybox::ROOT_DIRECTORY + "doge/doge.hdr");
+	m_skybox = std::make_unique<Skybox>(Skybox::ROOT_DIRECTORY + "at_the_window/at_the_window.hdr");
 
 	m_last_frame_time = glfwGetTime();
 
@@ -567,13 +707,11 @@ void Renderer::run() {
 		glEnable(GL_DEPTH_TEST);
 		glDisable(GL_CULL_FACE);
 
-		FrameBuffer* render_target = m_msaa_fb ? m_msaa_fb.get() : m_main_fb.get();
+		// Matrix calculations
 
 		if (m_rotate_mesh) {
 			m_mesh_rotation += static_cast<float>(glfwGetTime() - m_last_frame_time) / 2.f;
 		}
-
-		// Matrix calculations
 
 		m_world = glm::mat4(1);
 		m_world = glm::scale(m_world, glm::vec3(m_mesh->scale()));
@@ -585,8 +723,12 @@ void Renderer::run() {
 		m_world_view = view * m_world;
 		m_normal_matrix = glm::transpose(glm::inverse(m_world_view));
 
-		glm::mat4 world_inverse = glm::inverse(m_world);
-		glm::mat4 view_projection = m_projection * view;
+		m_world_inverse = glm::inverse(m_world);
+		m_view_projection = m_projection * view;
+
+		// Start rendering
+
+		FrameBuffer* render_target = m_msaa_fb ? m_msaa_fb.get() : m_main_fb.get();
 
 		render_target->bind_for_drawing();
 
@@ -603,7 +745,7 @@ void Renderer::run() {
 			m_basic_color_program->bind();
 
 				m_basic_color_program->set_uniform("u_world", m_world);
-				m_basic_color_program->set_uniform("u_view_projection", view_projection);
+				m_basic_color_program->set_uniform("u_view_projection", m_view_projection);
 
 				m_mesh->draw();
 
@@ -617,97 +759,14 @@ void Renderer::run() {
 			// Draw mesh with image based lighting
 
 			if (m_use_ibl) {
-
-				Program& program = m_mesh->use_pbr() ? *m_pb_image_based_lighting_program : *m_bp_image_based_lighting_program;
-
-				program.bind();
-
-					program.set_uniform("u_world", m_world);
-					program.set_uniform("u_view_position", m_camera.position());
-					program.set_uniform("u_view_projection", view_projection);
-					program.set_uniform("u_world_inverse", world_inverse);
-
-					if (m_mesh->use_pbr()) {
-
-						program.set_texture("u_diffuse_irradiance_map", m_skybox->diffuse_irradiance_map(), 1);
-						program.set_texture("u_specular_irradiance_map", m_skybox->specular_irradiance_map(), 2);
-						program.set_texture("u_brdf_lut", m_skybox->brdf_lut(), 3);
-
-					} else {
-
-						program.set_texture("u_environment_map", m_skybox->environment_map(), 1);
-						program.set_texture("u_diffuse_irradiance_map", m_skybox->diffuse_irradiance_map(), 2);
-						program.set_texture("u_specular_irradiance_map", m_skybox->specular_irradiance_map(), 3);
-
-					}
-
-					m_mesh->draw(&program);
-
-				program.unbind();
-
+				_draw_with_ibl();
 			}
 			
 			glDepthMask(GL_FALSE);
 
 			// Draw mesh with direct lights
 
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_ONE, GL_ONE);
-
-			Program& program = m_mesh->use_pbr() ? *m_pb_direct_lighting_program : *m_bp_direct_lighting_program;
-
-			program.bind();
-
-				program.set_uniform("u_world", m_world);
-				program.set_uniform("u_world_inverse", world_inverse);
-				program.set_uniform("u_projection", m_projection);
-				program.set_uniform("u_view_projection", view_projection);
-				program.set_uniform("u_world_view", m_world_view);
-				program.set_uniform("u_view_position", m_camera.position());
-
-				for (const auto& light : m_lights) {
-
-					Light* light_ptr = light.get();
-
-					if (light_ptr->is_on()) {
-
-						switch (light->type()) {
-
-						case Light::Type::POINT: {
-
-							PointLight* point_light = static_cast<PointLight*>(light_ptr);
-
-							if (m_move_point_light) {
-								glm::vec3 point_light_position = point_light->position();
-								// TODO
-								point_light->set_position(point_light_position);
-							}
-
-							point_light->set_uniforms(program);
-
-							} break;
-
-						case Light::Type::SPOT:
-
-							SpotLight* spot_light = static_cast<SpotLight*>(light_ptr);
-
-							spot_light->set_uniforms(program);
-							spot_light->set_direction(m_camera.direction());
-							spot_light->set_position(m_camera.position());
-
-							break;
-
-						}
-
-						m_mesh->draw(&program);
-
-					}
-
-				}
-
-			program.unbind();
-
-			glDisable(GL_BLEND);
+			_draw_with_direct_lights();
 			
 			// Draw skybox
 
@@ -733,33 +792,7 @@ void Renderer::run() {
 
 		// Tone mapping
 
-		glm::uvec2 screen_size = m_window.size();
-		glViewport(0, 0, screen_size.x, screen_size.y);
-
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-		if (m_tone_map != ToneMap::OFF) {
-
-			m_tone_map_program->bind();
-				
-				m_tone_map_program->set_texture("u_hdr_texture", m_main_fb->color_texture(0), 0);
-				m_tone_map_program->set_uniform("u_exposure", m_exposure);
-				m_tone_map_program->set_uniform("u_tone_map", static_cast<GLint>(m_tone_map));
-				m_tone_map_program->set_texture("u_average_luminance_texture", m_current_adapted_luminance_fb->color_texture(0), 1);
-
-				m_fullscreen_quad.draw();
-
-			m_tone_map_program->unbind();
-
-		} else {
-
-			m_fullscreen_program->bind();
-				m_fullscreen_program->set_texture("u_texture", m_main_fb->color_texture(0), 0);
-				m_fullscreen_quad.draw();
-			m_fullscreen_program->unbind();
-
-		}
+		_tone_map();
 
 		// Draw GUI
 

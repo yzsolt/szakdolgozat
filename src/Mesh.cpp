@@ -167,6 +167,10 @@ void Mesh::_update_pb_material_info(int material_id, bool predefined) {
 		m_predefined_materials_button->setEnabled(use_predefined);
 		m_use_predefined_material_checkbox->setChecked(use_predefined);
 
+		if (use_predefined) {
+			material = &m_default_pb_materials[material->use_default];
+		}
+
 	} else {
 		material = &m_default_pb_materials[material_id];
 	}

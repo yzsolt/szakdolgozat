@@ -41,8 +41,8 @@ void main() {
 	float exposure;
 
 	if (u_exposure < 0) {
-		float average_luminance = max(0.0001, texelFetch(u_average_luminance_texture, ivec2(0, 0), 0).r);
-		exposure = 1 / (9.6 * average_luminance);
+		float average_luminance = max(0.0001, texelFetch(u_average_luminance_texture, ivec2(0, 0), 0).r) / 2.0;
+		exposure = 1 / (9.6 * average_luminance);// + 0.5;
 	} else {
 		exposure = u_exposure;
 	}

@@ -59,7 +59,9 @@ private:
 	double m_last_frame_time;
 
 	glm::mat4 m_world;
+	glm::mat4 m_world_inverse;
 	glm::mat4 m_projection;
+	glm::mat4 m_view_projection;
 
 	glm::mat4 m_world_view;
 	glm::mat4 m_normal_matrix;
@@ -95,6 +97,9 @@ private:
 
 	void _measure_average_luminance();
 	void _adapt_luminance();
+	void _draw_with_ibl();
+	void _draw_with_direct_lights();
+	void _tone_map();
 
 	void _setup_gui();
 
