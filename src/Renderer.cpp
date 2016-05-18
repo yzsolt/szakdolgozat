@@ -380,11 +380,15 @@ Renderer::Renderer(const Settings& settings) :
 
 	m_window.set_vsync(true);
 
-	// Debug
+	#ifndef _NDEBUG
 
-	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-	glDebugMessageCallback(_on_gl_message, nullptr);
-	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+		// Enable OpenGL debug message logging
+
+		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+		glDebugMessageCallback(_on_gl_message, nullptr);
+		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+
+	#endif
 
 	// Add lights
 
