@@ -19,25 +19,13 @@ uniform SpotLight u_spot_light;
 
 uniform BlinnPhongMaterial u_bpm;
 
-/*
+
 float get_angle_attenuation(vec3 l, SpotLight spot_light) {
 
-    float current_angle = dot(-l, spot_light.direction);
+    float current_angle = dot(l, spot_light.direction);
     float inner_minus_outer = spot_light.inner_cone_angle - spot_light.outer_cone_angle;
 
     return clamp((current_angle - spot_light.outer_cone_angle) / inner_minus_outer, 0, 1);
-}*/
-
-float get_angle_attenuation(vec3 l, SpotLight spot_light) {
-
-    float angle_scale = 1 / max(0.001f, spot_light.inner_cone_angle - spot_light.outer_cone_angle);
-    float angle_offset = -spot_light.outer_cone_angle * angle_scale;
-
-	float cosa = -dot(l, spot_light.direction);
-	float attenuation = clamp(cosa * angle_scale + angle_offset, 0, 1);
-
-	return attenuation * attenuation;
-
 }
 
 void main() {
@@ -69,7 +57,8 @@ void main() {
     }
 
     vec3 normal;
-    vec3 light_direction = normalize(vs_out_world_position - position);
+    vec3 to_light = vs_out_world_position - position;
+    vec3 light_direction = normalize(to_light);
 
     if (u_bpm.normal.use_texture) {
 
@@ -80,31 +69,29 @@ void main() {
         normal = normalize(vs_out_world_normal);
     }
 
-    float lambertian = max(dot(-light_direction, normal), 0);
-    float specular = 0;
-
     float attenuation = 1;
 
     if (u_light_type == SPOT_LIGHT) {
         attenuation = get_angle_attenuation(light_direction, u_spot_light);
     }
 
+    float lambertian = max(dot(-light_direction, normal), 0);
+    float specular = 0;
+
     if (lambertian > 0) {
 
-        vec3 half_direction = normalize(light_direction + vs_out_view_direction);
+        vec3 half_direction = normalize(-light_direction + vs_out_view_direction);
         float specular_angle = max(dot(half_direction, normal), 0);
-        specular = pow(specular_angle, u_bpm.shininess);
+        specular = pow(specular_angle, max(0.1, u_bpm.shininess)) * 9;
 
     }
 
     vec4 diffuse_color = u_bpm.diffuse.use_texture ? texture(u_bpm.diffuse.texture, vs_out_texture) : u_bpm.diffuse.color;
+    vec4 specular_color = u_bpm.specular.use_texture ? texture(u_bpm.specular.texture, vs_out_texture) : u_bpm.specular.color;
 
-    float specularity = u_bpm.specular.use_texture ? texture(u_bpm.specular.texture, vs_out_texture).r : 1;
-    vec4 specular_component = specular * specularity * vec4(color, 1);
+    float brightness = luminous_intensity / 15.f;
 
-    float brightness = luminous_intensity / 20.f;
-
-    vec4 blinn_phong_color = lambertian * diffuse_color * vec4(color, 1) * attenuation + specular_component * attenuation;
+    vec4 blinn_phong_color = lambertian * diffuse_color * vec4(color, 1) * attenuation + specular * specular_color * attenuation * vec4(color, 1);
     blinn_phong_color *= brightness;
 
     out_color = vec4(blinn_phong_color.rgb, 1);

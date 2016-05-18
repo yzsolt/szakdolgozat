@@ -50,19 +50,20 @@ void main() {
     vec4 specular_color = u_bpm.specular.use_texture ? texture(u_bpm.specular.texture, vs_out_texture) : u_bpm.specular.color;
 
     float specularity = (specular_color.r + specular_color.g + specular_color.b) / 3;
-    vec4 specular_component = specular_intensity * specularity * specular_color;
 
+    vec4 specular_component = specular_intensity /** specularity*/ * specular_color;
 
     float reflectivity = specularity;
     vec4 reflect_color = vec4(0);
 
-    R.y *= -1;
+    R *= -1;
 
     if (reflectivity > 0.05) {
         reflect_color = texture(u_environment_map, R) * reflectivity;
     }
 
     reflect_color.a = 1;
+    reflect_color = vec4(0, 0, 0, 1);
 
     vec4 diffuse_irradiance = texture(u_diffuse_irradiance_map, normal);
 
